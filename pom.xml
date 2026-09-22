@@ -102,7 +102,7 @@
     <sl4j.version>1.7.36</sl4j.version>
 
     <jakarta.inject.version>2.0.1</jakarta.inject.version>
-    <jakarta.ws.version>3.1.0</jakarta.ws.version>
+    <jakarta.ws.version>4.0.0</jakarta.ws.version>
     <jakarta.servlet.version>6.0.0</jakarta.servlet.version>
     <jakarta.annotation.version>2.1.1</jakarta.annotation.version>
     <jakarta.xml.version>4.0.0</jakarta.xml.version>
