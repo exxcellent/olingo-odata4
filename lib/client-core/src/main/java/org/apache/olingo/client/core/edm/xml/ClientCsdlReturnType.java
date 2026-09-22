@@ -18,15 +18,15 @@
  */
 package org.apache.olingo.client.core.edm.xml;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.olingo.commons.api.edm.geo.SRID;
 import org.apache.olingo.commons.api.edm.provider.CsdlReturnType;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -42,11 +42,12 @@ class ClientCsdlReturnType extends CsdlReturnType implements Serializable {
             throws IOException {
       final ClientCsdlReturnType returnType = new ClientCsdlReturnType();
 
-      for (; jp.getCurrentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
-        final JsonToken token = jp.getCurrentToken();
-        if (token == JsonToken.FIELD_NAME) {
-          if ("Type".equals(jp.getCurrentName())) {
-            String metadataTypeName = jp.nextTextValue();
+      for (; jp.currentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
+        final JsonToken token = jp.currentToken();
+        if (token == JsonToken.PROPERTY_NAME) {
+          if ("Type".equals(jp.currentName())) {
+            jp.nextToken();
+            String metadataTypeName = jp.getString();
             if (metadataTypeName.startsWith("Collection(")) {
               returnType.setType(metadataTypeName.substring(metadataTypeName.indexOf("(") + 1,
                       metadataTypeName.length() - 1));
@@ -55,23 +56,28 @@ class ClientCsdlReturnType extends CsdlReturnType implements Serializable {
               returnType.setType(metadataTypeName);
               returnType.setCollection(false);
             }
-          } else if ("Nullable".equals(jp.getCurrentName())) {
-            returnType.setNullable(BooleanUtils.toBoolean(jp.nextTextValue()));
-          } else if ("MaxLength".equals(jp.getCurrentName())) {
-            final String maxLenght = jp.nextTextValue();
+          } else if ("Nullable".equals(jp.currentName())) {
+            jp.nextToken();
+            returnType.setNullable(BooleanUtils.toBoolean(jp.getString()));
+          } else if ("MaxLength".equals(jp.currentName())) {
+            jp.nextToken();
+            final String maxLenght = jp.getString();
             returnType.setMaxLength("max".equalsIgnoreCase(maxLenght) ? Integer.MAX_VALUE : Integer.valueOf(maxLenght));
-          } else if ("Precision".equals(jp.getCurrentName())) {
-            returnType.setPrecision(Integer.valueOf(jp.nextTextValue()));
-          } else if ("Scale".equals(jp.getCurrentName())) {
-            final String scale = jp.nextTextValue();
+          } else if ("Precision".equals(jp.currentName())) {
+            jp.nextToken();
+            returnType.setPrecision(Integer.valueOf(jp.getString()));
+          } else if ("Scale".equals(jp.currentName())) {
+            jp.nextToken();
+            final String scale = jp.getString();
             returnType.setScale("variable".equalsIgnoreCase(scale) || "floating".equalsIgnoreCase(scale) ?
                 0 : Integer.valueOf(scale));
-          } else if ("SRID".equals(jp.getCurrentName())) {
-            final String srid = jp.nextTextValue();
+          } else if ("SRID".equals(jp.currentName())) {
+            jp.nextToken();
+            final String srid = jp.getString();
             if (srid != null) {
               returnType.setSrid(SRID.valueOf(srid));
             }
-          } else if ("Annotation".equals(jp.getCurrentName())) {
+          } else if ("Annotation".equals(jp.currentName())) {
             jp.nextToken();
             returnType.getAnnotations().add(jp.readValueAs(ClientCsdlAnnotation.class));
           }

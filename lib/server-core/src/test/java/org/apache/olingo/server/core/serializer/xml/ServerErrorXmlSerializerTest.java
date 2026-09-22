@@ -18,9 +18,10 @@
  */
 package org.apache.olingo.server.core.serializer.xml;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
 import org.apache.commons.io.IOUtils;
@@ -30,7 +31,8 @@ import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataServerError;
 import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ServerErrorXmlSerializerTest {
 
@@ -45,7 +47,7 @@ public class ServerErrorXmlSerializerTest {
     ODataServerError error = new ODataServerError();
     error.setCode("Code").setMessage("ErrorMessage");
     InputStream stream = ser.error(error).getContent();
-    String jsonString = IOUtils.toString(stream);
+    String jsonString = IOUtils.toString(stream, StandardCharsets.UTF_8);
     assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
         + "<error xmlns=\"http://docs.oasis-open.org/odata/ns/metadata\">"
         + "<code>Code</code>"
@@ -54,9 +56,11 @@ public class ServerErrorXmlSerializerTest {
         jsonString);
   }
 
-  @Test(expected = SerializerException.class)
+  @Test
   public void nullErrorResultsInException() throws Exception {
-    ser.error(null);
+      assertThrows(SerializerException.class, () -> {
+      ser.error(null);
+      });
   }
 
   @Test
@@ -71,7 +75,7 @@ public class ServerErrorXmlSerializerTest {
         .setMessage("detail message")));
 
     InputStream stream = ser.error(error).getContent();
-    String jsonString = IOUtils.toString(stream);
+    String jsonString = IOUtils.toString(stream, StandardCharsets.UTF_8);
     assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
         + "<error xmlns=\"http://docs.oasis-open.org/odata/ns/metadata\">"
         + "<code>code</code>"

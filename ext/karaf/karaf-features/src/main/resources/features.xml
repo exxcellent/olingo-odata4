@@ -18,23 +18,33 @@
 -->
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.0.0" name="olingo-${project.version}">
 
+  <!-- The olingo-server feature provides the core OData server runtime (Netty-based).
+       jakarta.servlet is imported as optional in the server bundles, so the servlet-container
+       integration (via the Karaf "war" feature) is NOT required for the bundles to become ACTIVE.
+       Add the "war" feature separately if you need servlet-based deployment. -->
   <feature name="olingo-server" version="${project.version}" resolver="(obr)" start-level="50">
     <feature>war</feature>
-    <bundle>mvn:commons-codec/commons-codec/${commons.codec.version}</bundle>
-    <bundle>mvn:org.apache.commons/commons-lang3/${commons.lang3.version}</bundle>
-    <bundle>mvn:org.codehaus.woodstox/stax2-api/${woodstox.stax2-api.version}</bundle>
+    <bundle>mvn:commons-codec/commons-codec</bundle>
+    <bundle>mvn:org.apache.commons/commons-lang3</bundle>
+    <bundle>mvn:org.codehaus.woodstox/stax2-api</bundle>
     <bundle>mvn:io.netty/netty-common/${netty.version}</bundle>
     <bundle>mvn:io.netty/netty-buffer/${netty.version}</bundle>
     <bundle>mvn:io.netty/netty-resolver/${netty.version}</bundle>
     <bundle>mvn:io.netty/netty-transport/${netty.version}</bundle>
-    <bundle>mvn:io.netty/netty-codec/${netty.version}</bundle>
+    <!-- Netty 4.2.x restructured its module layout: -->
+    <!-- - netty-codec → netty-codec-base (renamed) -->
+    <!-- - io.netty.handler.codec.compression → netty-codec-compression (split out) -->
+    <!-- - io.netty.channel.unix (uses-constraint dep of netty-handler) → netty-transport-native-unix-common -->
+    <bundle>mvn:io.netty/netty-transport-native-unix-common/${netty.version}</bundle>
+    <bundle>mvn:io.netty/netty-codec-base/${netty.version}</bundle>
+    <bundle>mvn:io.netty/netty-codec-compression/${netty.version}</bundle>
     <bundle>mvn:io.netty/netty-handler/${netty.version}</bundle>
     <bundle>mvn:io.netty/netty-codec-http/${netty.version}</bundle>
 
     <bundle>mvn:com.fasterxml/aalto-xml/${aalto-xml.version}</bundle>
-    <bundle>mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
-    <bundle>mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
-    <bundle>mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
+    <bundle>mvn:tools.jackson.core/jackson-core/${jackson.version}</bundle>
+    <bundle>mvn:com.fasterxml.jackson.core/jackson-annotations</bundle>
+    <bundle>mvn:tools.jackson.core/jackson-databind/${jackson.version}</bundle>
 
     <bundle>mvn:org.apache.olingo/odata-commons-api/${project.version}</bundle>
     <bundle>mvn:org.apache.olingo/odata-commons-core/${project.version}</bundle>
@@ -43,19 +53,19 @@
   </feature>
 
   <feature name="olingo-client" version="${project.version}" resolver="(obr)" start-level="50">
-    <bundle>mvn:commons-codec/commons-codec/${commons.codec.version}</bundle>
-    <bundle>mvn:commons-io/commons-io/${commons.io.version}</bundle>
-    <bundle>mvn:org.apache.commons/commons-lang3/${commons.lang3.version}</bundle>
-    <bundle>mvn:org.codehaus.woodstox/stax2-api/${woodstox.stax2-api.version}</bundle>
+    <bundle>mvn:commons-codec/commons-codec</bundle>
+    <bundle>mvn:commons-io/commons-io</bundle>
+    <bundle>mvn:org.apache.commons/commons-lang3</bundle>
+    <bundle>mvn:org.codehaus.woodstox/stax2-api</bundle>
     <bundle>mvn:com.fasterxml/aalto-xml/${aalto-xml.version}</bundle>
-    <bundle>mvn:org.apache.httpcomponents/httpcore-osgi/${hc.core.version}</bundle>
-    <bundle>mvn:org.apache.httpcomponents/httpclient-osgi/${hc.client.version}</bundle>
+    <bundle>mvn:org.apache.httpcomponents.client5/httpcore-osgi</bundle>
+    <bundle>mvn:org.apache.httpcomponents.client5/httpclient-osgi</bundle>
 
-    <bundle>mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
-    <bundle>mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
-    <bundle>mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
+    <bundle>mvn:tools.jackson.core/jackson-core/${jackson.version}</bundle>
+    <bundle>mvn:com.fasterxml.jackson.core/jackson-annotations</bundle>
+    <bundle>mvn:tools.jackson.core/jackson-databind/${jackson.version}</bundle>
     <bundle>mvn:com.fasterxml.jackson.module/jackson-module-jaxb-annotations/${jackson.version}</bundle>
-    <bundle>mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-xml/${jackson.version}</bundle>
+    <bundle>mvn:tools.jackson.dataformat/jackson-dataformat-xml/${jackson.version}</bundle>
 
     <bundle>mvn:org.apache.olingo/odata-commons-api/${project.version}</bundle>
     <bundle>mvn:org.apache.olingo/odata-commons-core/${project.version}</bundle>

@@ -18,7 +18,7 @@
  */
 package org.apache.olingo.client.api.communication;
 
-import org.apache.http.StatusLine;
+import org.apache.hc.core5.http.message.StatusLine;
 import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 
 import java.io.InputStream;
@@ -48,7 +48,7 @@ public class ODataServerErrorException extends ODataRuntimeException {
    * @param rawResponse raw response of the request.
    */
   public ODataServerErrorException(final StatusLine statusLine, final InputStream rawResponse) {
-    super(statusLine.toString());
+    super(statusLine.getReasonPhrase() != null ? statusLine.getReasonPhrase() : statusLine.toString());
     this.rawResponse = rawResponse;
   }
 

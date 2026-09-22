@@ -18,14 +18,14 @@
  */
 package org.apache.olingo.client.core.edm.xml;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -43,13 +43,13 @@ class ClientCsdlNavigationProperty extends CsdlNavigationProperty implements Ser
 
       final CsdlNavigationProperty property = new ClientCsdlNavigationProperty();
 
-      for (; jp.getCurrentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
-        final JsonToken token = jp.getCurrentToken();
-        if (token == JsonToken.FIELD_NAME) {
-          if ("Name".equals(jp.getCurrentName())) {
-            property.setName(jp.nextTextValue());
-          } else if ("Type".equals(jp.getCurrentName())) {
-            String metadataTypeName = jp.nextTextValue();
+      for (; jp.currentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
+        final JsonToken token = jp.currentToken();
+        if (token == JsonToken.PROPERTY_NAME) {
+          if ("Name".equals(jp.currentName())) {
+            property.setName(nextTextValue(jp));
+          } else if ("Type".equals(jp.currentName())) {
+            String metadataTypeName = nextTextValue(jp);
             if (metadataTypeName.startsWith("Collection(")) {
               property.setType(metadataTypeName.substring(metadataTypeName.indexOf("(") + 1,
                       metadataTypeName.length() - 1));
@@ -58,19 +58,19 @@ class ClientCsdlNavigationProperty extends CsdlNavigationProperty implements Ser
               property.setType(metadataTypeName);
               property.setCollection(false);
             }
-          } else if ("Nullable".equals(jp.getCurrentName())) {
-            property.setNullable(BooleanUtils.toBoolean(jp.nextTextValue()));
-          } else if ("Partner".equals(jp.getCurrentName())) {
-            property.setPartner(jp.nextTextValue());
-          } else if ("ContainsTarget".equals(jp.getCurrentName())) {
-            property.setContainsTarget(BooleanUtils.toBoolean(jp.nextTextValue()));
-          } else if ("ReferentialConstraint".equals(jp.getCurrentName())) {
+          } else if ("Nullable".equals(jp.currentName())) {
+            property.setNullable(BooleanUtils.toBoolean(nextTextValue(jp)));
+          } else if ("Partner".equals(jp.currentName())) {
+            property.setPartner(nextTextValue(jp));
+          } else if ("ContainsTarget".equals(jp.currentName())) {
+            property.setContainsTarget(BooleanUtils.toBoolean(nextTextValue(jp)));
+          } else if ("ReferentialConstraint".equals(jp.currentName())) {
             jp.nextToken();
             property.getReferentialConstraints().add(jp.readValueAs(ClientCsdlReferentialConstraint.class));
-          } else if ("OnDelete".equals(jp.getCurrentName())) {
+          } else if ("OnDelete".equals(jp.currentName())) {
             jp.nextToken();
             property.setOnDelete(jp.readValueAs(ClientCsdlOnDelete.class));
-          } else if ("Annotation".equals(jp.getCurrentName())) {
+          } else if ("Annotation".equals(jp.currentName())) {
             jp.nextToken();
             property.getAnnotations().add(jp.readValueAs(ClientCsdlAnnotation.class));
           }

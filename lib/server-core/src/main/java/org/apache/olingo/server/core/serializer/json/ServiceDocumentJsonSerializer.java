@@ -28,7 +28,7 @@ import org.apache.olingo.commons.api.edm.EdmSingleton;
 import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.api.serializer.SerializerException;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonGenerator;
 
 public class ServiceDocumentJsonSerializer {
   public static final String KIND = "kind";
@@ -60,17 +60,17 @@ public class ServiceDocumentJsonSerializer {
           (serviceRoot == null ? "" :
               serviceRoot.endsWith("/") ? serviceRoot : (serviceRoot + "/"))
               + Constants.METADATA;
-      gen.writeObjectField(Constants.JSON_CONTEXT, metadataUri);
+      gen.writeStringProperty(Constants.JSON_CONTEXT, metadataUri);
 
       if (metadata != null
           && metadata.getServiceMetadataETagSupport() != null
           && metadata.getServiceMetadataETagSupport().getMetadataETag() != null) {
-        gen.writeStringField(Constants.JSON_METADATA_ETAG,
+        gen.writeStringProperty(Constants.JSON_METADATA_ETAG,
             metadata.getServiceMetadataETagSupport().getMetadataETag());
       }
     }
 
-    gen.writeArrayFieldStart(Constants.VALUE);
+    gen.writeArrayPropertyStart(Constants.VALUE);
     if(metadata != null){
       final EdmEntityContainer container = metadata.getEdm().getEntityContainer();
       if (container != null) {
@@ -107,13 +107,13 @@ public class ServiceDocumentJsonSerializer {
       final String title)
       throws IOException {
     gen.writeStartObject();
-    gen.writeObjectField(Constants.JSON_NAME, name);
+    gen.writeStringProperty(Constants.JSON_NAME, name);
     if (title != null) {
-      gen.writeObjectField(Constants.JSON_TITLE, title);
+      gen.writeStringProperty(Constants.JSON_TITLE, title);
     }
-    gen.writeObjectField(Constants.JSON_URL, reference);
+    gen.writeStringProperty(Constants.JSON_URL, reference);
     if (kind != null) {
-      gen.writeObjectField(KIND, kind);
+      gen.writeStringProperty(KIND, kind);
     }
     gen.writeEndObject();
   }

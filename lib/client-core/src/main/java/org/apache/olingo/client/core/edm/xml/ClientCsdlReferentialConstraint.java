@@ -18,10 +18,10 @@
  */
 package org.apache.olingo.client.core.edm.xml;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 import org.apache.olingo.commons.api.edm.provider.CsdlReferentialConstraint;
 
@@ -40,13 +40,13 @@ class ClientCsdlReferentialConstraint extends CsdlReferentialConstraint implemen
 
       final CsdlReferentialConstraint refConst = new ClientCsdlReferentialConstraint();
 
-      for (; jp.getCurrentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
-        final JsonToken token = jp.getCurrentToken();
-        if (token == JsonToken.FIELD_NAME) {
-          if ("Property".equals(jp.getCurrentName())) {
-            refConst.setProperty(jp.nextTextValue());
-          } else if ("ReferencedProperty".equals(jp.getCurrentName())) {
-            refConst.setReferencedProperty(jp.nextTextValue());
+      for (; jp.currentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
+        final JsonToken token = jp.currentToken();
+        if (token == JsonToken.PROPERTY_NAME) {
+          if ("Property".equals(jp.currentName())) {
+            refConst.setProperty(nextTextValue(jp));
+          } else if ("ReferencedProperty".equals(jp.currentName())) {
+            refConst.setReferencedProperty(nextTextValue(jp));
           }
         }
       }

@@ -18,117 +18,84 @@
  ******************************************************************************/
 package org.apache.olingo.osgi.itests;
 
-import java.io.File;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-import javax.inject.Inject;
-
-import org.apache.karaf.features.FeaturesService;
-import org.junit.Assert;
-import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.ProbeBuilder;
-import org.ops4j.pax.exam.TestProbeBuilder;
-import org.ops4j.pax.exam.options.MavenUrlReference;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import static org.ops4j.pax.exam.CoreOptions.composite;
-import static org.ops4j.pax.exam.CoreOptions.maven;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-import static org.ops4j.pax.exam.CoreOptions.when;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * 
+ * Base class for Karaf OSGi integration tests using Testcontainers.
+ *
+ * <p>A {@link KarafContainer} is started once per concrete test class
+ * ({@code @BeforeAll}/{@code @AfterAll}). The base features
+ * {@code olingo-server} and {@code olingo-client} are installed from the
+ * local Maven repository before any test method runs.
+ *
+ * <p>Subclasses may add a {@code @BeforeAll} method to install additional
+ * bundles; JUnit 5 guarantees that superclass {@code @BeforeAll} methods
+ * run before subclass ones.
  */
-public class OlingoOSGiTestSupport {
-    private static final String MAVEN_DEPENDENCIES_PROPERTIES = "/META-INF/maven/dependencies.properties";
+public abstract class OlingoOSGiTestSupport {
 
-    @Inject
-    protected BundleContext bundleContext;
+    /** Karaf container shared across all test methods in a concrete test class. */
+    protected static KarafContainer karaf;
 
-    @Inject
-    protected FeaturesService featureService;
+    @BeforeAll
+    static void startKaraf() throws Exception {
+        karaf = new KarafContainer();
+        karaf.start();
+        installOlingoFeatures();
+    }
 
-    protected ExecutorService executor = Executors.newCachedThreadPool();
+    @AfterAll
+    static void stopKaraf() {
+        if (karaf != null) {
+            karaf.stop();
+            karaf = null;
+        }
+    }
 
-    protected MavenUrlReference olingoUrl;
-    protected MavenUrlReference karafUrl;
+    private static void installOlingoFeatures() throws Exception {
+        String version = readOlingoVersion();
+        //TODO what is that url is targeting?
+        String featuresUrl =
+            "mvn:org.apache.olingo/odata-karaf-features/" + version + "/xml/features";
+        karaf.installFeatures(featuresUrl, "olingo-server", "olingo-client");
+    }
 
     /**
-     * @param probe
-     * @return
+     * Read the Olingo project version from the Maven-filtered resource
+     * {@code /karaf-fit.properties} on the test classpath.
      */
-    @ProbeBuilder
-    public TestProbeBuilder probeConfiguration(TestProbeBuilder probe) {
-        probe.setHeader(Constants.DYNAMICIMPORT_PACKAGE, "*,org.apache.felix.service.*;status=provisional");
-        return probe;
-    }
-
-    private static String getKarafVersion() {
-        String karafVersion = getVersionFromPom("org.apache.karaf/apache-karaf/version");
-        if (karafVersion == null) {
-            karafVersion = System.getProperty("karaf.version");
-        }
-        if (karafVersion == null) {
-            // setup the default version of it
-            karafVersion = "3.0.3";
-        }
-        return karafVersion;
-    }
-
-    private static String getVersionFromPom(String key) {
-        try {
-            InputStream ins = OlingoOSGiTestSupport.class.getResourceAsStream(MAVEN_DEPENDENCIES_PROPERTIES);
-            Properties p = new Properties();
-            p.load(ins);
-            return p.getProperty(key);
-        } catch (Exception t) {
-            throw new IllegalStateException(MAVEN_DEPENDENCIES_PROPERTIES + " can not be found", t);
-        }
-    }    
-    /**
-     * Create an {@link org.ops4j.pax.exam.Option} for using a .
-     * 
-     * @return
-     */
-    protected Option olingoBaseConfig() {
-        karafUrl = maven().groupId("org.apache.karaf").artifactId("apache-karaf").version(getKarafVersion())
-            .type("tar.gz");
-        olingoUrl = maven().groupId("org.apache.olingo").artifactId("odata-karaf-features").versionAsInProject()
-            .type("xml").classifier("features");
-        String localRepo = System.getProperty("localRepository");
-        return composite(karafDistributionConfiguration()
-                             .frameworkUrl(karafUrl)
-                             .karafVersion(getKarafVersion())
-                             .name("Apache Karaf")
-                             .useDeployFolder(false)
-                             .unpackDirectory(new File("target/paxexam/")),
-                         //DO NOT COMMIT WITH THIS LINE ENABLED!!!    
-                         //KarafDistributionOption.keepRuntimeFolder(),                         
-                         systemProperty("java.awt.headless").value("true"),
-                         when(localRepo != null)
-                             .useOptions(editConfigurationFilePut("etc/org.ops4j.pax.url.mvn.cfg",
-                                                                  "org.ops4j.pax.url.mvn.localRepository",
-                                                                  localRepo)));
-    }
-
-    protected void assertBundleStarted(String name) {
-        Bundle bundle = findBundleByName(name);
-        Assert.assertNotNull("Bundle " + name + " should be installed", bundle);
-        Assert.assertEquals("Bundle " + name + " should be started", Bundle.ACTIVE, bundle.getState());
-    }
-
-    protected Bundle findBundleByName(String symbolicName) {
-        for (Bundle bundle : bundleContext.getBundles()) {
-            if (bundle.getSymbolicName().equals(symbolicName)) {
-                return bundle;
+    protected static String readOlingoVersion() {
+        try (InputStream in =
+                 OlingoOSGiTestSupport.class.getResourceAsStream("/karaf-fit.properties")) {
+            if (in == null) {
+                throw new IllegalStateException(
+                    "/karaf-fit.properties not found on test classpath");
             }
+            Properties p = new Properties();
+            p.load(in);
+            String version = p.getProperty("olingo.version");
+            if (version == null || version.isBlank()) {
+                throw new IllegalStateException(
+                    "olingo.version not set in /karaf-fit.properties");
+            }
+            return version;
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot read /karaf-fit.properties", e);
         }
-        return null;
+    }
+
+    /**
+     * Assert that a bundle with the given OSGi symbolic name is in {@code Active} state.
+     */
+    protected static void assertBundleStarted(String symbolicName) throws Exception {
+        assertTrue(karaf.isBundleActive(symbolicName),
+            "Bundle " + symbolicName + " should be ACTIVE in Karaf");
     }
 }

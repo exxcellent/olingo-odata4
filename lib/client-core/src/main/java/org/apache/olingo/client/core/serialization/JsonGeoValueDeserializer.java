@@ -39,7 +39,7 @@ import org.apache.olingo.commons.api.edm.geo.SRID;
 import org.apache.olingo.commons.core.edm.EdmTypeInfo;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDouble;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 
 class JsonGeoValueDeserializer {
 
@@ -49,9 +49,9 @@ class JsonGeoValueDeserializer {
     if (itor.hasNext()) {
       point = new Point(GeoUtils.getDimension(type), srid);
       try {
-        point.setX(EdmDouble.getInstance().valueOfString(itor.next().asText(), null, null,
+        point.setX(EdmDouble.getInstance().valueOfString(itor.next().asString(), null, null,
             Constants.DEFAULT_PRECISION, Constants.DEFAULT_SCALE, null, Double.class));
-        point.setY(EdmDouble.getInstance().valueOfString(itor.next().asText(), null, null,
+        point.setY(EdmDouble.getInstance().valueOfString(itor.next().asString(), null, null,
             Constants.DEFAULT_PRECISION, Constants.DEFAULT_SCALE, null, Double.class));
       } catch (EdmPrimitiveTypeException e) {
         throw new IllegalArgumentException("While deserializing point coordinates as double", e);
@@ -67,7 +67,7 @@ class JsonGeoValueDeserializer {
     if (itor.hasNext()) {
       final List<Point> points = new ArrayList<>();
       while (itor.hasNext()) {
-        final Iterator<JsonNode> mpItor = itor.next().elements();
+        final Iterator<JsonNode> mpItor = itor.next().iterator();
         points.add(point(mpItor, type, srid));
       }
       multiPoint = new MultiPoint(GeoUtils.getDimension(type), srid, points);
@@ -84,7 +84,7 @@ class JsonGeoValueDeserializer {
     if (itor.hasNext()) {
       final List<Point> points = new ArrayList<>();
       while (itor.hasNext()) {
-        final Iterator<JsonNode> mpItor = itor.next().elements();
+        final Iterator<JsonNode> mpItor = itor.next().iterator();
         points.add(point(mpItor, type, srid));
       }
       lineString = new LineString(GeoUtils.getDimension(type), srid, points);
@@ -103,7 +103,7 @@ class JsonGeoValueDeserializer {
     if (itor.hasNext()) {
       final List<LineString> lineStrings = new ArrayList<>();
       while (itor.hasNext()) {
-        final Iterator<JsonNode> mlsItor = itor.next().elements();
+        final Iterator<JsonNode> mlsItor = itor.next().iterator();
         lineStrings.add(lineString(mlsItor, type, srid));
       }
       multiLineString = new MultiLineString(GeoUtils.getDimension(type), srid, lineStrings);
@@ -117,11 +117,11 @@ class JsonGeoValueDeserializer {
   private Polygon polygon(final Iterator<JsonNode> itor, final EdmPrimitiveTypeKind type, final SRID srid) {
     List<Point> extPoints = null;
     if (itor.hasNext()) {
-      final Iterator<JsonNode> extItor = itor.next().elements();
+      final Iterator<JsonNode> extItor = itor.next().iterator();
       if (extItor.hasNext()) {
         extPoints = new ArrayList<>();
         while (extItor.hasNext()) {
-          final Iterator<JsonNode> mpItor = extItor.next().elements();
+          final Iterator<JsonNode> mpItor = extItor.next().iterator();
           extPoints.add(point(mpItor, type, srid));
         }
       }
@@ -129,11 +129,11 @@ class JsonGeoValueDeserializer {
 
     List<LineString> intRings = new ArrayList<LineString>();
     while (itor.hasNext()) {
-      final Iterator<JsonNode> intItor = itor.next().elements();
+      final Iterator<JsonNode> intItor = itor.next().iterator();
       if (intItor.hasNext()) {
         List<Point> intPoints = new ArrayList<>();
         while (intItor.hasNext()) {
-          final Iterator<JsonNode> mpItor = intItor.next().elements();
+          final Iterator<JsonNode> mpItor = intItor.next().iterator();
           intPoints.add(point(mpItor, type, srid));
         }
         intRings.add(new LineString(GeoUtils.getDimension(type), srid, intPoints));
@@ -150,7 +150,7 @@ class JsonGeoValueDeserializer {
     if (itor.hasNext()) {
       final List<Polygon> polygons = new ArrayList<>();
       while (itor.hasNext()) {
-        final Iterator<JsonNode> mpItor = itor.next().elements();
+        final Iterator<JsonNode> mpItor = itor.next().iterator();
         polygons.add(polygon(mpItor, type, srid));
       }
       multiPolygon = new MultiPolygon(GeoUtils.getDimension(type), srid, polygons);
@@ -171,7 +171,7 @@ class JsonGeoValueDeserializer {
 
       while (itor.hasNext()) {
         final JsonNode geo = itor.next();
-        final String collItemType = geo.get(Constants.ATTR_TYPE).asText();
+        final String collItemType = geo.get(Constants.ATTR_TYPE).asString();
         final String callAsType;
         if (EdmPrimitiveTypeKind.GeographyCollection.name().equals(collItemType)
             || EdmPrimitiveTypeKind.GeometryCollection.name().equals(collItemType)) {
@@ -199,7 +199,7 @@ class JsonGeoValueDeserializer {
         || typeInfo.getPrimitiveTypeKind() == EdmPrimitiveTypeKind.Geometry)
         && node.has(Constants.ATTR_TYPE)) {
 
-      String nodeType = node.get(Constants.ATTR_TYPE).asText();
+      String nodeType = node.get(Constants.ATTR_TYPE).asString();
       if (nodeType.startsWith("Geo")) {
         final int yIdx = nodeType.indexOf('y');
         nodeType = nodeType.substring(yIdx + 1);
@@ -210,13 +210,13 @@ class JsonGeoValueDeserializer {
     }
 
     final Iterator<JsonNode> cooItor = node.has(Constants.JSON_COORDINATES)
-        ? node.get(Constants.JSON_COORDINATES).elements()
+        ? node.get(Constants.JSON_COORDINATES).iterator()
             : Collections.<JsonNode> emptyList().iterator();
 
         SRID srid = null;
         if (node.has(Constants.JSON_CRS)) {
           srid = SRID.valueOf(
-              node.get(Constants.JSON_CRS).get(Constants.PROPERTIES).get(Constants.JSON_NAME).asText().split(":")[1]);
+              node.get(Constants.JSON_CRS).get(Constants.PROPERTIES).get(Constants.JSON_NAME).asString().split(":")[1]);
         }
 
         Geospatial value = null;
@@ -253,7 +253,7 @@ class JsonGeoValueDeserializer {
 
         case GeographyCollection:
         case GeometryCollection:
-          value = collection(node.get(Constants.JSON_GEOMETRIES).elements(), actualType, srid);
+          value = collection(node.get(Constants.JSON_GEOMETRIES).iterator(), actualType, srid);
           break;
 
         default:

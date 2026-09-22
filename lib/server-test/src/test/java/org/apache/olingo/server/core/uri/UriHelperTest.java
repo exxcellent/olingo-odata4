@@ -33,10 +33,8 @@ import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.uri.UriHelper;
 import org.apache.olingo.server.tecsvc.data.DataProvider;
 import org.apache.olingo.server.tecsvc.provider.EdmTechProvider;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 public class UriHelperTest {
 
@@ -51,14 +49,14 @@ public class UriHelperTest {
   public void canonicalURL() throws Exception {
     final EdmEntitySet entitySet = container.getEntitySet("ESAllPrim");
     final Entity entity = data.readAll(entitySet).getEntities().get(0);
-    Assert.assertEquals("ESAllPrim(32767)", helper.buildCanonicalURL(entitySet, entity));
+    assertEquals("ESAllPrim(32767)", helper.buildCanonicalURL(entitySet, entity));
   }
 
   @Test
   public void canonicalURLLong() throws Exception {
     final EdmEntitySet entitySet = container.getEntitySet("ESAllKey");
     final Entity entity = data.readAll(entitySet).getEntities().get(0);
-    Assert.assertEquals("ESAllKey("
+    assertEquals("ESAllKey("
         + "PropertyString='First',"
         + "PropertyBoolean=true,"
         + "PropertyByte=255,"
@@ -75,36 +73,35 @@ public class UriHelperTest {
         helper.buildCanonicalURL(entitySet, entity));
   }
 
-  @Test(expected = SerializerException.class)
+  @Test
   public void canonicalURLWrong() throws Exception {
-    final EdmEntitySet entitySet = container.getEntitySet("ESAllPrim");
-    Entity entity = data.readAll(entitySet).getEntities().get(0);
-    entity.getProperty("PropertyInt16").setValue(ValueType.PRIMITIVE, "wrong");
-    helper.buildCanonicalURL(entitySet, entity);
+      assertThrows(SerializerException.class, () -> {
+      final EdmEntitySet entitySet = container.getEntitySet("ESAllPrim");
+      Entity entity = data.readAll(entitySet).getEntities().get(0);
+      entity.getProperty("PropertyInt16").setValue(ValueType.PRIMITIVE, "wrong");
+      helper.buildCanonicalURL(entitySet, entity);
+      });
   }
   
-  @Rule
-  public ExpectedException expectedEx = ExpectedException.none(); 
-  
-  @Test(expected = SerializerException.class)
+  @Test
   public void canonicalURLWithoutKeys() throws Exception {
-    final EdmEntitySet entitySet = container.getEntitySet("ESAllPrim");
-    Entity entity = data.readAll(entitySet).getEntities().get(0);
-    List<Property> properties = entity.getProperties();
-    properties.remove(0);
-    helper.buildCanonicalURL(entitySet, entity);
-    expectedEx.expect(SerializerException.class);
-    expectedEx.expectMessage("Key Value Cannot be null for property: PropertyInt16");
+      assertThrows(SerializerException.class, () -> {
+      final EdmEntitySet entitySet = container.getEntitySet("ESAllPrim");
+      Entity entity = data.readAll(entitySet).getEntities().get(0);
+      List<Property> properties = entity.getProperties();
+      properties.remove(0);
+      helper.buildCanonicalURL(entitySet, entity);
+      });
   }
-  
-  @Test(expected = SerializerException.class)
+
+  @Test
   public void canonicalURLWithKeyHavingNullValue() throws Exception {
-    final EdmEntitySet entitySet = container.getEntitySet("ESAllPrim");
-    Entity entity = data.readAll(entitySet).getEntities().get(0);
-    Property property = entity.getProperties().get(0);
-    property.setValue(property.getValueType(), null);
-    helper.buildCanonicalURL(entitySet, entity);
-    expectedEx.expect(SerializerException.class);
-    expectedEx.expectMessage("Wrong key value!");
+      assertThrows(SerializerException.class, () -> {
+      final EdmEntitySet entitySet = container.getEntitySet("ESAllPrim");
+      Entity entity = data.readAll(entitySet).getEntities().get(0);
+      Property property = entity.getProperties().get(0);
+      property.setValue(property.getValueType(), null);
+      helper.buildCanonicalURL(entitySet, entity);
+      });
   }
 }

@@ -18,14 +18,14 @@
  */
 package org.apache.olingo.client.core.edm.xml;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.olingo.commons.api.edm.provider.CsdlFunctionImport;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -42,18 +42,18 @@ class ClientCsdlFunctionImport extends CsdlFunctionImport implements Serializabl
 
       final ClientCsdlFunctionImport functImpImpl = new ClientCsdlFunctionImport();
 
-      for (; jp.getCurrentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
-        final JsonToken token = jp.getCurrentToken();
-        if (token == JsonToken.FIELD_NAME) {
-          if ("Name".equals(jp.getCurrentName())) {
-            functImpImpl.setName(jp.nextTextValue());
-          } else if ("Function".equals(jp.getCurrentName())) {
-            functImpImpl.setFunction(jp.nextTextValue());
-          } else if ("EntitySet".equals(jp.getCurrentName())) {
-            functImpImpl.setEntitySet(jp.nextTextValue());
-          } else if ("IncludeInServiceDocument".equals(jp.getCurrentName())) {
-            functImpImpl.setIncludeInServiceDocument(BooleanUtils.toBoolean(jp.nextTextValue()));
-          } else if ("Annotation".equals(jp.getCurrentName())) {
+      for (; jp.currentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
+        final JsonToken token = jp.currentToken();
+        if (token == JsonToken.PROPERTY_NAME) {
+          if ("Name".equals(jp.currentName())) {
+            functImpImpl.setName(nextTextValue(jp));
+          } else if ("Function".equals(jp.currentName())) {
+            functImpImpl.setFunction(nextTextValue(jp));
+          } else if ("EntitySet".equals(jp.currentName())) {
+            functImpImpl.setEntitySet(nextTextValue(jp));
+          } else if ("IncludeInServiceDocument".equals(jp.currentName())) {
+            functImpImpl.setIncludeInServiceDocument(BooleanUtils.toBoolean(nextTextValue(jp)));
+          } else if ("Annotation".equals(jp.currentName())) {
             jp.nextToken();
             functImpImpl.getAnnotations().add(jp.readValueAs(ClientCsdlAnnotation.class));
           }

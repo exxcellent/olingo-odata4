@@ -22,22 +22,24 @@ import java.io.IOException;
 
 import org.apache.olingo.commons.api.edm.provider.annotation.CsdlConstantExpression;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.dataformat.xml.deser.FromXmlParser;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.dataformat.xml.deser.FromXmlParser;
 
-public abstract class AbstractClientCsdlEdmDeserializer<T> extends JsonDeserializer<T> {
+public abstract class AbstractClientCsdlEdmDeserializer<T> extends ValueDeserializer<T> {
 
   protected boolean isAnnotationConstExprConstruct(final JsonParser jp) throws IOException {
-    return CsdlConstantExpression.ConstantExpressionType.fromString(jp.getCurrentName()) != null;
+    return CsdlConstantExpression.ConstantExpressionType.fromString(jp.currentName()) != null;
   }
 
   protected CsdlConstantExpression parseAnnotationConstExprConstruct(final JsonParser jp)
       throws IOException {
     final CsdlConstantExpression constExpr =
-        new CsdlConstantExpression(CsdlConstantExpression.ConstantExpressionType.fromString(jp.getCurrentName()));
-    constExpr.setValue(jp.nextTextValue());
+        new CsdlConstantExpression(CsdlConstantExpression.ConstantExpressionType.fromString(jp.currentName()));
+    jp.nextToken();
+    constExpr.setValue(jp.getString());
     return constExpr;
   }
 
@@ -45,7 +47,8 @@ public abstract class AbstractClientCsdlEdmDeserializer<T> extends JsonDeseriali
     final ClientCsdlReturnType returnType;
     if (elementName.equals(((FromXmlParser) jp).getStaxReader().getLocalName())) {
       returnType = new ClientCsdlReturnType();
-      returnType.setType(jp.nextTextValue());
+      jp.nextToken();
+      returnType.setType(jp.getString());
     } else {
       jp.nextToken();
       returnType = jp.readValueAs(ClientCsdlReturnType.class);
@@ -53,10 +56,22 @@ public abstract class AbstractClientCsdlEdmDeserializer<T> extends JsonDeseriali
     return returnType;
   }
 
+  /**
+   * Jackson 3.x removed nextTextValue(). This helper advances the parser and returns the string value.
+   */
+  protected String nextTextValue(final JsonParser jp) throws IOException {
+    jp.nextToken();
+    return jp.getString();
+  }
+
   protected abstract T doDeserialize(JsonParser jp, DeserializationContext ctxt) throws IOException;
 
   @Override
-  public T deserialize(final JsonParser jp, final DeserializationContext ctxt) throws IOException {
-    return doDeserialize(jp, ctxt);
+  public T deserialize(final JsonParser jp, final DeserializationContext ctxt) throws JacksonException {
+    try {
+      return doDeserialize(jp, ctxt);
+    } catch (IOException e) {
+      throw new tools.jackson.core.exc.StreamReadException(jp, e.getMessage(), e);
+    }
   }
 }

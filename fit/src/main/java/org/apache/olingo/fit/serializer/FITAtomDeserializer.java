@@ -20,14 +20,13 @@ package org.apache.olingo.fit.serializer;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.nio.charset.CodingErrorAction;
+import java.nio.charset.StandardCharsets;
 
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.olingo.client.core.serialization.AtomDeserializer;
-import org.apache.olingo.commons.api.Constants;
 
 public class FITAtomDeserializer extends AtomDeserializer {
 
@@ -38,7 +37,7 @@ public class FITAtomDeserializer extends AtomDeserializer {
   @Override
   protected XMLEventReader getReader(final InputStream input) throws XMLStreamException {
     return FACTORY.createXMLEventReader(new InputStreamReader(input,
-        Charset.forName(Constants.UTF8).newDecoder()
+        StandardCharsets.UTF_8.newDecoder()
             .onMalformedInput(CodingErrorAction.IGNORE)
             .onUnmappableCharacter(CodingErrorAction.IGNORE)));
   }

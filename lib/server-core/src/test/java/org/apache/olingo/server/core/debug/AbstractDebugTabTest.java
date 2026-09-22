@@ -21,8 +21,8 @@ package org.apache.olingo.server.core.debug;
 import java.io.IOException;
 import java.io.StringWriter;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.ObjectMapper;
 
 public abstract class AbstractDebugTabTest {
 
@@ -40,7 +40,7 @@ public abstract class AbstractDebugTabTest {
       tab.appendHtml(writer);
     } else {
       // Create JSON generator (the object mapper is necessary to write expression trees).
-      try (JsonGenerator json = new ObjectMapper().getFactory().createGenerator(writer)) {
+      try (JsonGenerator json = new ObjectMapper().createGenerator(writer)) {
         tab.appendJson(json);
         json.flush();
       }

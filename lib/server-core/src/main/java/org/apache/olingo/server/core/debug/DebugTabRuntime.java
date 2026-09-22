@@ -26,7 +26,7 @@ import java.util.List;
 
 import org.apache.olingo.server.api.debug.RuntimeMeasurement;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonGenerator;
 
 /**
  * Runtime debug information.
@@ -64,18 +64,18 @@ public class DebugTabRuntime implements DebugTab {
 
   private void appendJsonNode(final JsonGenerator gen, final RuntimeNode node) throws IOException {
     gen.writeStartObject();
-    gen.writeStringField("class", node.className);
-    gen.writeStringField("method", node.methodName);
+    gen.writeStringProperty("class", node.className);
+    gen.writeStringProperty("method", node.methodName);
 
     if (node.timeStopped == 0) {
-      gen.writeNullField("duration");
+      gen.writeNullProperty("duration");
     } else {
-      gen.writeNumberField("duration", (node.timeStopped - node.timeStarted) / TO_MILLIS_DIVISOR);
-      gen.writeStringField("unit", "µs");
+      gen.writeNumberProperty("duration", (node.timeStopped - node.timeStarted) / TO_MILLIS_DIVISOR);
+      gen.writeStringProperty("unit", "µs");
     }
 
     if (!node.children.isEmpty()) {
-      gen.writeFieldName("children");
+      gen.writeName("children");
       appendJsonChildren(gen, node);
     }
 

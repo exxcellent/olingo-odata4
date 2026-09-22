@@ -18,14 +18,14 @@
  */
 package org.apache.olingo.client.core.edm.xml;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -42,19 +42,19 @@ class ClientCsdlEntitySet extends CsdlEntitySet implements Serializable {
 
       final ClientCsdlEntitySet entitySet = new ClientCsdlEntitySet();
 
-      for (; jp.getCurrentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
-        final JsonToken token = jp.getCurrentToken();
-        if (token == JsonToken.FIELD_NAME) {
-          if ("Name".equals(jp.getCurrentName())) {
-            entitySet.setName(jp.nextTextValue());
-          } else if ("EntityType".equals(jp.getCurrentName())) {
-            entitySet.setType(jp.nextTextValue());
-          } else if ("IncludeInServiceDocument".equals(jp.getCurrentName())) {
-            entitySet.setIncludeInServiceDocument(BooleanUtils.toBoolean(jp.nextTextValue()));
-          } else if ("NavigationPropertyBinding".equals(jp.getCurrentName())) {
+      for (; jp.currentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
+        final JsonToken token = jp.currentToken();
+        if (token == JsonToken.PROPERTY_NAME) {
+          if ("Name".equals(jp.currentName())) {
+            entitySet.setName(nextTextValue(jp));
+          } else if ("EntityType".equals(jp.currentName())) {
+            entitySet.setType(nextTextValue(jp));
+          } else if ("IncludeInServiceDocument".equals(jp.currentName())) {
+            entitySet.setIncludeInServiceDocument(BooleanUtils.toBoolean(nextTextValue(jp)));
+          } else if ("NavigationPropertyBinding".equals(jp.currentName())) {
             jp.nextToken();
             entitySet.getNavigationPropertyBindings().add(jp.readValueAs(ClientCsdlNavigationPropertyBinding.class));
-          } else if ("Annotation".equals(jp.getCurrentName())) {
+          } else if ("Annotation".equals(jp.currentName())) {
             jp.nextToken();
             entitySet.getAnnotations().add(jp.readValueAs(ClientCsdlAnnotation.class));
           }

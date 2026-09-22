@@ -58,15 +58,15 @@ import org.xml.sax.SAXException;
 
 import com.fasterxml.aalto.stax.InputFactoryImpl;
 import com.fasterxml.aalto.stax.OutputFactoryImpl;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.InjectableValues;
-import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
-import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
-import com.fasterxml.jackson.dataformat.xml.XmlFactory;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.fasterxml.jackson.dataformat.xml.deser.FromXmlParser;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.InjectableValues;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.deser.DeserializationProblemHandler;
+import tools.jackson.dataformat.xml.XmlFactory;
+import tools.jackson.dataformat.xml.XmlMapper;
+import tools.jackson.dataformat.xml.XmlReadFeature;
 
 public class ClientODataDeserializerImpl implements ClientODataDeserializer {
 
@@ -107,24 +107,23 @@ public class ClientODataDeserializerImpl implements ClientODataDeserializer {
   }
 
   protected XmlMapper getXmlMapper() {
-    final XmlMapper xmlMapper = new XmlMapper(
-        new XmlFactory(new InputFactoryImpl(), new OutputFactoryImpl()), new JacksonXmlModule());
+    final XmlMapper xmlMapper = XmlMapper.builder(
+        new XmlFactory(new InputFactoryImpl(), new OutputFactoryImpl()))
+        .injectableValues(new InjectableValues.Std().addValue(Boolean.class, Boolean.FALSE))
+        .enable(XmlReadFeature.EMPTY_ELEMENT_AS_NULL)
+        .addHandler(new DeserializationProblemHandler() {
+          @Override
+          public boolean handleUnknownProperty(final DeserializationContext ctxt, final JsonParser jp,
+              final ValueDeserializer<?> deserializer,
+              final Object beanOrClass, final String propertyName)
+              throws JacksonException {
 
-    xmlMapper.setInjectableValues(new InjectableValues.Std().addValue(Boolean.class, Boolean.FALSE));
-    xmlMapper.enable(FromXmlParser.Feature.EMPTY_ELEMENT_AS_NULL);
-    
-    xmlMapper.addHandler(new DeserializationProblemHandler() {
-      @Override
-      public boolean handleUnknownProperty(final DeserializationContext ctxt, final JsonParser jp,
-          final com.fasterxml.jackson.databind.JsonDeserializer<?> deserializer,
-          final Object beanOrClass, final String propertyName)
-          throws IOException, JsonProcessingException {
-
-        // skip any unknown property
-        ctxt.getParser().skipChildren();
-        return true;
-      }
-    });
+            // skip any unknown property
+            ctxt.getParser().skipChildren();
+            return true;
+          }
+        })
+        .build();
     return xmlMapper;
   }
 

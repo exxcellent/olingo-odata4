@@ -88,15 +88,14 @@ import org.apache.olingo.server.core.deserializer.helper.ExpandTreeBuilder;
 import org.apache.olingo.server.core.deserializer.helper.ExpandTreeBuilderImpl;
 import org.apache.olingo.server.core.serializer.utils.ContentTypeHelper;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectReader;
+import tools.jackson.databind.exc.MismatchedInputException;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 public class ODataJsonDeserializer implements ODataDeserializer {
 
@@ -268,9 +267,9 @@ public class ODataJsonDeserializer implements ODataDeserializer {
               DeletedEntity deletedEntity = new DeletedEntity();
               Reason reason = null;
               if (reasonNode.get(REASON) != null) {
-                if(reasonNode.get(REASON).asText().equals(Reason.changed.name())){
+                if(reasonNode.get(REASON).asString().equals(Reason.changed.name())){
                   reason = Reason.changed;
-                }else if(reasonNode.get(REASON).asText().equals(Reason.deleted.name())){
+                }else if(reasonNode.get(REASON).asString().equals(Reason.deleted.name())){
                   reason = Reason.deleted;
                 }
               }else{
@@ -279,7 +278,7 @@ public class ODataJsonDeserializer implements ODataDeserializer {
               }
               deletedEntity.setReason(reason);
               try {
-                deletedEntity.setId(new URI(arrayElement.get(constants.getId()).asText()));
+                deletedEntity.setId(new URI(arrayElement.get(constants.getId()).asString()));
               } catch (URISyntaxException e) {
                 throw new DeserializerException("Could not set Id for deleted Entity", e,
                     DeserializerException.MessageKeys.UNKNOWN_CONTENT);
@@ -305,7 +304,7 @@ public class ODataJsonDeserializer implements ODataDeserializer {
       throws DeserializerException {
     if (node.get(constants.getId()) != null && constants instanceof Constantsv01) {
       try {
-        entity.setId(new URI(node.get(constants.getId()).textValue()));
+        entity.setId(new URI(node.get(constants.getId()).stringValue()));
         node.remove(constants.getId());
       } catch (URISyntaxException e) {
         throw new DeserializerException("Could not form Id", e,
@@ -343,10 +342,21 @@ public class ODataJsonDeserializer implements ODataDeserializer {
 
   private ObjectNode parseJsonTree(final InputStream stream) throws IOException, DeserializerException {
     ObjectMapper objectMapper = new ObjectMapper();
-    objectMapper.configure(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY, true);
-    objectMapper.configure(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS, true);
-    JsonParser parser = new JsonFactory(objectMapper).createParser(stream);
-    final JsonNode tree = parser.getCodec().readTree(parser);
+    ObjectReader reader = objectMapper.reader(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY,
+        DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
+    JsonParser parser = objectMapper.createParser(stream);
+    final JsonNode tree;
+    try {
+      tree = reader.readTree(parser);
+    } catch (MismatchedInputException e) {
+      // Jackson 3.x: FAIL_ON_READING_DUP_TREE_KEY throws MismatchedInputException for duplicate keys
+      throw new DeserializerException("Duplicate field in JSON input.", e,
+          DeserializerException.MessageKeys.DUPLICATE_PROPERTY);
+    } catch (RuntimeException e) {
+      // Jackson 3.x: JacksonException extends RuntimeException; parse errors are StreamReadException
+      throw new DeserializerException("Invalid JSON syntax.", e,
+          DeserializerException.MessageKeys.JSON_SYNTAX_EXCEPTION);
+    }
     if (tree == null || !tree.isObject()) {
       throw new DeserializerException("Invalid JSON syntax.",
           DeserializerException.MessageKeys.JSON_SYNTAX_EXCEPTION);
@@ -422,11 +432,10 @@ public class ODataJsonDeserializer implements ODataDeserializer {
   /** Reads a parameter value from a String. */
   public Parameter parameter(final String content, final EdmParameter parameter) throws DeserializerException {
     try {
-      JsonParser parser = new JsonFactory(new ObjectMapper()
-          .configure(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY, true))
-              .createParser(content);
-      JsonNode node = parser.getCodec().readTree(parser);
-      if (node == null) {
+      ObjectReader paramReader = new ObjectMapper().reader(DeserializationFeature.FAIL_ON_READING_DUP_TREE_KEY);
+      JsonNode node = paramReader.readTree(content);
+      if (node == null || node.isMissingNode()) {
+        // Jackson 3.x returns MissingNode (not null) for empty/missing input
         throw new DeserializerException("Invalid JSON syntax.",
             DeserializerException.MessageKeys.JSON_SYNTAX_EXCEPTION);
       }
@@ -436,8 +445,17 @@ public class ODataJsonDeserializer implements ODataDeserializer {
         assertJsonNodeIsEmpty(node);
       }
       return result;
-    } catch (final IOException e) {
-      throw wrapParseException(e);
+    } catch (MismatchedInputException e) {
+      throw new DeserializerException("Duplicate field in JSON input.", e,
+          DeserializerException.MessageKeys.DUPLICATE_PROPERTY);
+    } catch (final RuntimeException e) {
+      // Jackson 3.x: JacksonException (parse errors, syntax errors) extends RuntimeException
+      throw new DeserializerException("Invalid JSON syntax.", e,
+          DeserializerException.MessageKeys.JSON_SYNTAX_EXCEPTION);
+    } catch (final DeserializerException e) {
+      throw e;
+    } catch (final Exception e) {
+      throw new DeserializerException("An error occurred.", e, DeserializerException.MessageKeys.IO_EXCEPTION);
     }
   }
 
@@ -453,9 +471,7 @@ public class ODataJsonDeserializer implements ODataDeserializer {
   private void consumeRemainingJsonNodeFields(final EdmEntityType edmEntityType, final ObjectNode node,
       final Entity entity) throws DeserializerException {
     final List<String> toRemove = new ArrayList<>();
-    Iterator<Entry<String, JsonNode>> fieldsIterator = node.fields();
-    while (fieldsIterator.hasNext()) {
-      Entry<String, JsonNode> field = fieldsIterator.next();
+    for (Entry<String, JsonNode> field : node.properties()) {
 
       if (field.getKey().contains(constants.getBind())) {
         Link bindingLink = consumeBindingLink(field.getKey(), field.getValue(), edmEntityType);
@@ -647,11 +663,11 @@ public class ODataJsonDeserializer implements ODataDeserializer {
       List<String> bindingLinkStrings = new ArrayList<>();
       for (JsonNode arrayValue : jsonNode) {
         assertIsNullNode(key, arrayValue);
-        if (!arrayValue.isTextual()) {
+        if (!arrayValue.isString()) {
           throw new DeserializerException("Binding annotation: " + key + " must have string valued array.",
               DeserializerException.MessageKeys.INVALID_ANNOTATION_TYPE, key);
         }
-        bindingLinkStrings.add(arrayValue.asText());
+        bindingLinkStrings.add(arrayValue.asString());
       }
       bindingLink.setType(Constants.ENTITY_COLLECTION_BINDING_LINK_TYPE);
       bindingLink.setBindingLinks(bindingLinkStrings);
@@ -664,7 +680,7 @@ public class ODataJsonDeserializer implements ODataDeserializer {
         bindingLink.setBindingLink(null);
       } else {
         assertIsNullNode(key, jsonNode);
-        bindingLink.setBindingLink(jsonNode.asText());        
+        bindingLink.setBindingLink(jsonNode.asString());        
       }
       bindingLink.setType(Constants.ENTITY_BINDING_LINK_TYPE);
     }
@@ -781,7 +797,7 @@ public class ODataJsonDeserializer implements ODataDeserializer {
     if (isValidNull(name, isNullable, jsonNode)) {
       return null;
     }
-    if (jsonNode.isArray() || !jsonNode.isContainerNode()) {
+    if (jsonNode.isArray() || !jsonNode.isContainer()) {
       throw new DeserializerException(
           "Invalid value for property: " + name + " must not be an array or primitive value.",
           DeserializerException.MessageKeys.INVALID_JSON_TYPE_FOR_PROPERTY, name);
@@ -830,12 +846,18 @@ public class ODataJsonDeserializer implements ODataDeserializer {
       if (isGeoType) {
         return readPrimitiveGeoValue(name, type, (ObjectNode) jsonNode);
       }
-      return type.valueOfString(jsonNode.asText(),
+      return type.valueOfString(jsonNode.asString(),
           isNullable, maxLength, precision, scale, isUnicode,
           getJavaClassForPrimitiveType(mapping, type));
     } catch (final EdmPrimitiveTypeException e) {
+      // Use toString() instead of asText() to avoid JsonNodeException on ObjectNode (e.g. geo types) in Jackson 3.x
       throw new DeserializerException(
-          "Invalid value: " + jsonNode.asText() + " for property: " + name, e,
+          "Invalid value: " + jsonNode.toString() + " for property: " + name, e,
+          DeserializerException.MessageKeys.INVALID_VALUE_FOR_PROPERTY, name);
+    } catch (final RuntimeException e) {
+      // Jackson 3.x: asText()/asString() throws JsonNodeException when called on non-coercible nodes (e.g., ObjectNode)
+      throw new DeserializerException(
+          "Invalid value for property: " + name, e,
           DeserializerException.MessageKeys.INVALID_VALUE_FOR_PROPERTY, name);
     }
   }
@@ -862,8 +884,8 @@ public class ODataJsonDeserializer implements ODataDeserializer {
   private Geospatial readPrimitiveGeoValue(final String name, final EdmPrimitiveType type, ObjectNode jsonNode)
       throws DeserializerException, EdmPrimitiveTypeException {
     JsonNode typeNode = jsonNode.remove(Constants.ATTR_TYPE);
-    if (typeNode != null && typeNode.isTextual()) {
-      final Class<? extends Geospatial> geoDataType = jsonNameToGeoDataType.get(typeNode.asText());
+    if (typeNode != null && typeNode.isString()) {
+      final Class<? extends Geospatial> geoDataType = jsonNameToGeoDataType.get(typeNode.asString());
       if (geoDataType != null && (type == null || geoDataType.equals(type.getDefaultType()))) {
         final JsonNode topNode = jsonNode.remove(
             geoDataType.equals(GeospatialCollection.class) ? Constants.JSON_GEOMETRIES : Constants.JSON_COORDINATES);
@@ -872,7 +894,7 @@ public class ODataJsonDeserializer implements ODataDeserializer {
         if (jsonNode.has(Constants.JSON_CRS)) {
           srid = SRID.valueOf(
           jsonNode.remove(Constants.JSON_CRS).get(Constants.PROPERTIES).
-            get(Constants.JSON_NAME).asText().split(":")[1]);
+            get(Constants.JSON_NAME).asString().split(":")[1]);
         }
         
         assertJsonNodeIsEmpty(jsonNode);
@@ -929,10 +951,10 @@ public class ODataJsonDeserializer implements ODataDeserializer {
     if (node.isArray() && (node.size() ==2 || node.size() == 3)
         && node.get(0).isNumber() && node.get(1).isNumber() && (node.get(2) == null || node.get(2).isNumber())) {
       Point point = new Point(dimension, srid);
-      point.setX(getDoubleValue(node.get(0).asText()));
-      point.setY(getDoubleValue(node.get(1).asText()));
+      point.setX(getDoubleValue(node.get(0).asString()));
+      point.setY(getDoubleValue(node.get(1).asString()));
       if (node.get(2) != null) {
-        point.setZ(getDoubleValue(node.get(2).asText()));
+        point.setZ(getDoubleValue(node.get(2).asString()));
       }
       return point;
     }
@@ -1014,9 +1036,7 @@ public class ODataJsonDeserializer implements ODataDeserializer {
 
   private void removeAnnotations(final ObjectNode tree) throws DeserializerException {
     List<String> toRemove = new ArrayList<>();
-    Iterator<Entry<String, JsonNode>> fieldsIterator = tree.fields();
-    while (fieldsIterator.hasNext()) {
-      Map.Entry<String, JsonNode> field = fieldsIterator.next();
+    for (Map.Entry<String, JsonNode> field : tree.properties()) {
 
       if (field.getKey().contains(ODATA_CONTROL_INFORMATION_PREFIX)) {
         // Control Information is ignored for requests as per specification chapter "4.5 Control Information"
@@ -1041,7 +1061,7 @@ public class ODataJsonDeserializer implements ODataDeserializer {
    */
   private void assertJsonNodeIsEmpty(final JsonNode node) throws DeserializerException {
     if (node.size() != 0) {
-      final String unknownField = node.fieldNames().next();
+      final String unknownField = node.propertyNames().iterator().next();
       throw new DeserializerException("Tree should be empty but still has content left: " + unknownField,
           DeserializerException.MessageKeys.UNKNOWN_CONTENT, unknownField);
     }
@@ -1055,7 +1075,7 @@ public class ODataJsonDeserializer implements ODataDeserializer {
           ((EdmTypeDefinition) edmPrimitiveType).getUnderlyingType(), jsonNode);
     } else if (edmPrimitiveType.getKind() == EdmTypeKind.ENUM) {
       // Enum values must be strings.
-      valid = jsonNode.isTextual();
+      valid = jsonNode.isString();
     } else {
       final String name = edmPrimitiveType.getName();
       EdmPrimitiveTypeKind primKind;
@@ -1079,7 +1099,7 @@ public class ODataJsonDeserializer implements ODataDeserializer {
   }
 
   private boolean matchIEEENumberCase(final JsonNode node, final EdmPrimitiveTypeKind primKind) {
-    return (isIEEE754Compatible ? node.isTextual() : node.isNumber())
+    return (isIEEE754Compatible ? node.isString() : node.isNumber())
         && (primKind == EdmPrimitiveTypeKind.Int64 || primKind == EdmPrimitiveTypeKind.Decimal);
   }
 
@@ -1098,7 +1118,7 @@ public class ODataJsonDeserializer implements ODataDeserializer {
   }
 
   private boolean matchTextualCase(final JsonNode node, final EdmPrimitiveTypeKind primKind) {
-    return node.isTextual() &&
+    return node.isString() &&
         (primKind == EdmPrimitiveTypeKind.String
             || primKind == EdmPrimitiveTypeKind.Binary
             || primKind == EdmPrimitiveTypeKind.Date
@@ -1150,7 +1170,7 @@ public class ODataJsonDeserializer implements ODataDeserializer {
           while (it.hasNext()) {
             final JsonNode next = it.next();
             if (next.has(key)) {
-              parsedValues.add(new URI(next.get(key).asText()));
+              parsedValues.add(new URI(next.get(key).asString()));
             }
           }
         } else {
@@ -1160,7 +1180,7 @@ public class ODataJsonDeserializer implements ODataDeserializer {
         return DeserializerResultImpl.with().entityReferences(parsedValues).build();
       }
       if (tree.get(key) != null) {
-        parsedValues.add(new URI(tree.get(key).asText()));
+        parsedValues.add(new URI(tree.get(key).asString()));
       } else {
         throw new DeserializerException("Missing entity reference", DeserializerException.MessageKeys.UNKNOWN_CONTENT);
       }
@@ -1174,23 +1194,15 @@ public class ODataJsonDeserializer implements ODataDeserializer {
   }
 
   private DeserializerException wrapParseException(final IOException e) {
-    if (e instanceof JsonParseException) {
-      return new DeserializerException("A JsonParseException occurred.", e,
-          DeserializerException.MessageKeys.JSON_SYNTAX_EXCEPTION);
-    } else if (e instanceof JsonMappingException) {
-      return new DeserializerException("Duplicate json property detected.", e,
-          DeserializerException.MessageKeys.DUPLICATE_PROPERTY);
-    } else {
-      return new DeserializerException("An IOException occurred.", e,
-          DeserializerException.MessageKeys.IO_EXCEPTION);
-    }
+    return new DeserializerException("An IOException occurred.", e,
+        DeserializerException.MessageKeys.IO_EXCEPTION);
   }
 
   private EdmType getDerivedType(final EdmStructuredType edmType, final JsonNode jsonNode)
       throws DeserializerException {
     JsonNode odataTypeNode = jsonNode.get(constants.getType());
     if (odataTypeNode != null) {
-      String odataType = odataTypeNode.asText();
+      String odataType = odataTypeNode.asString();
       if (!odataType.isEmpty()) {
         odataType = odataType.substring(1);
 

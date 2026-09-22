@@ -22,6 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.nio.charset.StandardCharsets;
 import java.lang.reflect.Proxy;
 import java.util.Collections;
 import java.util.HashSet;
@@ -87,7 +88,7 @@ public abstract class AbstractService<C extends EdmEnabledODataClient> {
     XMLMetadata metadata = null;
     try {
       // use commons codec's Base64 in this fashion to stay compatible with Android
-      bais = new ByteArrayInputStream(new Base64().decode(compressedMetadata.getBytes("UTF-8")));
+      bais = new ByteArrayInputStream(new Base64().decode(compressedMetadata.getBytes(StandardCharsets.UTF_8)));
       gzis = new GZIPInputStream(bais);
       ois = createObjectInputStream(gzis);
       metadata = (XMLMetadata) ois.readObject();
@@ -188,7 +189,7 @@ public abstract class AbstractService<C extends EdmEnabledODataClient> {
    * @throws IOException If something went wrong.
    */
   private ObjectInputStream createObjectInputStream(InputStream is) throws IOException {
-    ValidatingObjectInputStream vois = new ValidatingObjectInputStream(is);
+    ValidatingObjectInputStream vois = ValidatingObjectInputStream.builder().setInputStream(is).get();
     Set<String> allowedClasses = new HashSet<>();
     allowedClasses.addAll(DEFAULT_ALLOWED_CLASSES);
     allowedClasses.addAll(getAllowedClasses());

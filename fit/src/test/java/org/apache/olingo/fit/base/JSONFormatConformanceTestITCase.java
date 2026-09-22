@@ -18,12 +18,13 @@
  */
 package org.apache.olingo.fit.base;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataEntityRequest;
@@ -40,7 +41,7 @@ import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.format.ContentType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * The test cases in this class are inspired by client conformance criteria defined in the <a
@@ -53,8 +54,8 @@ public class JSONFormatConformanceTestITCase extends AbstractTestITCase {
    */
   @Test
   public void item2() {
-    final URI uri = edmClient.newURIBuilder(testStaticServiceRootURL).
-        appendEntitySetSegment("Accounts").appendKeySegment(102).build();
+    final URI uri = edmClient.newURIBuilder(testStaticServiceRootURL).appendEntitySetSegment("Accounts")
+        .appendKeySegment(102).build();
     final ODataEntityRequest<ClientEntity> req = edmClient.getRetrieveRequestFactory().getEntityRequest(uri);
     req.setFormat(ContentType.JSON_FULL_METADATA);
 
@@ -113,7 +114,8 @@ public class JSONFormatConformanceTestITCase extends AbstractTestITCase {
         + "\"GeographyPoint\": {\"type\": \"Point\",\"coordinates\":[142.1,64.1]}"
         + "}";
 
-    final ClientEntity entity = client.getReader().readEntity(IOUtils.toInputStream(fromSection71), ContentType.JSON);
+    final ClientEntity entity = client.getReader()
+        .readEntity(IOUtils.toInputStream(fromSection71, StandardCharsets.UTF_8), ContentType.JSON);
 
     assertTrue(entity.getProperty("NullValue").hasNullValue());
 
@@ -183,8 +185,8 @@ public class JSONFormatConformanceTestITCase extends AbstractTestITCase {
         + "\"Parent@odata.associationLink\": \"People(976)/Parent\""
         + "}";
 
-    final ResWrap<Entity> entity =
-        client.getDeserializer(ContentType.JSON).toEntity(IOUtils.toInputStream(fromSection45_1));
+    final ResWrap<Entity> entity = client.getDeserializer(ContentType.JSON)
+        .toEntity(IOUtils.toInputStream(fromSection45_1, StandardCharsets.UTF_8));
 
     assertEquals("http://host/service/$metadata#Customers/$entity", entity.getContextURL().toASCIIString());
     assertEquals("W/\"A1FF3E230954908F\"", entity.getMetadataETag());
@@ -205,8 +207,8 @@ public class JSONFormatConformanceTestITCase extends AbstractTestITCase {
         + "  \"@odata.deltaLink\": \"Customers?$expand=Orders&$deltatoken=8015\""
         + "}";
 
-    final ResWrap<EntityCollection> entitySet =
-        client.getDeserializer(ContentType.JSON).toEntitySet(IOUtils.toInputStream(fromSection45_2));
+    final ResWrap<EntityCollection> entitySet = client.getDeserializer(ContentType.JSON)
+        .toEntitySet(IOUtils.toInputStream(fromSection45_2, StandardCharsets.UTF_8));
 
     assertEquals(5, entitySet.getPayload().getCount(), 0);
     assertEquals("Customers?$expand=Orders&$skipToken=5", entitySet.getPayload().getNext().toASCIIString());
@@ -235,8 +237,8 @@ public class JSONFormatConformanceTestITCase extends AbstractTestITCase {
         + "  ]"
         + "}";
 
-    final ClientEntitySet entitySet = client.getReader().
-        readEntitySet(IOUtils.toInputStream(sample), ContentType.JSON);
+    final ClientEntitySet entitySet = client.getReader()
+        .readEntitySet(IOUtils.toInputStream(sample, StandardCharsets.UTF_8), ContentType.JSON);
 
     assertEquals(2, entitySet.getAnnotations().size());
 
@@ -278,9 +280,8 @@ public class JSONFormatConformanceTestITCase extends AbstractTestITCase {
    */
   @Test
   public void item6() throws EdmPrimitiveTypeException {
-    final URI uri = edmClient.newURIBuilder().
-        appendEntitySetSegment("Accounts").appendKeySegment(102).
-        appendNavigationSegment("MyPaymentInstruments").appendKeySegment(102902).build();
+    final URI uri = edmClient.newURIBuilder().appendEntitySetSegment("Accounts").appendKeySegment(102)
+        .appendNavigationSegment("MyPaymentInstruments").appendKeySegment(102902).build();
     final ODataEntityRequest<ClientEntity> req = edmClient.getRetrieveRequestFactory().getEntityRequest(uri);
 
     // request format (via Accept header) does not contain odata.streaming=true

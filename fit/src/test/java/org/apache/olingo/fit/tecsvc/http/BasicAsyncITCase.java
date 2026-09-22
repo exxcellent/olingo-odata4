@@ -26,13 +26,14 @@ import org.apache.olingo.fit.AbstractBaseTestITCase;
 import org.apache.olingo.fit.tecsvc.TecSvcConst;
 import org.apache.olingo.fit.util.StringHelper;
 import org.apache.olingo.server.tecsvc.async.TechnicalAsyncService;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -40,9 +41,9 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Test support of asynchronous batch within the TecSvc without using the OData client library (only
@@ -53,8 +54,8 @@ public class BasicAsyncITCase extends AbstractBaseTestITCase {
   private static final String SERVICE_URI = TecSvcConst.BASE_URI + "/";
 
   private static final String HEADER_CONTENT_TRANSFER_ENCODING_BINARY = "Content-Transfer-Encoding: binary";
-  private static final String HEADER_CONTENT_TYPE_HTTP =
-      HttpHeader.CONTENT_TYPE + ": " + ContentType.APPLICATION_HTTP.toContentTypeString();
+  private static final String HEADER_CONTENT_TYPE_HTTP = HttpHeader.CONTENT_TYPE + ": "
+      + ContentType.APPLICATION_HTTP.toContentTypeString();
   private static final String DEFAULT_BATCH_BOUNDARY = "batch_123";
   private static final String ACCEPT_HEADER_VALUE = ContentType.APPLICATION_JSON.toContentTypeString();
 
@@ -81,7 +82,8 @@ public class BasicAsyncITCase extends AbstractBaseTestITCase {
 
     // get async response (still pending)
     String respondUri = headerFields.get("Location").get(0);
-    HttpURLConnection statusRequest = getRequest(new URL(respondUri), Collections.<String, String>emptyMap());
+    HttpURLConnection statusRequest = getRequest(URI.create(respondUri).toURL(),
+        Collections.<String, String> emptyMap());
     StringHelper.Stream statusBody = StringHelper.toStream(statusRequest.getInputStream());
     Map<String, List<String>> statusHeaderFields = statusRequest.getHeaderFields();
     assertEquals("HTTP/1.1 202", statusHeaderFields.get(null).get(0));
@@ -125,7 +127,8 @@ public class BasicAsyncITCase extends AbstractBaseTestITCase {
 
     // get async response (still pending)
     String respondUri = headerFields.get("Location").get(0);
-    HttpURLConnection statusRequest = getRequest(new URL(respondUri), Collections.<String, String>emptyMap());
+    HttpURLConnection statusRequest = getRequest(URI.create(respondUri).toURL(),
+        Collections.<String, String> emptyMap());
     StringHelper.Stream statusBody = StringHelper.toStream(statusRequest.getInputStream());
     Map<String, List<String>> statusHeaderFields = statusRequest.getHeaderFields();
     assertEquals("HTTP/1.1 202", statusHeaderFields.get(null).get(0));
@@ -150,7 +153,7 @@ public class BasicAsyncITCase extends AbstractBaseTestITCase {
 
   /**
    * Validates that the content contains all given values in same order as the parameters are given.
-   * If the content does not contain a value or not in the given order <code>Assert.fail()</code> is called.
+   * If the content does not contain a value or not in the given order <code>fail()</code> is called.
    *
    * @param content content which is checked
    * @param values values which must be in content (and in correct order)
@@ -159,8 +162,8 @@ public class BasicAsyncITCase extends AbstractBaseTestITCase {
     int index = 0;
     for (String value : values) {
       int currentIndex = content.indexOf(value, index);
-      if(currentIndex == -1) {
-        if(content.contains(value)) {
+      if (currentIndex == -1) {
+        if (content.contains(value)) {
           int foundIndex = content.indexOf(value);
           fail("Expected value '" + value + "' was found but not were expected " +
               "(started to search from position '" + index + "' but found first occurrence at index '" +
@@ -188,18 +191,19 @@ public class BasicAsyncITCase extends AbstractBaseTestITCase {
     HttpURLConnection result = null;
     int waitCounter = maxWaitInSeconds * 1000;
 
-    while(result == null && waitCounter > 0) {
-      HttpURLConnection statusRequest = getRequest(new URL(location), Collections.<String, String>emptyMap());
+    while (result == null && waitCounter > 0) {
+      HttpURLConnection statusRequest = getRequest(URI.create(location).toURL(),
+          Collections.<String, String> emptyMap());
       Map<String, List<String>> statusHeaderFields = statusRequest.getHeaderFields();
       String statusHeader = statusHeaderFields.get(null).get(0);
-      if("HTTP/1.1 202".equals(statusHeader)) {
+      if ("HTTP/1.1 202".equals(statusHeader)) {
         TimeUnit.MILLISECONDS.sleep(SLEEP_TIMEOUT_IN_MS);
         waitCounter -= SLEEP_TIMEOUT_IN_MS;
-      } else if("HTTP/1.1 200".equals(statusHeader)) {
+      } else if ("HTTP/1.1 200".equals(statusHeader)) {
         result = statusRequest;
       } else {
         throw new RuntimeException("Unexpected status header ('" + statusHeader +
-                "') for async status request on: " + location);
+            "') for async status request on: " + location);
       }
     }
     return result;
@@ -242,13 +246,13 @@ public class BasicAsyncITCase extends AbstractBaseTestITCase {
         ContentType.MULTIPART_MIXED, "boundary", batchBoundary).toContentTypeString();
     headers.put(HttpHeader.CONTENT_TYPE, contentTypeValue);
     headers.put(HttpHeader.ACCEPT, ACCEPT_HEADER_VALUE);
-    if(sleepTime >= 0) {
+    if (sleepTime >= 0) {
       headers.put(HttpHeader.PREFER, "respond-async; " +
           TechnicalAsyncService.TEC_ASYNC_SLEEP + "=" + String.valueOf(sleepTime));
     }
 
     StringHelper.Stream s = StringHelper.toStream(content);
-    final URL url = new URL(SERVICE_URI + "$batch");
+    final URL url = URI.create(SERVICE_URI + "$batch").toURL();
     return postRequest(url, s.asString(DEFAULT_ENCODING), headers);
   }
 

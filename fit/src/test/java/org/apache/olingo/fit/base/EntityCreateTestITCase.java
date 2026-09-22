@@ -18,8 +18,8 @@
  */
 package org.apache.olingo.fit.base;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.net.URI;
 import java.util.Calendar;
@@ -33,7 +33,7 @@ import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.format.ContentType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class EntityCreateTestITCase extends AbstractTestITCase {
 
@@ -60,7 +60,7 @@ public class EntityCreateTestITCase extends AbstractTestITCase {
     final ClientEntity instrument = getClient().getObjectFactory().
         newEntity(new FullQualifiedName("Microsoft.Test.OData.Services.ODataWCFService.PaymentInstrument"));
 
-    int id = RandomUtils.nextInt(101999, 105000);
+    int id = RandomUtils.secure().randomInt(101999, 105000);
     instrument.getProperties().add(getClient().getObjectFactory().newPrimitiveProperty("PaymentInstrumentID",
         getClient().getObjectFactory().newPrimitiveValueBuilder().buildInt32(id)));
     instrument.getProperties().add(getClient().getObjectFactory().newPrimitiveProperty("FriendlyName",

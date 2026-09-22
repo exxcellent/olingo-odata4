@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,9 +41,10 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.mail.Header;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMultipart;
+import jakarta.mail.Header;
+import jakarta.mail.internet.MimeBodyPart;
+import jakarta.mail.internet.MimeMultipart;
+import jakarta.mail.util.ByteArrayDataSource;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -111,8 +113,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 @Path("/V40/Static.svc")
@@ -409,7 +411,7 @@ public class Services {
       builder.append("Content-Type: ").append(accept)
           .append(new String(Constants.CRLF))
           .append(new String(Constants.CRLF));
-      builder.append(IOUtils.toString(feed));
+      builder.append(IOUtils.toString(feed, StandardCharsets.UTF_8));
       IOUtils.closeQuietly(feed);
 
       final UUID uuid = UUID.randomUUID();
@@ -429,7 +431,6 @@ public class Services {
   }
 
   private Response bodyPartRequest(final MimeBodyPart body, final Map<String, String> references) throws Exception {
-    @SuppressWarnings("unchecked")
     final Enumeration<Header> en = body.getAllHeaders();
 
     Header header = en.nextElement();
@@ -471,7 +472,7 @@ public class Services {
         res = client.delete();
       } else {
         final InputStream is = body.getDataHandler().getInputStream();
-        String content = IOUtils.toString(is);
+        String content = IOUtils.toString(is, StandardCharsets.UTF_8);
         IOUtils.closeQuietly(is);
 
         final Matcher refs = REF_PATTERN.matcher(content);
@@ -480,12 +481,8 @@ public class Services {
           content = content.replace(refs.group(1), references.get(refs.group(1)));
         }
 
-        if ("PATCH".equals(method) || "MERGE".equals(method)) {
-          client.header("X-HTTP-METHOD", method);
-          res = client.invoke("POST", IOUtils.toInputStream(content));
-        } else {
-          res = client.invoke(method, IOUtils.toInputStream(content));
-        }
+        // CXF 4.x supports PATCH/MERGE natively — no need for POST + X-HTTP-METHOD tunneling
+        res = client.invoke(method, IOUtils.toInputStream(content, StandardCharsets.UTF_8));
       }
 
       // When updating to CXF 3.0.1, uncomment the following line, see CXF-5865
@@ -509,8 +506,26 @@ public class Services {
         bos.write(("--" + boundary).getBytes());
         bos.write(Constants.CRLF);
 
-        final Object content = obj.getDataHandler().getContent();
-        if (content instanceof MimeMultipart) {
+        // CXF 4.x + geronimo-mail 1.1.0 (Jakarta Mail 2.1) fix:
+        // getContent() returns a MimeMultipart whose stream is already consumed, so getCount()
+        // throws. Instead: (1) get the Content-Type with boundary from attachment headers,
+        // (2) read raw bytes from the DataHandler, (3) strip the leading CRLF preamble that CXF
+        // prepends to the changeset body (geronimo-mail's parse() rejects it contrary to RFC 2046),
+        // (4) construct a fresh MimeMultipart via ByteArrayDataSource.
+        final String objHeaderContentType = obj.getHeaders().getFirst("Content-Type");
+        final String objDataHandlerContentType = obj.getDataHandler().getContentType();
+        final String objContentType = objHeaderContentType != null ? objHeaderContentType : objDataHandlerContentType;
+        if (objContentType != null && objContentType.toLowerCase().contains("multipart/mixed")) {
+          byte[] changesetBytes = IOUtils.toByteArray(obj.getDataHandler().getInputStream());
+          // Strip leading CRLF if present (outer multipart boundary separator).
+          // geronimo-mail 1.1.0 (Jakarta Mail 2.1) MimeMultipart.parse() throws
+          // "no body parts" when the first byte of the stream is a leading CRLF preamble
+          // before the first boundary marker — contrary to RFC 2046 which says preamble is ignored.
+          if (changesetBytes.length >= 2 && changesetBytes[0] == '\r' && changesetBytes[1] == '\n') {
+            changesetBytes = Arrays.copyOfRange(changesetBytes, 2, changesetBytes.length);
+          }
+          final MimeMultipart content = new MimeMultipart(
+              new ByteArrayDataSource(changesetBytes, objContentType));
           final ByteArrayOutputStream chbos = new ByteArrayOutputStream();
           String lastContebtID = null;
           try {
@@ -521,8 +536,8 @@ public class Services {
             chbos.write(Constants.CRLF);
             chbos.write(Constants.CRLF);
 
-            for (int j = 0; j < ((MimeMultipart) content).getCount(); j++) {
-              final MimeBodyPart part = (MimeBodyPart) ((MimeMultipart) content).getBodyPart(j);
+            for (int j = 0; j < content.getCount(); j++) {
+              final MimeBodyPart part = (MimeBodyPart) content.getBodyPart(j);
               lastContebtID = part.getContentID();
               addChangesetItemIntro(chbos, lastContebtID, cboundary);
 
@@ -976,6 +991,7 @@ public class Services {
       final InputStream entity = entityInfo.getValue();
 
       ResWrap<Entity> container = atomDeserializer.toEntity(entity);
+      IOUtils.closeQuietly(entity);
       if (container.getContextURL() == null) {
         container = new ResWrap<Entity>(URI.create(Constants.get(ConstantKey.ODATA_METADATA_PREFIX)
             + entitySetName + Constants.get(ConstantKey.ODATA_METADATA_ENTITY_SUFFIX)),
@@ -1105,7 +1121,7 @@ public class Services {
       @QueryParam("$skiptoken") @DefaultValue(StringUtils.EMPTY) final String skiptoken) {
 
     return StringUtils.isBlank(filter) && StringUtils.isBlank(search) ?
-        NumberUtils.isNumber(type) ?
+        NumberUtils.isCreatable(type) ?
             getEntityInternal(uriInfo.getRequestUri().toASCIIString(), accept, "People", type, format, null, null) :
             getEntitySet(accept, "People", type) :
         getEntitySet(uriInfo, accept, "People", top, skip, format, count, filter, orderby, skiptoken, type);
@@ -1279,6 +1295,7 @@ public class Services {
           xml.addOrReplaceEntity(entityKey, entitySetName, new ByteArrayInputStream(content.toByteArray()), entry);
 
       ResWrap<Entity> result = atomDeserializer.toEntity(serialization);
+      IOUtils.closeQuietly(serialization);
       result = new ResWrap<Entity>(
           URI.create(Constants.get(ConstantKey.ODATA_METADATA_PREFIX)
               + entitySetName + Constants.get(ConstantKey.ODATA_METADATA_ENTITY_SUFFIX)),
@@ -1460,6 +1477,7 @@ public class Services {
 
       final InputStream entity = entityInfo.getValue();
       final ResWrap<Entity> container = atomDeserializer.toEntity(entity);
+      IOUtils.closeQuietly(entity);
 
       container.getPayload().getProperty("Salary").setValue(ValueType.PRIMITIVE, 0);
       container.getPayload().getProperty("Title").setValue(ValueType.PRIMITIVE, "[Sacked]");
@@ -1551,6 +1569,7 @@ public class Services {
 
       final InputStream entity = entityInfo.getValue();
       final ResWrap<Entity> container = atomDeserializer.toEntity(entity);
+      IOUtils.closeQuietly(entity);
 
       final Entity param = xml.readEntity(utils.getKey(), IOUtils.toInputStream(argument, Constants.ENCODING));
 
@@ -1587,6 +1606,7 @@ public class Services {
 
       final InputStream entity = entityInfo.getValue();
       final ResWrap<Entity> container = atomDeserializer.toEntity(entity);
+      IOUtils.closeQuietly(entity);
 
       final Entity param = xml.readEntity(utils.getKey(), IOUtils.toInputStream(argument, Constants.ENCODING));
 
@@ -1858,7 +1878,7 @@ public class Services {
         throw new UnsupportedMediaTypeException("Unsupported media type");
       }
 
-      final String filename = Base64.encodeBase64String(path.getBytes("UTF-8"));
+      final String filename = Base64.encodeBase64String(path.getBytes(StandardCharsets.UTF_8));
 
       return utils.getValue().createResponse(
           FSManager.instance().readFile(Constants.get(ConstantKey.REF)
@@ -1922,6 +1942,7 @@ public class Services {
       }
 
       final ResWrap<Entity> container = atomDeserializer.toEntity(entityInfo.getValue());
+      IOUtils.closeQuietly(entityInfo.getValue());
 
       for (Property property : entryChanges.getProperties()) {
         final Property _property = container.getPayload().getProperty(property.getName());
@@ -1946,6 +1967,7 @@ public class Services {
           entityId, entitySetName, new ByteArrayInputStream(content.toByteArray()), container.getPayload());
 
       final ResWrap<Entity> cres = atomDeserializer.toEntity(res);
+      IOUtils.closeQuietly(res);
 
       normalizeAtomEntry(cres.getPayload(), entitySetName, entityId);
 
@@ -1960,7 +1982,6 @@ public class Services {
             xml.readEntity(entitySetName, entityId, acceptType).getValue(),
             null, acceptType, Response.Status.OK);
       } else {
-        res.close();
         response = xml.createResponse(
             uriInfo.getRequestUri().toASCIIString(),
             null,
@@ -2021,6 +2042,7 @@ public class Services {
       } else {
         cres = jsonDeserializer.toEntity(res);
       }
+      IOUtils.closeQuietly(res);
 
       final String path = Commons.getEntityBasePath(entitySetName, entityId);
       FSManager.instance().putInMemory(
@@ -2035,7 +2057,6 @@ public class Services {
             acceptType,
             Response.Status.OK);
       } else {
-        res.close();
         response = xml.createResponse(
             uriInfo.getRequestUri().toASCIIString(),
             null,
@@ -2119,8 +2140,9 @@ public class Services {
       final FSManager fsManager = FSManager.instance();
       final String basePath = Commons.getEntityBasePath(entitySetName, entityId);
 
-      final ResWrap<Entity> container = xml.readContainerEntity(Accept.ATOM,
-          fsManager.readFile(basePath + Constants.get(ConstantKey.ENTITY), Accept.ATOM));
+      final InputStream entityIS = fsManager.readFile(basePath + Constants.get(ConstantKey.ENTITY), Accept.ATOM);
+      final ResWrap<Entity> container = xml.readContainerEntity(Accept.ATOM, entityIS);
+      IOUtils.closeQuietly(entityIS);
 
       final Entity entry = container.getPayload();
 
@@ -2699,6 +2721,7 @@ public class Services {
       final String atomFeedRelativePath = containedPath(entityId, containedEntitySetName).toString();
       final InputStream feedIS = FSManager.instance().readFile(atomFeedRelativePath, Accept.ATOM);
       final ResWrap<EntityCollection> feedContainer = atomDeserializer.toEntitySet(feedIS);
+      IOUtils.closeQuietly(feedIS);
       feedContainer.getPayload().getEntities().add(entry);
 
       final ByteArrayOutputStream content = new ByteArrayOutputStream();
@@ -2756,7 +2779,9 @@ public class Services {
       final LinkInfo links = xml.readLinks(
           entitySetName, entityId, containedEntitySetName + "(" + containedEntityId + ")", Accept.ATOM);
 
-      ResWrap<Entity> container = atomDeserializer.toEntity(links.getLinks());
+      final InputStream linksIS = links.getLinks();
+      ResWrap<Entity> container = atomDeserializer.toEntity(linksIS);
+      IOUtils.closeQuietly(linksIS);
       final Entity original = container.getPayload();
 
       final Entity entryChanges;
@@ -2805,6 +2830,7 @@ public class Services {
           readFile(containedPath(entityId, containedEntitySetName).
               append('(').append(containedEntityId).append(')').toString(), Accept.ATOM);
       final ResWrap<Entity> container = atomDeserializer.toEntity(entry);
+      IOUtils.closeQuietly(entry);
 
       // 2. Remove the contained entity
       final String atomEntryRelativePath = containedPath(entityId, containedEntitySetName).
@@ -2815,6 +2841,7 @@ public class Services {
       final String atomFeedRelativePath = containedPath(entityId, containedEntitySetName).toString();
       final InputStream feedIS = FSManager.instance().readFile(atomFeedRelativePath, Accept.ATOM);
       final ResWrap<EntityCollection> feedContainer = atomDeserializer.toEntitySet(feedIS);
+      IOUtils.closeQuietly(feedIS);
       feedContainer.getPayload().getEntities().remove(container.getPayload());
 
       final ByteArrayOutputStream content = new ByteArrayOutputStream();

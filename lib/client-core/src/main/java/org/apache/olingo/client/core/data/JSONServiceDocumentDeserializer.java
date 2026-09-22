@@ -30,11 +30,10 @@ import org.apache.olingo.client.api.serialization.ODataDeserializerException;
 import org.apache.olingo.client.core.serialization.JsonDeserializer;
 import org.apache.olingo.commons.api.Constants;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 public class JSONServiceDocumentDeserializer extends JsonDeserializer {
 
@@ -44,13 +43,13 @@ public class JSONServiceDocumentDeserializer extends JsonDeserializer {
 
   protected ResWrap<ServiceDocument> doDeserialize(final JsonParser parser) throws IOException {
 
-    final ObjectNode tree = parser.getCodec().readTree(parser);
+    final ObjectNode tree = (ObjectNode) MAPPER.readTree(parser);
 
     ServiceDocumentImpl serviceDocument = new ServiceDocumentImpl();
 
     final String metadataETag;
     if (tree.hasNonNull(Constants.JSON_METADATA_ETAG)) {
-      metadataETag = tree.get(Constants.JSON_METADATA_ETAG).textValue();
+      metadataETag = tree.get(Constants.JSON_METADATA_ETAG).stringValue();
       tree.remove(Constants.JSON_METADATA_ETAG);
     } else {
       metadataETag = null;
@@ -58,10 +57,10 @@ public class JSONServiceDocumentDeserializer extends JsonDeserializer {
 
     final URI contextURL;
     if (tree.hasNonNull(Constants.JSON_CONTEXT)) {
-      contextURL = URI.create(tree.get(Constants.JSON_CONTEXT).textValue());
+      contextURL = URI.create(tree.get(Constants.JSON_CONTEXT).stringValue());
       tree.remove(Constants.JSON_CONTEXT);
     } else if (tree.hasNonNull(Constants.JSON_METADATA)) {
-      contextURL = URI.create(tree.get(Constants.JSON_METADATA).textValue());
+      contextURL = URI.create(tree.get(Constants.JSON_METADATA).stringValue());
       tree.remove(Constants.JSON_METADATA);
     } else {
       contextURL = null;
@@ -69,18 +68,18 @@ public class JSONServiceDocumentDeserializer extends JsonDeserializer {
 
     serviceDocument.setMetadata(contextURL == null ? null : contextURL.toASCIIString());
 
-    for (final Iterator<JsonNode> itor = tree.get(Constants.VALUE).elements(); itor.hasNext();) {
+    for (final Iterator<JsonNode> itor = tree.get(Constants.VALUE).iterator(); itor.hasNext();) {
       final JsonNode node = itor.next();
 
       final ServiceDocumentItemImpl item = new ServiceDocumentItemImpl();
-      item.setName(node.get("name").asText());
+      item.setName(node.get("name").asString());
       JsonNode titleNode = node.get("title");
       if (titleNode != null) {
-        item.setTitle(titleNode.asText());
+        item.setTitle(titleNode.asString());
       }
-      item.setUrl(node.get("url").asText());
+      item.setUrl(node.get("url").asString());
 
-      final String kind = node.has("kind") ? node.get("kind").asText() : null;
+      final String kind = node.has("kind") ? node.get("kind").asString() : null;
       if (StringUtils.isBlank(kind) || "EntitySet".equals(kind)) {
         serviceDocument.getEntitySets().add(item);
       } else if ("Singleton".equals(kind)) {
@@ -97,7 +96,7 @@ public class JSONServiceDocumentDeserializer extends JsonDeserializer {
 
   public ResWrap<ServiceDocument> toServiceDocument(final InputStream input) throws ODataDeserializerException {
     try {
-      JsonParser parser = new JsonFactory(new ObjectMapper()).createParser(input);
+      JsonParser parser = new ObjectMapper().createParser(input);
       return doDeserialize(parser);
     } catch (final IOException e) {
       throw new ODataDeserializerException(e);

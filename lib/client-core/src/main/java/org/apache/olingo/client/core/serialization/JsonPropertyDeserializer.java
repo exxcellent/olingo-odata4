@@ -21,7 +21,6 @@ package org.apache.olingo.client.core.serialization;
 import java.io.IOException;
 import java.net.URI;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -35,9 +34,9 @@ import org.apache.olingo.commons.api.data.ValueType;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.core.edm.EdmTypeInfo;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Parse JSON string into <tt>Property</tt>.
@@ -50,25 +49,25 @@ public class JsonPropertyDeserializer extends JsonDeserializer {
 
   protected ResWrap<Property> doDeserialize(final JsonParser parser) throws IOException {
 
-    final ObjectNode tree = parser.getCodec().readTree(parser);
+    final ObjectNode tree = (ObjectNode) MAPPER.readTree(parser);
 
     final String metadataETag;
     final URI contextURL;
     final Property property = new Property();
 
     if (tree.hasNonNull(Constants.JSON_METADATA_ETAG)) {
-      metadataETag = tree.get(Constants.JSON_METADATA_ETAG).textValue();
+      metadataETag = tree.get(Constants.JSON_METADATA_ETAG).stringValue();
       tree.remove(Constants.JSON_METADATA_ETAG);
     } else {
       metadataETag = null;
     }
 
     if (tree.hasNonNull(Constants.JSON_CONTEXT)) {
-      contextURL = URI.create(tree.get(Constants.JSON_CONTEXT).textValue());
+      contextURL = URI.create(tree.get(Constants.JSON_CONTEXT).stringValue());
       property.setName(StringUtils.substringAfterLast(contextURL.toASCIIString(), "/"));
       tree.remove(Constants.JSON_CONTEXT);
     } else if (tree.hasNonNull(Constants.JSON_METADATA)) {
-      contextURL = URI.create(tree.get(Constants.JSON_METADATA).textValue());
+      contextURL = URI.create(tree.get(Constants.JSON_METADATA).stringValue());
       property.setType(new EdmTypeInfo.Builder().
           setTypeExpression(StringUtils.substringAfterLast(contextURL.toASCIIString(), "#")).build().internal());
       tree.remove(Constants.JSON_METADATA);
@@ -77,7 +76,7 @@ public class JsonPropertyDeserializer extends JsonDeserializer {
     }
 
     if (tree.has(Constants.JSON_TYPE)) {
-      property.setType(new EdmTypeInfo.Builder().setTypeExpression(tree.get(Constants.JSON_TYPE).textValue()).build()
+      property.setType(new EdmTypeInfo.Builder().setTypeExpression(tree.get(Constants.JSON_TYPE).stringValue()).build()
           .internal());
       tree.remove(Constants.JSON_TYPE);
     }
@@ -89,7 +88,7 @@ public class JsonPropertyDeserializer extends JsonDeserializer {
 
     if (property.getValue() == null) {
       try {
-        value(property, tree.has(Constants.VALUE) ? tree.get(Constants.VALUE) : tree, parser.getCodec());
+        value(property, tree.has(Constants.VALUE) ? tree.get(Constants.VALUE) : tree);
       } catch (final EdmPrimitiveTypeException e) {
         throw new IOException(e);
       }
@@ -98,14 +97,13 @@ public class JsonPropertyDeserializer extends JsonDeserializer {
 
     Set<String> toRemove = new HashSet<>();
     // any remaining entry is supposed to be an annotation or is ignored
-    for (final Iterator<Map.Entry<String, JsonNode>> itor = tree.fields(); itor.hasNext();) {
-      final Map.Entry<String, JsonNode> field = itor.next();
+    for (final Map.Entry<String, JsonNode> field : tree.properties()) {
       if (field.getKey().charAt(0) == '@') {
         final Annotation annotation = new Annotation();
         annotation.setTerm(field.getKey().substring(1));
 
         try {
-          value(annotation, field.getValue(), parser.getCodec());
+          value(annotation, field.getValue());
         } catch (final EdmPrimitiveTypeException e) {
           throw new IOException(e);
         }
@@ -115,8 +113,8 @@ public class JsonPropertyDeserializer extends JsonDeserializer {
         operation.setMetadataAnchor(field.getKey());
 
         final ObjectNode opNode = (ObjectNode) tree.get(field.getKey());
-        operation.setTitle(opNode.get(Constants.ATTR_TITLE).asText());
-        operation.setTarget(URI.create(opNode.get(Constants.ATTR_TARGET).asText()));
+        operation.setTitle(opNode.get(Constants.ATTR_TITLE).asString());
+        operation.setTarget(URI.create(opNode.get(Constants.ATTR_TARGET).asString()));
         property.getOperations().add(operation);
         toRemove.add(field.getKey());
       }

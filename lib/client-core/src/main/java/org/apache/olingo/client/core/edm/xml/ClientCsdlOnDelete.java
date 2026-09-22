@@ -18,10 +18,10 @@
  */
 package org.apache.olingo.client.core.edm.xml;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 import org.apache.olingo.commons.api.edm.provider.CsdlOnDelete;
 import org.apache.olingo.commons.api.edm.provider.CsdlOnDeleteAction;
@@ -41,10 +41,10 @@ class ClientCsdlOnDelete extends CsdlOnDelete implements Serializable {
 
       final CsdlOnDelete ondelete = new ClientCsdlOnDelete();
 
-      for (; jp.getCurrentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
-        final JsonToken token = jp.getCurrentToken();
-        if (token == JsonToken.FIELD_NAME && "Action".equals(jp.getCurrentName())) {
-          CsdlOnDeleteAction action = CsdlOnDeleteAction.valueOf(jp.nextTextValue());
+      for (; jp.currentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
+        final JsonToken token = jp.currentToken();
+        if (token == JsonToken.PROPERTY_NAME && "Action".equals(jp.currentName())) {
+          CsdlOnDeleteAction action = CsdlOnDeleteAction.valueOf(nextTextValue(jp));
           ondelete.setAction(action);
         }
       }

@@ -18,7 +18,7 @@
  */
 package org.apache.olingo.server.core;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -33,7 +33,7 @@ import org.apache.olingo.server.api.ODataRequest;
 import org.apache.olingo.server.api.serializer.CustomContentTypeSupport;
 import org.apache.olingo.server.api.serializer.RepresentationType;
 import org.apache.olingo.server.api.uri.queryoption.FormatOption;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 
 public class ContentNegotiatorTest {
@@ -58,7 +58,7 @@ public class ContentNegotiatorTest {
   static final private String ACCEPT_CASE_MULTIPART_MIXED = ContentType.MULTIPART_MIXED.toContentTypeString();
 
   //@formatter:off (Eclipse formatter)
-  //CHECKSTYLE:OFF (Maven checkstyle)
+  // CHECKSTYLE:OFF (Maven checkstyle)
 
   String[][] casesServiceDocument = {
       /* expected                     $format           accept                          modified content types */
@@ -169,7 +169,7 @@ public class ContentNegotiatorTest {
       { null,                  "application/json;charset=abc",ACCEPT_CASE_MIN_UTF8,   null,           null       }
   };
   
-  //CHECKSTYLE:ON
+  // CHECKSTYLE:ON
   //@formatter:on
 
   @Test

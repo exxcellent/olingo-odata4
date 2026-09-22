@@ -18,8 +18,8 @@
  */
 package org.apache.olingo.server.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -28,7 +28,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.server.api.ODataLibraryException;
 import org.apache.olingo.server.api.ODataRequest;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ODataHttpHandlerImplTest {
 
@@ -93,7 +93,7 @@ public class ODataHttpHandlerImplTest {
   public void extractUri() {
 
     //@formatter:off (Eclipse formatter)
-    //CHECKSTYLE:OFF (Maven checkstyle)
+    // CHECKSTYLE:OFF (Maven checkstyle)
     String [][] uris = {
         /* 0: host                    1: cp         2: sp       3: sr          4: od       5: qp        6: spl  */
         {  "http://localhost",          "",           "",         "",          "",          "",         "0"},
@@ -169,7 +169,7 @@ public class ODataHttpHandlerImplTest {
   public void extractUriForController() {
 
     //@formatter:off (Eclipse formatter)
-    //CHECKSTYLE:OFF (Maven checkstyle)
+    // CHECKSTYLE:OFF (Maven checkstyle)
     String [][] uris = {
         /* 0: host                    1: cp         2: sp       3: sr          4: od       5: qp        6: spl  */
         

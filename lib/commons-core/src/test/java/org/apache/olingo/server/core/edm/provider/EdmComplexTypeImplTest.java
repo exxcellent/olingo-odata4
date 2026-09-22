@@ -18,17 +18,18 @@
  */
 package org.apache.olingo.server.core.edm.provider;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.EdmComplexType;
 import org.apache.olingo.commons.api.edm.EdmElement;
 import org.apache.olingo.commons.api.edm.EdmException;
@@ -40,8 +41,9 @@ import org.apache.olingo.commons.api.edm.provider.CsdlNavigationProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.core.edm.EdmComplexTypeImpl;
 import org.apache.olingo.commons.core.edm.EdmProviderImpl;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class EdmComplexTypeImplTest {
 
@@ -49,7 +51,7 @@ public class EdmComplexTypeImplTest {
 
   private EdmComplexType type;
 
-  @Before
+  @BeforeEach
   public void setupTypes() throws Exception {
     CsdlEdmProvider provider = mock(CsdlEdmProvider.class);
     EdmProviderImpl edm = new EdmProviderImpl(provider);
@@ -82,7 +84,7 @@ public class EdmComplexTypeImplTest {
 
   @Test
   public void noPropertiesAndNoNavPropertiesMustNotResultInException() {
-    EdmProviderImpl edm = mock(EdmProviderImpl.class);
+    Edm edm = mock(Edm.class);
     CsdlComplexType complexType = new CsdlComplexType().setName("n");
     new EdmComplexTypeImpl(edm, new FullQualifiedName("n", "n"), complexType);
   }
@@ -97,9 +99,11 @@ public class EdmComplexTypeImplTest {
     assertFalse(baseType.compatibleTo(type));
   }
 
-  @Test(expected = EdmException.class)
+  @Test
   public void nullForCompatibleTypeMustResultInEdmException() {
-    assertFalse(type.compatibleTo(null));
+      assertThrows(EdmException.class, () -> {
+      assertFalse(type.compatibleTo(null));
+      });
   }
 
   @Test
@@ -153,17 +157,19 @@ public class EdmComplexTypeImplTest {
     assertTrue(property == type.getProperty("nav2"));
   }
 
-  @Test(expected = EdmException.class)
+  @Test
   public void nonExistingBaseType() throws Exception {
-    CsdlEdmProvider provider = mock(CsdlEdmProvider.class);
-    EdmProviderImpl edm = new EdmProviderImpl(provider);
-    FullQualifiedName typeWithNonexistingBaseTypeName = new FullQualifiedName("namespace", "typeName");
-    CsdlComplexType complexTypeForNonexistingBaseType =
-        new CsdlComplexType().setBaseType(new FullQualifiedName("wrong", "wrong"));
-    complexTypeForNonexistingBaseType.setName("typeName");
-    when(provider.getComplexType(typeWithNonexistingBaseTypeName)).thenReturn(complexTypeForNonexistingBaseType);
-    EdmComplexTypeImpl instance =
-        new EdmComplexTypeImpl(edm, typeWithNonexistingBaseTypeName, complexTypeForNonexistingBaseType);
-    instance.getBaseType();
+      assertThrows(EdmException.class, () -> {
+      CsdlEdmProvider provider = mock(CsdlEdmProvider.class);
+      EdmProviderImpl edm = new EdmProviderImpl(provider);
+      FullQualifiedName typeWithNonexistingBaseTypeName = new FullQualifiedName("namespace", "typeName");
+      CsdlComplexType complexTypeForNonexistingBaseType =
+          new CsdlComplexType().setBaseType(new FullQualifiedName("wrong", "wrong"));
+      complexTypeForNonexistingBaseType.setName("typeName");
+      when(provider.getComplexType(typeWithNonexistingBaseTypeName)).thenReturn(complexTypeForNonexistingBaseType);
+      EdmComplexTypeImpl instance =
+          new EdmComplexTypeImpl(edm, typeWithNonexistingBaseTypeName, complexTypeForNonexistingBaseType);
+      instance.getBaseType();
+      });
   }
 }

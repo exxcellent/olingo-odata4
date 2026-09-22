@@ -31,11 +31,10 @@ import org.apache.olingo.commons.api.data.DeletedEntity;
 import org.apache.olingo.commons.api.data.Delta;
 import org.apache.olingo.commons.api.data.DeltaLink;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 public class JsonDeltaDeserializer extends JsonDeserializer {
 
@@ -45,12 +44,12 @@ public class JsonDeltaDeserializer extends JsonDeserializer {
 
   protected ResWrap<Delta> doDeserialize(final JsonParser parser) throws IOException {
 
-    final ObjectNode tree = parser.getCodec().readTree(parser);
+    final ObjectNode tree = (ObjectNode) MAPPER.readTree(parser);
 
     final Delta delta = new Delta();
 
     final URI contextURL = tree.hasNonNull(Constants.JSON_CONTEXT) ?
-        URI.create(tree.get(Constants.JSON_CONTEXT).textValue()) : null;
+        URI.create(tree.get(Constants.JSON_CONTEXT).stringValue()) : null;
     if (contextURL != null) {
       delta.setBaseURI(URI.create(StringUtils.substringBefore(contextURL.toASCIIString(), Constants.METADATA)));
     }
@@ -59,10 +58,10 @@ public class JsonDeltaDeserializer extends JsonDeserializer {
       delta.setCount(tree.get(Constants.JSON_COUNT).asInt());
     }
     if (tree.hasNonNull(Constants.JSON_NEXT_LINK)) {
-      delta.setNext(URI.create(tree.get(Constants.JSON_NEXT_LINK).textValue()));
+      delta.setNext(URI.create(tree.get(Constants.JSON_NEXT_LINK).stringValue()));
     }
     if (tree.hasNonNull(Constants.JSON_DELTA_LINK)) {
-      delta.setDeltaLink(URI.create(tree.get(Constants.JSON_DELTA_LINK).textValue()));
+      delta.setDeltaLink(URI.create(tree.get(Constants.JSON_DELTA_LINK).stringValue()));
     }
 
     if (tree.hasNonNull(Constants.VALUE)) {
@@ -70,18 +69,18 @@ public class JsonDeltaDeserializer extends JsonDeserializer {
       for (JsonNode jsonNode : tree.get(Constants.VALUE)) {
         final ObjectNode item = (ObjectNode) jsonNode;
         final ContextURL itemContextURL = item.hasNonNull(Constants.JSON_CONTEXT) ?
-            ContextURLParser.parse(URI.create(item.get(Constants.JSON_CONTEXT).textValue())) : null;
+            ContextURLParser.parse(URI.create(item.get(Constants.JSON_CONTEXT).stringValue())) : null;
         item.remove(Constants.JSON_CONTEXT);
 
         if (itemContextURL == null || itemContextURL.isEntity()) {
           delta.getEntities().add(
-              entityDeserializer.doDeserialize(item.traverse(parser.getCodec())).getPayload());
+              entityDeserializer.doDeserialize(MAPPER.treeAsTokens(item)).getPayload());
         } else if (itemContextURL.isDeltaDeletedEntity()) {
-          delta.getDeletedEntities().add(parser.getCodec().treeToValue(item, DeletedEntity.class));
+          delta.getDeletedEntities().add(MAPPER.treeToValue(item, DeletedEntity.class));
         } else if (itemContextURL.isDeltaLink()) {
-          delta.getAddedLinks().add(parser.getCodec().treeToValue(item, DeltaLink.class));
+          delta.getAddedLinks().add(MAPPER.treeToValue(item, DeltaLink.class));
         } else if (itemContextURL.isDeltaDeletedLink()) {
-          delta.getDeletedLinks().add(parser.getCodec().treeToValue(item, DeltaLink.class));
+          delta.getDeletedLinks().add(MAPPER.treeToValue(item, DeltaLink.class));
         }
       }
     }
@@ -91,7 +90,7 @@ public class JsonDeltaDeserializer extends JsonDeserializer {
 
   public ResWrap<Delta> toDelta(final InputStream input) throws ODataDeserializerException {
     try {
-      JsonParser parser = new JsonFactory(new ObjectMapper()).createParser(input);
+      JsonParser parser = new ObjectMapper().createParser(input);
       return doDeserialize(parser);
     } catch (final IOException e) {
       throw new ODataDeserializerException(e);

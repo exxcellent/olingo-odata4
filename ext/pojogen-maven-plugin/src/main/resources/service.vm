@@ -30,10 +30,10 @@ import org.apache.olingo.ext.proxy.AbstractService;
 
 public class Service<C extends EdmEnabledODataClient> extends AbstractService<C> {
 
-  //CHECKSTYLE:OFF (Maven checkstyle)
+  // CHECKSTYLE:OFF (Maven checkstyle)
   private static final String COMPRESSED_METADATA = "$metadata";
   private static final String METADATA_ETAG = #if($metadataETag)"$metadataETag"#{else}null#{end};
-  //CHECKSTYLE:ON (Maven checkstyle)
+  // CHECKSTYLE:ON (Maven checkstyle)
 
   private static final Map<String, Service<?>> SERVICES = new ConcurrentHashMap<String, Service<?>>();
 
@@ -88,7 +88,7 @@ public class Service<C extends EdmEnabledODataClient> extends AbstractService<C>
 
     super(compressedMetadata, metadataETag,version, serviceRoot, transactional);
 
-    //CHECKSTYLE:OFF (Maven checkstyle)
+    // CHECKSTYLE:OFF (Maven checkstyle)
 #foreach ($entityType in $entityTypes.entrySet())
     entityTypes.put("$entityType.key", ${entityType.value}.class);
 #end
@@ -101,7 +101,7 @@ public class Service<C extends EdmEnabledODataClient> extends AbstractService<C>
 #foreach ($term in $terms.entrySet())
     terms.put("$term.key", ${term.value}.class);
 #end
-    //CHECKSTYLE:ON (Maven checkstyle)
+    // CHECKSTYLE:ON (Maven checkstyle)
   }
 
   @Override

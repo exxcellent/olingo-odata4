@@ -18,11 +18,11 @@
  */
 package org.apache.olingo.client.core.domain;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.net.URI;
@@ -41,7 +41,7 @@ import org.apache.olingo.client.core.ODataClientImpl;
 import org.apache.olingo.client.core.domain.ClientPrimitiveValueImpl.BuilderImpl;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ClientObjectImplTest {
 
@@ -212,11 +212,11 @@ public class ClientObjectImplTest {
     assertNotNull(builder);
     byte[] byteArray = new byte[2];
     assertNotNull(builder.buildBinary(byteArray));
-    Short shortValue = new Short("1");
+    Short shortValue = Short.parseShort("1");
     assertNotNull(builder.buildInt16(shortValue));
-    assertNotNull(builder.buildInt32(new Integer("1")));
-    assertNotNull(builder.buildSingle(new Float("1")));
-    assertNotNull(builder.buildDouble(new Double("1")));
+    assertNotNull(builder.buildInt32(Integer.parseInt("1")));
+    assertNotNull(builder.buildSingle(Float.parseFloat("1")));
+    assertNotNull(builder.buildDouble(Double.parseDouble("1")));
     assertNotNull(builder.buildGuid(new UUID(1,1)));
     assertNotNull(builder.buildDecimal(new BigDecimal("1")));
     assertNotNull(builder.buildDuration(new BigDecimal("1")));

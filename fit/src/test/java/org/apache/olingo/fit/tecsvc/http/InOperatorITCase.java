@@ -18,11 +18,12 @@
  */
 package org.apache.olingo.fit.tecsvc.http;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URI;
 import java.nio.charset.Charset;
 
 import org.apache.commons.io.IOUtils;
@@ -33,12 +34,12 @@ import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.fit.AbstractBaseTestITCase;
 import org.apache.olingo.fit.tecsvc.TecSvcConst;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class InOperatorITCase extends AbstractBaseTestITCase {
 
   private static final String SERVICE_URI = TecSvcConst.BASE_URI + "/";
-  
+
   @Override
   protected ODataClient getClient() {
     return null;
@@ -46,8 +47,8 @@ public class InOperatorITCase extends AbstractBaseTestITCase {
 
   @Test
   public void querySimple() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim?$filter=PropertyString%20in%20("
-        + "%27Second%20Resource%20-%20negative%20values%27,%27xyz%27)");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim?$filter=PropertyString%20in%20("
+        + "%27Second%20Resource%20-%20negative%20values%27,%27xyz%27)").toURL();
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
     connection.setRequestProperty(HttpHeader.ACCEPT, "application/json;odata.metadata=minimal");
@@ -67,10 +68,11 @@ public class InOperatorITCase extends AbstractBaseTestITCase {
         + "\"PropertyGuid\":\"76543201-23ab-cdef-0123-456789dddfff\","
         + "\"PropertyTimeOfDay\":\"23:49:14\"}]"));
   }
-  
+
   @Test
   public void queryInOperatorWithFunction() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim?$filter=PropertyString%20in%20olingo.odata.test1.UFCRTCollString()");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim?$filter=PropertyString%20in%20olingo.odata.test1.UFCRTCollString()")
+        .toURL();
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
     connection.setRequestProperty(HttpHeader.ACCEPT, "application/json;odata.metadata=minimal");
@@ -91,11 +93,11 @@ public class InOperatorITCase extends AbstractBaseTestITCase {
         + "\"PropertyGuid\":\"76543201-23ab-cdef-0123-456789cccddd\","
         + "\"PropertyTimeOfDay\":\"00:01:01\"}]"));
   }
-  
+
   @Test
   public void queryInOperatorOnNavProperty() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESKeyNav?$filter=PropertyCompTwoPrim/"
-        + "PropertyInt16%20in%20NavPropertyETKeyNavOne/CollPropertyInt16");
+    URL url = URI.create(SERVICE_URI + "ESKeyNav?$filter=PropertyCompTwoPrim/"
+        + "PropertyInt16%20in%20NavPropertyETKeyNavOne/CollPropertyInt16").toURL();
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
     connection.setRequestProperty(HttpHeader.ACCEPT, "application/json;odata.metadata=minimal");

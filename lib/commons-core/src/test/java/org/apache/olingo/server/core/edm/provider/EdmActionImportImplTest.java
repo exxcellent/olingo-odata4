@@ -18,12 +18,13 @@
  */
 package org.apache.olingo.server.core.edm.provider;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.EdmAction;
 import org.apache.olingo.commons.api.edm.EdmActionImport;
 import org.apache.olingo.commons.api.edm.EdmEntityContainer;
@@ -32,9 +33,9 @@ import org.apache.olingo.commons.api.edm.EdmException;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.provider.CsdlActionImport;
 import org.apache.olingo.commons.core.edm.EdmActionImportImpl;
-import org.apache.olingo.commons.core.edm.EdmProviderImpl;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class EdmActionImportImplTest {
 
@@ -46,7 +47,7 @@ public class EdmActionImportImplTest {
 
   private EdmEntitySet entitySet;
 
-  @Before
+  @BeforeEach
   public void setup() {
     FullQualifiedName actionFqn = new FullQualifiedName("namespace", "actionName");
     FullQualifiedName entityContainerFqn = new FullQualifiedName("namespace", "containerName");
@@ -54,7 +55,7 @@ public class EdmActionImportImplTest {
     CsdlActionImport providerActionImport =
         new CsdlActionImport().setName("actionImportName").setAction(actionFqn).setEntitySet(target);
 
-    EdmProviderImpl edm = mock(EdmProviderImpl.class);
+    Edm edm = mock(Edm.class);
     container = mock(EdmEntityContainer.class);
     when(edm.getEntityContainer(entityContainerFqn)).thenReturn(container);
     action = mock(EdmAction.class);
@@ -82,23 +83,27 @@ public class EdmActionImportImplTest {
     assertTrue(returnedEntitySet == actionImport.getReturnedEntitySet());
   }
 
-  @Test(expected = EdmException.class)
+  @Test
   public void getReturnedEntitySetNonExistingContainer() {
-    String target = "alias.nonexisting/Es";
-    CsdlActionImport providerActionImport = new CsdlActionImport().setName("actionImportName").setEntitySet(target);
-    EdmActionImport actionImport =
-        new EdmActionImportImpl(mock(EdmProviderImpl.class), container, providerActionImport);
-    actionImport.getReturnedEntitySet();
+      assertThrows(EdmException.class, () -> {
+      String target = "alias.nonexisting/Es";
+      CsdlActionImport providerActionImport = new CsdlActionImport().setName("actionImportName").setEntitySet(target);
+      EdmActionImport actionImport =
+          new EdmActionImportImpl(mock(Edm.class), container, providerActionImport);
+      actionImport.getReturnedEntitySet();
+      });
   }
 
-  @Test(expected = EdmException.class)
+  @Test
   public void getReturnedEntitySetNonExistingEntitySet() {
-    String target = "nonExisting";
-    CsdlActionImport providerActionImport = new CsdlActionImport().setName("actionImportName").setEntitySet(target);
-    EdmProviderImpl edm = mock(EdmProviderImpl.class);
-    when(edm.getEntityContainer()).thenReturn(container);
-    EdmActionImport actionImport = new EdmActionImportImpl(edm, container, providerActionImport);
-    actionImport.getReturnedEntitySet();
+      assertThrows(EdmException.class, () -> {
+      String target = "nonExisting";
+      CsdlActionImport providerActionImport = new CsdlActionImport().setName("actionImportName").setEntitySet(target);
+      Edm edm = mock(Edm.class);
+      when(edm.getEntityContainer()).thenReturn(container);
+      EdmActionImport actionImport = new EdmActionImportImpl(edm, container, providerActionImport);
+      actionImport.getReturnedEntitySet();
+      });
   }
 
 }

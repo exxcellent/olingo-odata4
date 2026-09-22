@@ -18,11 +18,12 @@
  */
 package org.apache.olingo.fit.base;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Calendar;
@@ -53,16 +54,15 @@ import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.http.HttpHeader;
 import org.apache.olingo.commons.api.format.ContentType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class MediaEntityTestITCase extends AbstractTestITCase {
 
   private void read(final ODataClient client, final ContentType contentType) throws IOException {
-    final URIBuilder builder = client.newURIBuilder(testDemoServiceRootURL).
-        appendEntitySetSegment("Advertisements").
-        appendKeySegment(UUID.fromString("f89dee73-af9f-4cd4-b330-db93c25ff3c7"));
-    final ODataEntityRequest<ClientEntity> entityReq =
-        client.getRetrieveRequestFactory().getEntityRequest(builder.build());
+    final URIBuilder builder = client.newURIBuilder(testDemoServiceRootURL).appendEntitySetSegment("Advertisements")
+        .appendKeySegment(UUID.fromString("f89dee73-af9f-4cd4-b330-db93c25ff3c7"));
+    final ODataEntityRequest<ClientEntity> entityReq = client.getRetrieveRequestFactory()
+        .getEntityRequest(builder.build());
     entityReq.setFormat(contentType);
 
     final ClientEntity entity = entityReq.execute().getBody();
@@ -72,8 +72,8 @@ public class MediaEntityTestITCase extends AbstractTestITCase {
     assertEquals(EdmPrimitiveTypeKind.DateTimeOffset.getFullQualifiedName().toString(),
         ((ClientValuable) entity.getProperty("AirDate")).getValue().getTypeName());
 
-    final ODataMediaRequest streamReq = client.getRetrieveRequestFactory().
-        getMediaRequest(entity.getMediaContentSource());
+    final ODataMediaRequest streamReq = client.getRetrieveRequestFactory()
+        .getMediaRequest(entity.getMediaContentSource());
     final ODataRetrieveResponse<InputStream> streamRes = streamReq.execute();
     assertEquals(200, streamRes.getStatusCode());
 
@@ -97,12 +97,12 @@ public class MediaEntityTestITCase extends AbstractTestITCase {
   }
 
   private void create(final ContentType contentType) throws IOException {
-    final String random = RandomStringUtils.random(110);
-    final InputStream input = IOUtils.toInputStream(random);
+    final String random = RandomStringUtils.secure().next(110);
+    final InputStream input = IOUtils.toInputStream(random, StandardCharsets.UTF_8);
 
     final URI uri = client.newURIBuilder(testDemoServiceRootURL).appendEntitySetSegment("Advertisements").build();
-    final ODataMediaEntityCreateRequest<ClientEntity> createReq =
-        client.getCUDRequestFactory().getMediaEntityCreateRequest(uri, input);
+    final ODataMediaEntityCreateRequest<ClientEntity> createReq = client.getCUDRequestFactory()
+        .getMediaEntityCreateRequest(uri, input);
     final MediaEntityCreateStreamManager<ClientEntity> streamManager = createReq.payloadManager();
 
     final ODataMediaEntityCreateResponse<ClientEntity> createRes = streamManager.getResponse();
@@ -112,21 +112,20 @@ public class MediaEntityTestITCase extends AbstractTestITCase {
     assertNotNull(location);
     final URI createdLocation = URI.create(location.iterator().next());
 
-    final ClientEntity changes = client.getObjectFactory().
-        newEntity(new FullQualifiedName("ODataDemo.Advertisement"));
+    final ClientEntity changes = client.getObjectFactory().newEntity(new FullQualifiedName("ODataDemo.Advertisement"));
     changes.getProperties().add(client.getObjectFactory().newPrimitiveProperty("AirDate",
-        getClient().getObjectFactory().newPrimitiveValueBuilder().
-        setType(EdmPrimitiveTypeKind.DateTimeOffset).setValue(Calendar.getInstance()).build()));
+        getClient().getObjectFactory().newPrimitiveValueBuilder().setType(EdmPrimitiveTypeKind.DateTimeOffset)
+            .setValue(Calendar.getInstance()).build()));
 
-    final ODataEntityUpdateRequest<ClientEntity> updateReq = getClient().getCUDRequestFactory().
-        getEntityUpdateRequest(createdLocation, UpdateType.PATCH, changes);
+    final ODataEntityUpdateRequest<ClientEntity> updateReq = getClient().getCUDRequestFactory()
+        .getEntityUpdateRequest(createdLocation, UpdateType.PATCH, changes);
     updateReq.setFormat(contentType);
 
     final ODataEntityUpdateResponse<ClientEntity> updateRes = updateReq.execute();
     assertEquals(204, updateRes.getStatusCode());
 
-    final ODataMediaRequest retrieveReq = client.getRetrieveRequestFactory().
-        getMediaEntityRequest(client.newURIBuilder(createdLocation.toASCIIString()).build());
+    final ODataMediaRequest retrieveReq = client.getRetrieveRequestFactory()
+        .getMediaEntityRequest(client.newURIBuilder(createdLocation.toASCIIString()).build());
     final ODataRetrieveResponse<InputStream> retrieveRes = retrieveReq.execute();
     assertEquals(200, retrieveRes.getStatusCode());
 
@@ -146,15 +145,14 @@ public class MediaEntityTestITCase extends AbstractTestITCase {
   }
 
   private void update(final ContentType contentType) throws IOException, EdmPrimitiveTypeException {
-    final URI uri = client.newURIBuilder(testDemoServiceRootURL).
-        appendEntitySetSegment("Advertisements").
-        appendKeySegment(UUID.fromString("f89dee73-af9f-4cd4-b330-db93c25ff3c7")).build();
+    final URI uri = client.newURIBuilder(testDemoServiceRootURL).appendEntitySetSegment("Advertisements")
+        .appendKeySegment(UUID.fromString("f89dee73-af9f-4cd4-b330-db93c25ff3c7")).build();
 
-    final String random = RandomStringUtils.random(124);
+    final String random = RandomStringUtils.secure().next(124);
 
     // 1. update providing media content
-    final ODataMediaEntityUpdateRequest<ClientEntity> updateReq = client.getCUDRequestFactory().
-        getMediaEntityUpdateRequest(uri, IOUtils.toInputStream(random));
+    final ODataMediaEntityUpdateRequest<ClientEntity> updateReq = client.getCUDRequestFactory()
+        .getMediaEntityUpdateRequest(uri, IOUtils.toInputStream(random, StandardCharsets.UTF_8));
     updateReq.setFormat(contentType);
 
     final MediaEntityUpdateStreamManager<ClientEntity> streamManager = updateReq.payloadManager();

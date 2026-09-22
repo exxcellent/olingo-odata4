@@ -22,8 +22,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -36,7 +36,6 @@ import org.apache.olingo.client.api.domain.ClientProperty;
 import org.apache.olingo.client.api.serialization.ODataSerializer;
 import org.apache.olingo.client.api.serialization.ODataSerializerException;
 import org.apache.olingo.client.api.serialization.ODataWriter;
-import org.apache.olingo.commons.api.Constants;
 import org.apache.olingo.commons.api.format.ContentType;
 
 public class ODataWriterImpl implements ODataWriter {
@@ -51,12 +50,7 @@ public class ODataWriterImpl implements ODataWriter {
   public InputStream writeEntities(final Collection<ClientEntity> entities, final ContentType contentType)
       throws ODataSerializerException {
     ByteArrayOutputStream output = new ByteArrayOutputStream();
-    OutputStreamWriter writer;
-    try {
-      writer = new OutputStreamWriter(output, Constants.UTF8);
-    } catch (final UnsupportedEncodingException e) {
-      writer = null;
-    }
+    OutputStreamWriter writer = new OutputStreamWriter(output, StandardCharsets.UTF_8);
     try {
       final ODataSerializer serializer = client.getSerializer(contentType);
       for (ClientEntity entity : entities) {
@@ -79,12 +73,7 @@ public class ODataWriterImpl implements ODataWriter {
   public InputStream writeProperty(final ClientProperty property, final ContentType contentType)
       throws ODataSerializerException {
     final ByteArrayOutputStream output = new ByteArrayOutputStream();
-    OutputStreamWriter writer;
-    try {
-      writer = new OutputStreamWriter(output, Constants.UTF8);
-    } catch (final UnsupportedEncodingException e) {
-      writer = null;
-    }
+    OutputStreamWriter writer = new OutputStreamWriter(output, StandardCharsets.UTF_8);
     try {
       client.getSerializer(contentType).write(writer, client.getBinder().getProperty(property));
 
@@ -97,12 +86,7 @@ public class ODataWriterImpl implements ODataWriter {
   @Override
   public InputStream writeLink(final ClientLink link, final ContentType contentType) throws ODataSerializerException {
     final ByteArrayOutputStream output = new ByteArrayOutputStream();
-    OutputStreamWriter writer;
-    try {
-      writer = new OutputStreamWriter(output, Constants.UTF8);
-    } catch (final UnsupportedEncodingException e) {
-      writer = null;
-    }
+    OutputStreamWriter writer = new OutputStreamWriter(output, StandardCharsets.UTF_8);
     try {
       client.getSerializer(contentType).write(writer, client.getBinder().getLink(link));
 
@@ -115,14 +99,7 @@ public class ODataWriterImpl implements ODataWriter {
   @Override
   public InputStream writeReference(ResWrap<URI> reference, ContentType contenType) throws ODataSerializerException {
     final ByteArrayOutputStream output = new ByteArrayOutputStream();
-    OutputStreamWriter writer;
-    
-    try {
-      writer = new OutputStreamWriter(output, Constants.UTF8);
-    } catch (final UnsupportedEncodingException e) {
-      writer = null;
-    }
-    
+    OutputStreamWriter writer = new OutputStreamWriter(output, StandardCharsets.UTF_8);
     try {
       client.getSerializer(contenType).write(writer, reference);
 

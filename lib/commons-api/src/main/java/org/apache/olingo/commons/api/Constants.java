@@ -28,9 +28,6 @@ import org.apache.olingo.commons.api.format.ContentType;
  */
 public interface Constants {
 
-  // Other stuff
-  String UTF8 = "UTF-8";
-
   String METADATA = "$metadata";
 
   Integer DEFAULT_PRECISION = 40;

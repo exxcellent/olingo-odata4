@@ -28,10 +28,11 @@ import org.apache.olingo.client.api.serialization.ODataDeserializerException;
 import org.apache.olingo.client.core.serialization.JsonDeserializer;
 import org.apache.olingo.client.core.uri.URIUtils;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.dataformat.xml.XmlFactory;
-import com.fasterxml.jackson.dataformat.xml.deser.FromXmlParser;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.core.ObjectReadContext;
+import tools.jackson.dataformat.xml.XmlFactory;
+import tools.jackson.dataformat.xml.deser.FromXmlParser;
 
 public class XMLServiceDocumentDeserializer extends JsonDeserializer {
 
@@ -40,30 +41,37 @@ public class XMLServiceDocumentDeserializer extends JsonDeserializer {
   }
 
   private String getName(final JsonParser jp) throws IOException {
-    String title = jp.nextTextValue();
-    if (title == null) {
-      jp.nextToken();
-      jp.nextToken();
-      jp.nextToken();
-      title = jp.nextTextValue();
+    jp.nextToken();
+    if (jp.currentToken() == JsonToken.VALUE_STRING) {
+      return jp.getString();
     }
-    return title;
+    // Element has attributes (START_OBJECT): skip attribute name/value pair,
+    // then the empty-key text-content property, and read the text value.
+    // Jackson 3.x: getString() on START_OBJECT returns "{" instead of null,
+    // so we must check currentToken() rather than the getString() return value.
+    jp.nextToken(); // PROPERTY_NAME (attribute, e.g. "type")
+    jp.nextToken(); // VALUE_STRING  (attribute value, e.g. "text")
+    jp.nextToken(); // PROPERTY_NAME "" (text content key)
+    jp.nextToken(); // VALUE_STRING  (text content)
+    return jp.getString();
   }
 
   private ServiceDocumentItemImpl deserializeElement(final JsonParser jp, final String elementName)
       throws IOException {
 
     final ServiceDocumentItemImpl element = new ServiceDocumentItemImpl();
-    for (; jp.getCurrentToken() != JsonToken.END_OBJECT
+    for (; jp.currentToken() != JsonToken.END_OBJECT
         || !elementName.equals(((FromXmlParser) jp).getStaxReader().getLocalName()); jp.nextToken()) {
 
-      final JsonToken token = jp.getCurrentToken();
-      if (token == JsonToken.FIELD_NAME) {
-        if ("href".equals(jp.getCurrentName())) {
-          element.setUrl(jp.nextTextValue());
-        } else if ("name".equals(jp.getCurrentName())) {
-          element.setName(jp.nextTextValue());
-        } else if ("title".equals(jp.getCurrentName())) {
+      final JsonToken token = jp.currentToken();
+      if (token == JsonToken.PROPERTY_NAME) {
+        if ("href".equals(jp.currentName())) {
+          jp.nextToken();
+          element.setUrl(jp.getString());
+        } else if ("name".equals(jp.currentName())) {
+          jp.nextToken();
+          element.setName(jp.getString());
+        } else if ("title".equals(jp.currentName())) {
           element.setTitle(getName(jp));
         }
       }
@@ -83,33 +91,36 @@ public class XMLServiceDocumentDeserializer extends JsonDeserializer {
     String metadataETag = null;
     String base = null;
 
-    for (; jp.getCurrentToken() != JsonToken.END_OBJECT
+    for (; jp.currentToken() != JsonToken.END_OBJECT
         || !"service".equals(((FromXmlParser) jp).getStaxReader().getLocalName()); jp.nextToken()) {
 
-      final JsonToken token = jp.getCurrentToken();
-      if (token == JsonToken.FIELD_NAME) {
-        if ("base".equals(jp.getCurrentName())) {
-          base = jp.nextTextValue();
-        } else if ("context".equals(jp.getCurrentName())) {
-          contextURL = URI.create(jp.nextTextValue());
-        } else if ("metadata-etag".equals(jp.getCurrentName())) {
-          metadataETag = jp.nextTextValue();
-        } else if ("workspace".equals(jp.getCurrentName())) {
+      final JsonToken token = jp.currentToken();
+      if (token == JsonToken.PROPERTY_NAME) {
+        if ("base".equals(jp.currentName())) {
+          jp.nextToken();
+          base = jp.getString();
+        } else if ("context".equals(jp.currentName())) {
+          jp.nextToken();
+          contextURL = URI.create(jp.getString());
+        } else if ("metadata-etag".equals(jp.currentName())) {
+          jp.nextToken();
+          metadataETag = jp.getString();
+        } else if ("workspace".equals(jp.currentName())) {
           jp.nextToken();
           jp.nextToken();
-          if ("title".equals(jp.getCurrentName())) {
+          if ("title".equals(jp.currentName())) {
             sdoc.setTitle(getName(jp));
           }
-        } else if ("collection".equals(jp.getCurrentName())) {
+        } else if ("collection".equals(jp.currentName())) {
           jp.nextToken();
           sdoc.getEntitySets().add(deserializeElement(jp, "collection"));
-        } else if ("function-import".equals(jp.getCurrentName())) {
+        } else if ("function-import".equals(jp.currentName())) {
           jp.nextToken();
           sdoc.getFunctionImports().add(deserializeElement(jp, "function-import"));
-        } else if ("singleton".equals(jp.getCurrentName())) {
+        } else if ("singleton".equals(jp.currentName())) {
           jp.nextToken();
           sdoc.getSingletons().add(deserializeElement(jp, "singleton"));
-        } else if ("service-document".equals(jp.getCurrentName())) {
+        } else if ("service-document".equals(jp.currentName())) {
           jp.nextToken();
           sdoc.getRelatedServiceDocuments().add(deserializeElement(jp, "service-document"));
         }
@@ -127,7 +138,7 @@ public class XMLServiceDocumentDeserializer extends JsonDeserializer {
 
   public ResWrap<ServiceDocument> toServiceDocument(InputStream input) throws ODataDeserializerException {
     try {
-      JsonParser parser = new XmlFactory().createParser(input);
+      JsonParser parser = new XmlFactory().createParser(ObjectReadContext.empty(), input);
       return doDeserialize(parser);
     } catch (final IOException e) {
       throw new ODataDeserializerException(e);

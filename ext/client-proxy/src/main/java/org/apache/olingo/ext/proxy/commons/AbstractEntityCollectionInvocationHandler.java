@@ -41,10 +41,10 @@ import org.apache.olingo.ext.proxy.api.EntityCollection;
 import org.apache.olingo.ext.proxy.api.EntityType;
 import org.apache.olingo.ext.proxy.utils.ClassUtils;
 
-//CHECKSTYLE:OFF
+// CHECKSTYLE:OFF
 public abstract class AbstractEntityCollectionInvocationHandler<T extends EntityType<?>, EC extends EntityCollection<T, ?, ?>>
     extends AbstractCollectionInvocationHandler<T, EC> {
-//CHECKSTYLE:ON
+// CHECKSTYLE:ON
   protected URI targetEntitySetURI;
 
   private boolean isSingleton = false;

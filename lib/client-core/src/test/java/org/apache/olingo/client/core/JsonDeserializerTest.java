@@ -26,13 +26,13 @@ import org.apache.olingo.client.core.serialization.ClientODataDeserializerImpl;
 import org.apache.olingo.client.core.serialization.ODataBinderImpl;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.format.ContentType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JsonDeserializerTest {
 

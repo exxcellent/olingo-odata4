@@ -23,12 +23,13 @@ import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.olingo.client.api.http.HttpClientFactory;
+import org.apache.olingo.client.api.http.ODataHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractHttpClientFactory implements HttpClientFactory {
+public abstract class AbstractHttpClientFactory<C extends ODataHttpClient> implements HttpClientFactory<C> {
 
-  private static final Logger LOG = LoggerFactory.getLogger(AbstractHttpClientFactory.class);
+  protected static final Logger LOG = LoggerFactory.getLogger(AbstractHttpClientFactory.class);
 
   protected static final String USER_AGENT;
 
@@ -48,4 +49,5 @@ public abstract class AbstractHttpClientFactory implements HttpClientFactory {
 
     USER_AGENT = userAgent.toString();
   }
+  
 }

@@ -160,7 +160,7 @@ public final class ODataClientBuilder {
     try {
       Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
       if (ctorParameters == null || ctorParameterClasses == null) {
-        return typeOfClass.cast(clazz.newInstance());
+        return typeOfClass.cast(clazz.getDeclaredConstructor().newInstance());
       }
       Constructor<?> ctor = clazz.getConstructor(ctorParameterClasses);
       return typeOfClass.cast(ctor.newInstance(ctorParameters));

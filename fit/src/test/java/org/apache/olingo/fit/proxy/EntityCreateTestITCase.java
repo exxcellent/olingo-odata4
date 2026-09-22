@@ -19,10 +19,10 @@
 package org.apache.olingo.fit.proxy;
 
 // CHECKSTYLE:OFF (Maven checkstyle)
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 import java.math.BigDecimal;
@@ -50,8 +50,7 @@ import org.apache.olingo.fit.proxy.staticservice.odatawcfservice.types.PaymentIn
 import org.apache.olingo.fit.proxy.staticservice.odatawcfservice.types.Product;
 import org.apache.olingo.fit.proxy.staticservice.odatawcfservice.types.ProductDetail;
 import org.apache.olingo.fit.proxy.staticservice.odatawcfservice.types.ProductDetailCollection;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 // CHECKSTYLE:ON (Maven checkstyle)
 
 /**
@@ -107,13 +106,13 @@ public class EntityCreateTestITCase extends AbstractTestITCase {
     Employee actual = getContainer().getPeople().getByKey(id, Employee.class).load();
     assertNotNull(actual);
     assertEquals(id, actual.getPersonID());
-    Assert.assertEquals(homeAddress.getCity(), actual.getHomeAddress().getCity());
+    assertEquals(homeAddress.getCity(), actual.getHomeAddress().getCity());
 
     getService().getContext().detachAll();
     actual = getContainer().getPeople().getByKey(id, Employee.class).load();
     assertNotNull(actual);
     assertEquals(id, actual.getPersonID());
-    Assert.assertEquals(homeAddress.getCity(), actual.getHomeAddress().getCity());
+    assertEquals(homeAddress.getCity(), actual.getHomeAddress().getCity());
 
     getContainer().getPeople().delete(actual.getPersonID());
     getContainer().flush();
@@ -168,9 +167,9 @@ public class EntityCreateTestITCase extends AbstractTestITCase {
     getContainer().flush();
 
     Customer actual = readCustomer(getContainer(), id);
-    Assert.assertEquals(homeAddress.getCity(), actual.getHomeAddress().getCity());
-    Assert.assertEquals(1, actual.getOrders().execute().size());
-    Assert.assertEquals(8, actual.getOrders().iterator().next().getOrderID(), 0);
+    assertEquals(homeAddress.getCity(), actual.getHomeAddress().getCity());
+    assertEquals(1, actual.getOrders().execute().size());
+    assertEquals(8, actual.getOrders().iterator().next().getOrderID(), 0);
 
     getContainer().getCustomers().delete(actual.getPersonID());
     getContainer().flush();
@@ -249,13 +248,13 @@ public class EntityCreateTestITCase extends AbstractTestITCase {
     assertEquals(id, customer.getPersonID());
 
     Customer actual = readCustomer(getContainer(), id);
-    Assert.assertEquals(homeAddress.getCity(), actual.getHomeAddress().getCity());
-    Assert.assertEquals(1, actual.getOrders().execute().size());
-    Assert.assertEquals(id, actual.getOrders().iterator().next().getOrderID());
+    assertEquals(homeAddress.getCity(), actual.getHomeAddress().getCity());
+    assertEquals(1, actual.getOrders().execute().size());
+    assertEquals(id, actual.getOrders().iterator().next().getOrderID());
 
     order = getContainer().getOrders().getByKey(id);
     assertNotNull(order);
-    Assert.assertEquals(id, order.getCustomerForOrder().load().getPersonID());
+    assertEquals(id, order.getCustomerForOrder().load().getPersonID());
 
     getContainer().getOrders().delete(actual.getOrders());
     getContainer().flush();
@@ -347,7 +346,7 @@ public class EntityCreateTestITCase extends AbstractTestITCase {
 
     product = getContainer().getProducts().getByKey(12).load();
     assertEquals("Latte", product.getName());
-    Assert.assertEquals(12, product.getDetails().execute().iterator().next().getProductDetailID(), 0);
+    assertEquals(12, product.getDetails().execute().iterator().next().getProductDetailID(), 0);
   }
 
   @Test
@@ -359,7 +358,7 @@ public class EntityCreateTestITCase extends AbstractTestITCase {
     final PaymentInstrument instrument = getContainer().newEntityInstance(PaymentInstrument.class);
     instruments.add(instrument);
 
-    final int id = RandomUtils.nextInt(101999, 105000);
+    final int id = RandomUtils.secure().randomInt(101999, 105000);
     instrument.setPaymentInstrumentID(id);
     instrument.setFriendlyName("New one");
     instrument.setCreatedDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));

@@ -19,12 +19,13 @@
 package org.apache.olingo.samples.client.core.http;
 
 import java.net.URI;
-import org.apache.http.HttpVersion;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.params.CoreProtocolPNames;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.olingo.commons.api.http.HttpMethod;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.core5.util.Timeout;
 import org.apache.olingo.client.core.http.DefaultHttpUriRequestFactory;
+import org.apache.olingo.commons.api.http.HttpMethod;
 
 /**
  * Shows how to customize the runtime behavior of an HTTP request.
@@ -37,15 +38,15 @@ import org.apache.olingo.client.core.http.DefaultHttpUriRequestFactory;
 public class ParametersHttpUriRequestFactory extends DefaultHttpUriRequestFactory {
 
   @Override
-  public HttpUriRequest create(final HttpMethod method, final URI uri) {
-    final HttpUriRequest request = super.create(method, uri);
-
-    request.getParams().setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_0);
-    request.getParams().setParameter(CoreProtocolPNames.HTTP_CONTENT_CHARSET, "UTF-8");
+  public HttpUriRequestBase create(final HttpMethod method, final URI uri) {
+    final HttpUriRequestBase request = super.create(method, uri);
 
     final int timeout = 1000;
-    HttpConnectionParams.setConnectionTimeout(request.getParams(), timeout);
-    HttpConnectionParams.setSoTimeout(request.getParams(), timeout);
+    final RequestConfig requestConfig = RequestConfig.custom()
+        .setConnectionRequestTimeout(Timeout.of(timeout, TimeUnit.MILLISECONDS))
+        .setResponseTimeout(Timeout.of(timeout, TimeUnit.MILLISECONDS))
+        .build();
+    request.setConfig(requestConfig);
 
     return request;
   }

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,8 +18,8 @@
  */
 package org.apache.olingo.fit;
 
-import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 
 import jakarta.ws.rs.core.MediaType;
 
@@ -32,33 +32,25 @@ import org.apache.cxf.rs.security.oauth2.common.ClientAccessToken;
 import org.apache.cxf.rs.security.oauth2.grants.code.AuthorizationCodeGrant;
 import org.apache.cxf.rs.security.oauth2.grants.refresh.RefreshTokenGrant;
 import org.apache.cxf.rs.security.oauth2.provider.OAuthServiceException;
-import org.apache.http.Header;
-import org.apache.http.HttpException;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.params.ClientPNames;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.routing.RoutingSupport;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.net.URIBuilder;
 import org.apache.olingo.client.core.http.AbstractOAuth2HttpClientFactory;
 import org.apache.olingo.client.core.http.OAuth2Exception;
 import org.apache.olingo.fit.rest.OAuth2Provider;
 import org.apache.cxf.rs.security.oauth2.client.Consumer;
 
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.dataformat.xml.XmlMapper;
 
 public class CXFOAuth2HttpClientFactory extends AbstractOAuth2HttpClientFactory {
 
-  private static final Consumer OAUTH2_CONSUMER =
-          new Consumer(OAuth2Provider.CLIENT_ID, OAuth2Provider.CLIENT_SECRET);
+  private static final Consumer OAUTH2_CONSUMER = new Consumer(OAuth2Provider.CLIENT_ID, OAuth2Provider.CLIENT_SECRET);
 
   private ClientAccessToken accessToken;
 
@@ -71,8 +63,8 @@ public class CXFOAuth2HttpClientFactory extends AbstractOAuth2HttpClientFactory 
     bean.setAddress(oauth2TokenServiceURI.toASCIIString());
     bean.setUsername("odatajclient");
     bean.setPassword("odatajclient");
-    return bean.createWebClient().
-        type(MediaType.APPLICATION_FORM_URLENCODED_TYPE).accept(MediaType.APPLICATION_JSON_TYPE);
+    return bean.createWebClient().type(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
+        .accept(MediaType.APPLICATION_JSON_TYPE);
   }
 
   @Override
@@ -90,22 +82,26 @@ public class CXFOAuth2HttpClientFactory extends AbstractOAuth2HttpClientFactory 
         "foo bar");
 
     // Disable automatic redirects handling
-    final HttpParams params = new BasicHttpParams();
-    params.setParameter(ClientPNames.HANDLE_REDIRECTS, false);
-    final DefaultHttpClient httpClient = new DefaultHttpClient(params);
+    final CloseableHttpClient httpClient = HttpClients.custom()
+        .disableRedirectHandling()
+        .build();
 
     JsonNode oAuthAuthorizationData = null;
     String authenticityCookie = null;
     try {
       // 1. Need to (basic) authenticate against the OAuth2 service
       final HttpGet method = new HttpGet(authURI);
-      method.addHeader("Authorization", "Basic " + Base64.encodeBase64String("odatajclient:odatajclient".getBytes()));
-      final HttpResponse response = httpClient.execute(method);
+      method.addHeader("Authorization", "Basic " + Base64.encodeBase64String("odatajclient:odatajclient".getBytes(
+          StandardCharsets.UTF_8)));
+      final ClassicHttpResponse response = (ClassicHttpResponse) httpClient
+          .executeOpen(RoutingSupport.determineHost(method), method, null);
 
       // 2. Pull out OAuth2 authorization data and "authenticity" cookie (CXF specific)
-      oAuthAuthorizationData = new XmlMapper().readTree(EntityUtils.toString(response.getEntity()));
+      oAuthAuthorizationData = XmlMapper.builder().build()
+          .readTree(EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8, Integer.MAX_VALUE));
 
       final Header setCookieHeader = response.getFirstHeader("Set-Cookie");
+      response.close();
       if (setCookieHeader == null) {
         throw new IllegalStateException("OAuth flow is broken");
       }
@@ -117,28 +113,29 @@ public class CXFOAuth2HttpClientFactory extends AbstractOAuth2HttpClientFactory 
     String code = null;
     try {
       // 3. Submit the HTTP form for allowing access to the application
-      final URI location = new URIBuilder(oAuthAuthorizationData.get("replyTo").asText()).
-          addParameter("session_authenticity_token", oAuthAuthorizationData.get("authenticityToken").asText()).
-          addParameter("client_id", oAuthAuthorizationData.get("clientId").asText()).
-          addParameter("redirect_uri", oAuthAuthorizationData.get("redirectUri").asText()).
-          addParameter("oauthDecision", "allow").
-          addParameter("scope", "foo bar").
-          build();
+      final URI location = new URIBuilder(oAuthAuthorizationData.get("replyTo").asString())
+          .addParameter("session_authenticity_token", oAuthAuthorizationData.get("authenticityToken").asString())
+          .addParameter("client_id", oAuthAuthorizationData.get("clientId").asString())
+          .addParameter("redirect_uri", oAuthAuthorizationData.get("redirectUri").asString())
+          .addParameter("oauthDecision", "allow").addParameter("scope", "foo bar").build();
       final HttpGet method = new HttpGet(location);
-      method.addHeader("Authorization", "Basic " + Base64.encodeBase64String("odatajclient:odatajclient".getBytes()));
+      method.addHeader("Authorization", "Basic " + Base64.encodeBase64String("odatajclient:odatajclient".getBytes(
+          StandardCharsets.UTF_8)));
       method.addHeader("Cookie", authenticityCookie);
 
-      final HttpResponse response = httpClient.execute(method);
+      final ClassicHttpResponse response = (ClassicHttpResponse) httpClient
+          .executeOpen(RoutingSupport.determineHost(method), method, null);
 
       final Header locationHeader = response.getFirstHeader("Location");
-      if (response.getStatusLine().getStatusCode() != 303 || locationHeader == null) {
+      if (response.getCode() != 303 || locationHeader == null) {
         throw new IllegalStateException("OAuth flow is broken");
       }
 
       // 4. Get the authorization code value out of this last redirect
       code = StringUtils.substringAfterLast(locationHeader.getValue(), "=");
 
-      EntityUtils.consumeQuietly(response.getEntity());
+      EntityUtils.consume(response.getEntity());
+      response.close();
     } catch (Exception e) {
       throw new OAuth2Exception(e);
     }
@@ -157,19 +154,20 @@ public class CXFOAuth2HttpClientFactory extends AbstractOAuth2HttpClientFactory 
   }
 
   @Override
-  protected void accessToken(final DefaultHttpClient client) throws OAuth2Exception {
-    client.addRequestInterceptor(new HttpRequestInterceptor() {
-
-      @Override
-      public void process(final HttpRequest request, final HttpContext context) throws HttpException, IOException {
-        request.removeHeaders(HttpHeaders.AUTHORIZATION);
-        request.addHeader(HttpHeaders.AUTHORIZATION, OAuthClientUtils.createAuthorizationHeader(accessToken));
-      }
-    });
+  protected String getAuthorizationHeaderValue() {
+    if (accessToken == null) {
+      return null;
+    }
+    return accessToken.getTokenType() + " " + accessToken.getTokenKey();
   }
 
   @Override
-  protected void refreshToken(final DefaultHttpClient client) throws OAuth2Exception {
+  protected void accessToken(final CloseableHttpClient client) throws OAuth2Exception {
+    // Token is applied via getAuthorizationHeaderValue() called from the parent request interceptor.
+  }
+
+  @Override
+  protected void refreshToken(final CloseableHttpClient client) throws OAuth2Exception {
     final String refreshToken = accessToken.getRefreshToken();
     if (refreshToken == null) {
       throw new OAuth2Exception("No OAuth2 refresh token");

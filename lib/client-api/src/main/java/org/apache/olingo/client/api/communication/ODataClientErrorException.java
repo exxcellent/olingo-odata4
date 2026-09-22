@@ -18,8 +18,8 @@
  */
 package org.apache.olingo.client.api.communication;
 
-import org.apache.http.Header;
-import org.apache.http.StatusLine;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.message.StatusLine;
 import org.apache.olingo.commons.api.ex.ODataError;
 import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 
@@ -80,7 +80,7 @@ public class ODataClientErrorException extends ODataRuntimeException {
    */
   public ODataClientErrorException(final StatusLine statusLine, final ODataError error, final InputStream rawResponse) {
     super(error == null ?
-        statusLine.toString() :
+        (statusLine.getReasonPhrase() != null ? statusLine.getReasonPhrase() : statusLine.toString()) :
         (error.getCode() == null || error.getCode().isEmpty() ? "" : "(" + error.getCode() + ") ")
             + error.getMessage() + " [" + statusLine.toString() + "]");
 

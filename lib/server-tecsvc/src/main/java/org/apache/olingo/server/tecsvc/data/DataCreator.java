@@ -20,7 +20,7 @@ package org.apache.olingo.server.tecsvc.data;
 
 import java.math.BigDecimal;
 import java.net.URI;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -373,7 +373,6 @@ public class DataCreator {
 }
   
   
-  @SuppressWarnings("unchecked")
   private EntityCollection createESCompCollDerived(final Edm edm, final OData odata) {
     final EntityCollection entityCollection = new EntityCollection();
     Property derivedComplexProperty = 
@@ -480,7 +479,6 @@ public class DataCreator {
     return entityCollection;
   }
 
-  @SuppressWarnings("unchecked")
   private Entity createETCompMixPrimCollComp(final Short propertyInt16) {
     return new Entity()
         .addProperty(createPrimitive("PropertyInt16", propertyInt16))
@@ -879,7 +877,6 @@ public class DataCreator {
     return entityCollection;
   }
 
-  @SuppressWarnings("unchecked")
   private Entity createETKeyNavEntity(final short propertyInt16, final String propertyString) {
     return new Entity()
         .addProperty(createPrimitive("PropertyInt16", propertyInt16))
@@ -933,7 +930,6 @@ public class DataCreator {
     return entityCollection;
   }
 
-  @SuppressWarnings("unchecked")
   private Entity createESTwoKeyNavEntity(final short propertyInt16, final String propertyString) {
     return new Entity()
         .addProperty(createPrimitive("PropertyInt16", propertyInt16))
@@ -995,7 +991,6 @@ public class DataCreator {
         createPrimitive("PropertyTimeOfDay", getTime(21, 5, 59)));
   }
 
-  @SuppressWarnings("unchecked")
   private EntityCollection createESCompCollComp(final Edm edm, final OData odata) {
     final EntityCollection entityCollection = new EntityCollection();
 
@@ -1832,7 +1827,7 @@ public class DataCreator {
     return ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         + "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" viewBox=\"0 0 100 100\">\n"
         + "  <g stroke=\"darkmagenta\" stroke-width=\"16\" fill=\"" + color + "\">\n"
-        + "    <circle cx=\"50\" cy=\"50\" r=\"42\"/>\n" + "  </g>\n" + "</svg>\n").getBytes(Charset.forName("UTF-8"));
+        + "    <circle cx=\"50\" cy=\"50\" r=\"42\"/>\n" + "  </g>\n" + "</svg>\n").getBytes(StandardCharsets.UTF_8);
   }
   
   
@@ -2139,6 +2134,7 @@ public class DataCreator {
     }
   }  
 
+  @SafeVarargs
   protected static Property createComplexCollection(final String name,
       String type, final List<Property>... propertiesList) {
     List<ComplexValue> complexCollection = new ArrayList<ComplexValue>();

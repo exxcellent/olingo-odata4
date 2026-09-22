@@ -18,11 +18,12 @@
  */
 package org.apache.olingo.fit.tecsvc.client;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse;
@@ -31,7 +32,7 @@ import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.client.api.domain.ClientProperty;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.fit.tecsvc.TecSvcConst;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class NavigationITCase extends AbstractParamTecSvcITCase {
 
@@ -43,7 +44,7 @@ public class NavigationITCase extends AbstractParamTecSvcITCase {
             .appendEntitySetSegment("ESAllPrim").appendKeySegment(32767).build())
         .rawExecute();
 
-    final String zeroLevelResponseBody = IOUtils.toString(zeroLevelResponse);
+    final String zeroLevelResponseBody = IOUtils.toString(zeroLevelResponse, StandardCharsets.UTF_8);
     assertTrue(zeroLevelResponseBody.contains("\"$metadata#ESAllPrim/$entity\""));
 
     // one navigation
@@ -53,7 +54,7 @@ public class NavigationITCase extends AbstractParamTecSvcITCase {
             .appendNavigationSegment("NavPropertyETTwoPrimOne").build())
         .rawExecute();
 
-    final String oneLevelResponseBody = IOUtils.toString(oneLevelResponse);
+    final String oneLevelResponseBody = IOUtils.toString(oneLevelResponse, StandardCharsets.UTF_8);
     assertTrue(oneLevelResponseBody.contains("\"../$metadata#ESTwoPrim/$entity\""));
 
     // two navigation
@@ -64,7 +65,7 @@ public class NavigationITCase extends AbstractParamTecSvcITCase {
             .appendNavigationSegment("NavPropertyETTwoPrimMany").appendKeySegment(-365).build())
         .rawExecute();
 
-    final String twoLevelResponseBody = IOUtils.toString(twoLevelResponse);
+    final String twoLevelResponseBody = IOUtils.toString(twoLevelResponse, StandardCharsets.UTF_8);
     assertTrue(twoLevelResponseBody.contains("\"../../$metadata#ESTwoPrim/$entity\""));
   }
 

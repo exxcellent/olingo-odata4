@@ -23,6 +23,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.olingo.commons.api.data.ContextURL;
@@ -50,8 +51,8 @@ import org.apache.olingo.server.core.serializer.ExpandSelectMock;
 import org.apache.olingo.server.tecsvc.MetadataETagSupport;
 import org.apache.olingo.server.tecsvc.data.DataProvider;
 import org.apache.olingo.server.tecsvc.provider.EdmTechProvider;
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 public class JsonDeltaSerializerTest {
@@ -85,15 +86,15 @@ public class JsonDeltaSerializerTest {
         EntityCollectionSerializerOptions.with()
         .contextURL(ContextURL.with().entitySet(edmEntitySet).build())
         .build()).getContent();
-       String jsonString = IOUtils.toString(stream);
+       String jsonString = IOUtils.toString(stream, StandardCharsets.UTF_8);
        final String expectedResult = "{"
            + "\"@odata.context\":\"$metadata#ESDelta/$delta\",\"value\":[{"
            + "\"@odata.context\":\"#ESDelta/$link\",\"source\":\"ESDelta(100)\","
            + "\"relationship\":\"NavPropertyETAllPrimOne\","
            + "\"target\":\"ESAllPrim(0)\"}]"          
            + "}";
-       Assert.assertNotNull(jsonString);
-       Assert.assertEquals(expectedResult, jsonString);
+       assertNotNull(jsonString);
+       assertEquals(expectedResult, jsonString);
      } 
   
   @Test
@@ -111,15 +112,15 @@ public class JsonDeltaSerializerTest {
         EntityCollectionSerializerOptions.with()
         .contextURL(ContextURL.with().entitySet(edmEntitySet).build())
         .build()).getContent();
-       String jsonString = IOUtils.toString(stream);
+       String jsonString = IOUtils.toString(stream, StandardCharsets.UTF_8);
        final String expectedResult = "{"
            + "\"@odata.context\":\"$metadata#ESDelta/$delta\",\"value\":[{"
            + "\"@odata.context\":\"#ESDelta/$deletedLink\",\"source\":\"ESDelta(100)\","
            + "\"relationship\":\"NavPropertyETAllPrimOne\","
            + "\"target\":\"ESAllPrim(0)\"}]"          
            + "}";
-       Assert.assertNotNull(jsonString);
-       Assert.assertEquals(expectedResult, jsonString);
+       assertNotNull(jsonString);
+       assertEquals(expectedResult, jsonString);
      } 
   
   @Test
@@ -140,7 +141,7 @@ public class JsonDeltaSerializerTest {
         EntityCollectionSerializerOptions.with()
         .contextURL(ContextURL.with().entitySet(edmEntitySet).build())
         .build()).getContent();
-       String jsonString = IOUtils.toString(stream);
+       String jsonString = IOUtils.toString(stream, StandardCharsets.UTF_8);
        final String expectedResult = "{"
            +"\"@odata.context\":\"$metadata#ESDelta/$delta\",\"value\":[{"
            + "\"@odata.context\":\"#ESDelta(100)/$deletedEntity\","
@@ -148,8 +149,8 @@ public class JsonDeltaSerializerTest {
            + "\"@odata.context\":\"#ESDelta(-32768)/$deletedEntity\","
            + "\"id\":\"ESDelta(-32768)\",\"reason\":\"changed\"}]"
            + "}";
-       Assert.assertNotNull(jsonString);
-       Assert.assertEquals(expectedResult, jsonString);
+       assertNotNull(jsonString);
+       assertEquals(expectedResult, jsonString);
      } 
   
 
@@ -170,15 +171,15 @@ public class JsonDeltaSerializerTest {
         EntityCollectionSerializerOptions.with()
         .contextURL(ContextURL.with().entitySet(edmEntitySet).build())
         .build()).getContent();
-       String jsonString = IOUtils.toString(stream);
+       String jsonString = IOUtils.toString(stream, StandardCharsets.UTF_8);
        final String expectedResult = "{"
            + "\"@odata.context\":\"$metadata#ESDelta/$delta\",\"value\":[{"
            + "\"@odata.id\":\"ESDelta(32767)\",\"PropertyInt16\":32767,"
            + "\"PropertyString\":\"Number:32767\"},{\"@odata.id\":\"ESDelta(-32768)\","
            + "\"PropertyString\":\"Number:-32768\"}]"
            + "}";
-       Assert.assertNotNull(jsonString);
-       Assert.assertEquals(expectedResult, jsonString);
+       assertNotNull(jsonString);
+       assertEquals(expectedResult, jsonString);
      } 
   @Test
   public void basicDeltaTest() throws Exception {
@@ -225,7 +226,7 @@ public class JsonDeltaSerializerTest {
         EntityCollectionSerializerOptions.with()
         .contextURL(ContextURL.with().entitySet(edmEntitySet).build())
         .build()).getContent();
-       String jsonString = IOUtils.toString(stream);
+       String jsonString = IOUtils.toString(stream, StandardCharsets.UTF_8);
        final String expectedResult = "{"
          +"\"@odata.context\":\"$metadata#ESDelta/$delta\",\"value\":[{"
          + "\"@odata.id\":\"ESDelta(32767)\",\"PropertyInt16\":32767,"
@@ -238,8 +239,8 @@ public class JsonDeltaSerializerTest {
          + "\"#ESDelta/$deletedLink\",\"source\":\"ESDelta(100)\",\"relationship\":\"NavPropertyETAllPrimOne\","
          + "\"target\":\"ESAllPrim(0)\"}]"
            + "}";
-       Assert.assertNotNull(jsonString);
-       Assert.assertEquals(expectedResult, jsonString);
+       assertNotNull(jsonString);
+       assertEquals(expectedResult, jsonString);
      } 
   
   @Test
@@ -255,14 +256,14 @@ public class JsonDeltaSerializerTest {
         EntityCollectionSerializerOptions.with()
         .contextURL(ContextURL.with().entitySet(edmEntitySet2).build())
         .build()).getContent();
-       String jsonString = IOUtils.toString(stream);
+       String jsonString = IOUtils.toString(stream, StandardCharsets.UTF_8);
        final String expectedResult = "{"
          +"\"@odata.context\":\"$metadata#ESDelta/$delta\",\"value\":[{"
          + "\"@odata.context\":\"#ESAllPrim/$entity\",\"@odata.id\":\"ESAllPrim(32767)\","
          + "\"PropertyInt16\":32767,\"PropertyString\":\"First Resource - positive values\"}]"
          + "}";
-       Assert.assertNotNull(jsonString);
-       Assert.assertEquals(expectedResult, jsonString);
+       assertNotNull(jsonString);
+       assertEquals(expectedResult, jsonString);
      } 
   
   @Test
@@ -281,7 +282,7 @@ public class JsonDeltaSerializerTest {
         EntityCollectionSerializerOptions.with()
         .contextURL(ContextURL.with().entitySet(edmEntitySet).build())
         .build()).getContent();
-       String jsonString = IOUtils.toString(stream);
+       String jsonString = IOUtils.toString(stream, StandardCharsets.UTF_8);
        final String expectedResult = "{"
            + "\"@odata.context\":\"$metadata#ESDelta/$delta\",\"value\":[{"
            + "\"@odata.context\":\"#ESDelta/$link\",\"source\":\"ESDelta(100)\","
@@ -289,8 +290,8 @@ public class JsonDeltaSerializerTest {
            + "\"target\":\"ESAllPrim(0)\"}],"          
            + "\"@odata.deltaLink\":\"23042017\""
            + "}";
-       Assert.assertNotNull(jsonString);
-       Assert.assertEquals(expectedResult, jsonString);
+       assertNotNull(jsonString);
+       assertEquals(expectedResult, jsonString);
      } 
   
   @Test
@@ -309,7 +310,7 @@ public class JsonDeltaSerializerTest {
         EntityCollectionSerializerOptions.with()
         .contextURL(ContextURL.with().entitySet(edmEntitySet).build())
         .build()).getContent();
-       String jsonString = IOUtils.toString(stream);
+       String jsonString = IOUtils.toString(stream, StandardCharsets.UTF_8);
        final String expectedResult = "{"
            + "\"@odata.context\":\"$metadata#ESDelta/$delta\",\"value\":[{"
            + "\"@odata.context\":\"#ESDelta/$link\",\"source\":\"ESDelta(100)\","
@@ -317,8 +318,8 @@ public class JsonDeltaSerializerTest {
            + "\"target\":\"ESAllPrim(0)\"}],"          
            + "\"@odata.nextLink\":\"23042017\""
            + "}";
-       Assert.assertNotNull(jsonString);
-       Assert.assertEquals(expectedResult, jsonString);
+       assertNotNull(jsonString);
+       assertEquals(expectedResult, jsonString);
      } 
   
   @Test
@@ -338,7 +339,7 @@ public class JsonDeltaSerializerTest {
         EntityCollectionSerializerOptions.with()
         .contextURL(ContextURL.with().entitySet(edmEntitySet).build())
         .build()).getContent();
-       String jsonString = IOUtils.toString(stream);
+       String jsonString = IOUtils.toString(stream, StandardCharsets.UTF_8);
        final String expectedResult = "{"
            + "\"@odata.context\":\"$metadata#ESDelta/$delta\",\"value\":[{"
            + "\"@odata.context\":\"#ESDelta/$link\",\"source\":\"ESDelta(100)\","
@@ -346,8 +347,8 @@ public class JsonDeltaSerializerTest {
            + "\"target\":\"ESAllPrim(0)\"}],"          
            + "\"@odata.nextLink\":\"23042017\""
            + "}";
-       Assert.assertNotNull(jsonString);
-       Assert.assertEquals(expectedResult, jsonString);
+       assertNotNull(jsonString);
+       assertEquals(expectedResult, jsonString);
      } 
   
   @Test
@@ -370,7 +371,7 @@ public class JsonDeltaSerializerTest {
         .contextURL(ContextURL.with().entitySet(edmEntitySet).build())
         .count(countOption)
         .build()).getContent();
-       String jsonString = IOUtils.toString(stream);
+       String jsonString = IOUtils.toString(stream, StandardCharsets.UTF_8);
        final String expectedResult = "{"
            + "\"@odata.context\":\"$metadata#ESDelta/$delta\","
            + "\"@odata.count\":\"1\","
@@ -380,8 +381,8 @@ public class JsonDeltaSerializerTest {
            + "\"target\":\"ESAllPrim(0)\"}],"          
            + "\"@odata.deltaLink\":\"23042017\""
            + "}";
-       Assert.assertNotNull(jsonString);
-       Assert.assertEquals(expectedResult, jsonString);
+       assertNotNull(jsonString);
+       assertEquals(expectedResult, jsonString);
      } 
   @Test
   public void testEmptyDelta() throws Exception {
@@ -391,12 +392,12 @@ public class JsonDeltaSerializerTest {
         EntityCollectionSerializerOptions.with()
         .contextURL(ContextURL.with().entitySet(edmEntitySet).build())
         .build()).getContent();
-       String jsonString = IOUtils.toString(stream);
+       String jsonString = IOUtils.toString(stream, StandardCharsets.UTF_8);
        final String expectedResult = "{"
            + "\"@odata.context\":\"$metadata#ESDelta/$delta\",\"value\":[]"
            + "}";
-       Assert.assertNotNull(jsonString);
-       Assert.assertEquals(expectedResult, jsonString);
+       assertNotNull(jsonString);
+       assertEquals(expectedResult, jsonString);
      }
   
   @Test
@@ -414,15 +415,15 @@ public class JsonDeltaSerializerTest {
         EntityCollectionSerializerOptions.with()
         .contextURL(ContextURL.with().entitySet(edmEntitySet).build())
         .build()).getContent();
-       String jsonString = IOUtils.toString(stream);
+       String jsonString = IOUtils.toString(stream, StandardCharsets.UTF_8);
        final String expectedResult = "{"
            + "\"@odata.context\":\"$metadata#ESWithStream/$delta\","
            + "\"value\":[{\"@odata.context\":\"#ESWithStream/$link\","
            + "\"source\":\"ESDelta(100)\",\"relationship\":\"NavPropertyETAllPrimOne\","
            + "\"target\":\"ESAllPrim(0)\"}]"      
            + "}";
-       Assert.assertNotNull(jsonString);
-       Assert.assertEquals(expectedResult, jsonString);
+       assertNotNull(jsonString);
+       assertEquals(expectedResult, jsonString);
      } 
   
   @Test
@@ -451,8 +452,8 @@ public class JsonDeltaSerializerTest {
                .selectList(helper.buildContextURLSelectList(entityType, null, select))
                .suffix(Suffix.ENTITY).build())
            .select(select).build()).getContent();
-          String jsonString = IOUtils.toString(stream);
-    Assert.assertEquals("{"
+          String jsonString = IOUtils.toString(stream, StandardCharsets.UTF_8);
+    assertEquals("{"
         +"\"@odata.context\":\"$metadata#ESDelta(PropertyInt16,PropertyString)/$entity/$delta\","
         + "\"value\":[{\"@odata.id\":\"ESDelta(32767)\",\"PropertyString\":\"Number:32767\"},"
         + "{\"@odata.id\":\"ESDelta(-32768)\",\"PropertyString\":\"Number:-32768\"}]}",
@@ -478,7 +479,7 @@ public class JsonDeltaSerializerTest {
         EntityCollectionSerializerOptions.with()
         .contextURL(ContextURL.with().entitySet(edmEntitySet).build())
         .build()).getContent();
-       String jsonString = IOUtils.toString(stream);
+       String jsonString = IOUtils.toString(stream, StandardCharsets.UTF_8);
        final String expectedResult = "{"
            + "\"@odata.context\":\"$metadata#ESCollAllPrim/$delta\","
            + "\"value\":[{\"@odata.id\":\"ESCollAllPrim(1)\",\"PropertyInt16\":1,"
@@ -498,8 +499,8 @@ public class JsonDeltaSerializerTest {
            + "\"01:12:33\"]},{\"@odata.context\":\"#ESCollAllPrim/$link\",\"source\":\"ESDelta(100)\",\"relationship\":"
            + "\"NavPropertyETAllPrimOne\",\"target\":\"ESAllPrim(0)\"}]"
            + "}";
-       Assert.assertNotNull(jsonString);
-       Assert.assertEquals(expectedResult, jsonString);
+       assertNotNull(jsonString);
+       assertEquals(expectedResult, jsonString);
      } 
   
   @Test
@@ -521,7 +522,7 @@ public class JsonDeltaSerializerTest {
         EntityCollectionSerializerOptions.with()
         .contextURL(ContextURL.with().entitySet(edmEntitySet).build())
         .build()).getContent();
-       String jsonString = IOUtils.toString(stream);
+       String jsonString = IOUtils.toString(stream, StandardCharsets.UTF_8);
        final String expectedResult = "{"
          +"\"@odata.context\":\"$metadata#ESKeyNav/$delta\","
          + "\"value\":[{\"@odata.id\":\"ESKeyNav(1)\",\"PropertyInt16\":1,"
@@ -570,8 +571,8 @@ public class JsonDeltaSerializerTest {
          + "\"relationship\":\"NavPropertyETAllPrimOne\","
          + "\"target\":\"ESAllPrim(0)\"}]"
            + "}";
-       Assert.assertNotNull(jsonString);
-       Assert.assertEquals(expectedResult, jsonString);
+       assertNotNull(jsonString);
+       assertEquals(expectedResult, jsonString);
      } 
   
   @Test
@@ -593,139 +594,153 @@ public class JsonDeltaSerializerTest {
         EntityCollectionSerializerOptions.with()
         .contextURL(ContextURL.with().entitySet(edmEntitySet).build()).expand(expand)
         .build()).getContent();
-       String jsonString = IOUtils.toString(stream);
+       String jsonString = IOUtils.toString(stream, StandardCharsets.UTF_8);
        final String expectedResult = "{"         
            +  "\"@odata.context\":\"$metadata#ESDelta/$delta\",\"value\":"
            + "[{\"@odata.id\":\"ESDelta(32767)\",\"PropertyInt16\":32767,\"PropertyString\":"
            + "\"Number:32767\"},{\"@odata.id\":\"ESDelta(100)\",\"PropertyInt16\":100,"
            + "\"PropertyString\":\"Number:100\"}]"
            + "}";
-       Assert.assertNotNull(jsonString);
-       Assert.assertEquals(expectedResult, jsonString);
+       assertNotNull(jsonString);
+       assertEquals(expectedResult, jsonString);
      }
   
-  @Test(expected = SerializerException.class)
+  @Test
   public void negativeDeltaEntityTest() throws Exception {
-    final EdmEntitySet edmEntitySet = entityContainer.getEntitySet("ESDelta");
-    Delta delta = new Delta();
-    
-    final Entity entity2 = data.readAll(edmEntitySet).getEntities().get(1);
-    List<Entity> addedEntity = new ArrayList<Entity>();
-    Entity changedEntity = new Entity();
-    changedEntity.addProperty(entity2.getProperty("PropertyString"));
-    addedEntity.add(changedEntity);
-    delta.getEntities().addAll(addedEntity);
-     ser.entityCollection(metadata, edmEntitySet.getEntityType(), delta ,
-        EntityCollectionSerializerOptions.with()
-        .contextURL(ContextURL.with().entitySet(edmEntitySet).build())
-        .build()).getContent();
+      assertThrows(SerializerException.class, () -> {
+      final EdmEntitySet edmEntitySet = entityContainer.getEntitySet("ESDelta");
+      Delta delta = new Delta();
       
-     } 
+      final Entity entity2 = data.readAll(edmEntitySet).getEntities().get(1);
+      List<Entity> addedEntity = new ArrayList<Entity>();
+      Entity changedEntity = new Entity();
+      changedEntity.addProperty(entity2.getProperty("PropertyString"));
+      addedEntity.add(changedEntity);
+      delta.getEntities().addAll(addedEntity);
+       ser.entityCollection(metadata, edmEntitySet.getEntityType(), delta ,
+          EntityCollectionSerializerOptions.with()
+          .contextURL(ContextURL.with().entitySet(edmEntitySet).build())
+          .build()).getContent();
+        
+      });
+  }
   
-  @Test(expected = SerializerException.class)
+  @Test
   public void negativeLinkDeltaTest1() throws Exception {
-    final EdmEntitySet edmEntitySet = entityContainer.getEntitySet("ESDelta");
-    Delta delta = new Delta();
-    
-    List<DeltaLink> addedLinks = new ArrayList<DeltaLink>();
-    DeltaLink link1 = new DeltaLink();
-    link1.setSource(new URI("ESDelta(100)"));
-    link1.setTarget(new URI("ESAllPrim(0)"));
-    addedLinks.add(link1 );
-    delta.getAddedLinks().addAll(addedLinks );
-       
-    ser.entityCollection(metadata, edmEntitySet.getEntityType(), delta ,
-        EntityCollectionSerializerOptions.with()
-        .contextURL(ContextURL.with().entitySet(edmEntitySet).build())
-        .build()).getContent();      
-     } 
+      assertThrows(SerializerException.class, () -> {
+      final EdmEntitySet edmEntitySet = entityContainer.getEntitySet("ESDelta");
+      Delta delta = new Delta();
+      
+      List<DeltaLink> addedLinks = new ArrayList<DeltaLink>();
+      DeltaLink link1 = new DeltaLink();
+      link1.setSource(new URI("ESDelta(100)"));
+      link1.setTarget(new URI("ESAllPrim(0)"));
+      addedLinks.add(link1 );
+      delta.getAddedLinks().addAll(addedLinks );
+         
+      ser.entityCollection(metadata, edmEntitySet.getEntityType(), delta ,
+          EntityCollectionSerializerOptions.with()
+          .contextURL(ContextURL.with().entitySet(edmEntitySet).build())
+          .build()).getContent();      
+      });
+  }
   
-  @Test(expected = SerializerException.class)
+  @Test
   public void negativeLinkDeltaTest2() throws Exception {
-    final EdmEntitySet edmEntitySet = entityContainer.getEntitySet("ESDelta");
-    Delta delta = new Delta();
-    
-    List<DeltaLink> addedLinks = new ArrayList<DeltaLink>();
-    DeltaLink link1 = new DeltaLink();
-    link1.setRelationship("NavPropertyETAllPrimOne");
-    link1.setTarget(new URI("ESAllPrim(0)"));
-    addedLinks.add(link1 );
-    delta.getAddedLinks().addAll(addedLinks );
-       
-    ser.entityCollection(metadata, edmEntitySet.getEntityType(), delta ,
-        EntityCollectionSerializerOptions.with()
-        .contextURL(ContextURL.with().entitySet(edmEntitySet).build())
-        .build()).getContent();      
-     }
-  @Test(expected = SerializerException.class)
+      assertThrows(SerializerException.class, () -> {
+      final EdmEntitySet edmEntitySet = entityContainer.getEntitySet("ESDelta");
+      Delta delta = new Delta();
+      
+      List<DeltaLink> addedLinks = new ArrayList<DeltaLink>();
+      DeltaLink link1 = new DeltaLink();
+      link1.setRelationship("NavPropertyETAllPrimOne");
+      link1.setTarget(new URI("ESAllPrim(0)"));
+      addedLinks.add(link1 );
+      delta.getAddedLinks().addAll(addedLinks );
+         
+      ser.entityCollection(metadata, edmEntitySet.getEntityType(), delta ,
+          EntityCollectionSerializerOptions.with()
+          .contextURL(ContextURL.with().entitySet(edmEntitySet).build())
+          .build()).getContent();      
+      });
+  }
+  @Test
   public void negativeLinkDeltaTest3() throws Exception {
-    final EdmEntitySet edmEntitySet = entityContainer.getEntitySet("ESDelta");
-    Delta delta = new Delta();
-    
-    List<DeltaLink> addedLinks = new ArrayList<DeltaLink>();
-    DeltaLink link1 = new DeltaLink();
-    link1.setRelationship("NavPropertyETAllPrimOne");
-    link1.setSource(new URI("ESDelta(100)"));
-    addedLinks.add(link1 );
-    delta.getAddedLinks().addAll(addedLinks );
-       
-    ser.entityCollection(metadata, edmEntitySet.getEntityType(), delta ,
-        EntityCollectionSerializerOptions.with()
-        .contextURL(ContextURL.with().entitySet(edmEntitySet).build())
-        .build()).getContent();      
-     }
+      assertThrows(SerializerException.class, () -> {
+      final EdmEntitySet edmEntitySet = entityContainer.getEntitySet("ESDelta");
+      Delta delta = new Delta();
+      
+      List<DeltaLink> addedLinks = new ArrayList<DeltaLink>();
+      DeltaLink link1 = new DeltaLink();
+      link1.setRelationship("NavPropertyETAllPrimOne");
+      link1.setSource(new URI("ESDelta(100)"));
+      addedLinks.add(link1 );
+      delta.getAddedLinks().addAll(addedLinks );
+         
+      ser.entityCollection(metadata, edmEntitySet.getEntityType(), delta ,
+          EntityCollectionSerializerOptions.with()
+          .contextURL(ContextURL.with().entitySet(edmEntitySet).build())
+          .build()).getContent();      
+      });
+  }
   
-  @Test(expected = SerializerException.class)
+  @Test
   public void negativeLinkDeltaTest4() throws Exception {
-    final EdmEntitySet edmEntitySet = entityContainer.getEntitySet("ESDelta");
-    Delta delta = new Delta();
-    
-    List<DeltaLink> addedLinks = new ArrayList<DeltaLink>();
-    DeltaLink link1 = null;
-    addedLinks.add(link1 );
-    delta.getAddedLinks().addAll(addedLinks );
-       
-    ser.entityCollection(metadata, edmEntitySet.getEntityType(), delta ,
-        EntityCollectionSerializerOptions.with()
-        .contextURL(ContextURL.with().entitySet(edmEntitySet).build())
-        .build()).getContent();      
-     } 
-  @Test(expected = SerializerException.class)
+      assertThrows(SerializerException.class, () -> {
+      final EdmEntitySet edmEntitySet = entityContainer.getEntitySet("ESDelta");
+      Delta delta = new Delta();
+      
+      List<DeltaLink> addedLinks = new ArrayList<DeltaLink>();
+      DeltaLink link1 = null;
+      addedLinks.add(link1 );
+      delta.getAddedLinks().addAll(addedLinks );
+         
+      ser.entityCollection(metadata, edmEntitySet.getEntityType(), delta ,
+          EntityCollectionSerializerOptions.with()
+          .contextURL(ContextURL.with().entitySet(edmEntitySet).build())
+          .build()).getContent();      
+      });
+  }
+  @Test
   public void negativeDeltaDeletedEntityTest1() throws Exception {
-    final EdmEntitySet edmEntitySet = entityContainer.getEntitySet("ESDelta");
-    Delta delta = new Delta();   
-      
-    List<DeletedEntity> deletedEntity = new ArrayList<DeletedEntity>();
-    DeletedEntity delEntity1 = new DeletedEntity();
-    delEntity1.setReason(Reason.deleted);
-   
-    deletedEntity.add(delEntity1);
-    delta.getDeletedEntities().addAll(deletedEntity);    
-   
-    ser.entityCollection(metadata, edmEntitySet.getEntityType(), delta ,
-        EntityCollectionSerializerOptions.with()
-        .contextURL(ContextURL.with().entitySet(edmEntitySet).build())
-        .build()).getContent();
-      
-     } 
+      assertThrows(SerializerException.class, () -> {
+      final EdmEntitySet edmEntitySet = entityContainer.getEntitySet("ESDelta");
+      Delta delta = new Delta();   
+        
+      List<DeletedEntity> deletedEntity = new ArrayList<DeletedEntity>();
+      DeletedEntity delEntity1 = new DeletedEntity();
+      delEntity1.setReason(Reason.deleted);
+     
+      deletedEntity.add(delEntity1);
+      delta.getDeletedEntities().addAll(deletedEntity);    
+     
+      ser.entityCollection(metadata, edmEntitySet.getEntityType(), delta ,
+          EntityCollectionSerializerOptions.with()
+          .contextURL(ContextURL.with().entitySet(edmEntitySet).build())
+          .build()).getContent();
+        
+      });
+  }
   
-  @Test(expected = SerializerException.class)
+  @Test
   public void negativeDeltaDeletedEntityTest2() throws Exception {
-    final EdmEntitySet edmEntitySet = entityContainer.getEntitySet("ESDelta");
-    Delta delta = new Delta();   
-      
-    List<DeletedEntity> deletedEntity = new ArrayList<DeletedEntity>();
-    DeletedEntity delEntity1 = new DeletedEntity();
-    delEntity1.setId(new URI("ESDelta(100)"));
-   
-    deletedEntity.add(delEntity1);
-    delta.getDeletedEntities().addAll(deletedEntity);    
-   
-    ser.entityCollection(metadata, edmEntitySet.getEntityType(), delta ,
-        EntityCollectionSerializerOptions.with()
-        .contextURL(ContextURL.with().entitySet(edmEntitySet).build())
-        .build()).getContent();
-      
-     } 
+      assertThrows(SerializerException.class, () -> {
+      final EdmEntitySet edmEntitySet = entityContainer.getEntitySet("ESDelta");
+      Delta delta = new Delta();   
+        
+      List<DeletedEntity> deletedEntity = new ArrayList<DeletedEntity>();
+      DeletedEntity delEntity1 = new DeletedEntity();
+      delEntity1.setId(new URI("ESDelta(100)"));
+     
+      deletedEntity.add(delEntity1);
+      delta.getDeletedEntities().addAll(deletedEntity);    
+     
+      ser.entityCollection(metadata, edmEntitySet.getEntityType(), delta ,
+          EntityCollectionSerializerOptions.with()
+          .contextURL(ContextURL.with().entitySet(edmEntitySet).build())
+          .build()).getContent();
+        
+      });
+  }
   
 }

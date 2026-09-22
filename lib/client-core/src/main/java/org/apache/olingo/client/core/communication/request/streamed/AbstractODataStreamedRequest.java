@@ -22,18 +22,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.olingo.client.api.ODataBatchConstants;
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.api.communication.request.ODataPayloadManager;
 import org.apache.olingo.client.api.communication.request.ODataStreamedRequest;
-import org.apache.olingo.client.api.communication.request.ODataStreamer;
 import org.apache.olingo.client.api.communication.request.batch.ODataBatchRequest;
 import org.apache.olingo.client.api.communication.response.ODataResponse;
 import org.apache.olingo.client.core.communication.request.AbstractODataRequest;
@@ -55,14 +55,14 @@ public abstract class AbstractODataStreamedRequest<V extends ODataResponse, T ex
    * OData payload stream manager.
    */
   protected ODataPayloadManager<V> payloadManager;
-  private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+  private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
   private static final byte[] CRLF = {13, 10};
 
   /**
    * Wrapper for actual streamed request's future. This holds information about the HTTP request / response currently
    * open.
    */
-  protected final Wrapper<Future<HttpResponse>> futureWrapper = new Wrapper<>();
+  protected final Wrapper<Future<ClassicHttpResponse>> futureWrapper = new Wrapper<>();
 
   /**
    * Constructor.
@@ -100,10 +100,10 @@ public abstract class AbstractODataStreamedRequest<V extends ODataResponse, T ex
     payloadManager = getPayloadManager();
 
     if (URIUtils.shouldUseRepeatableHttpBodyEntry(odataClient)) {
-      futureWrapper.setWrapped(odataClient.getConfiguration().getExecutor().submit(new Callable<HttpResponse>() {
+      futureWrapper.setWrapped(odataClient.getConfiguration().getExecutor().submit(new Callable<ClassicHttpResponse>() {
         @Override
-        public HttpResponse call() throws Exception { //NOSONAR
-          ((HttpEntityEnclosingRequestBase) request).setEntity(
+        public ClassicHttpResponse call() throws Exception { //NOSONAR
+          ((HttpUriRequestBase) request).setEntity(
                   URIUtils.buildInputStreamEntity(odataClient, payloadManager.getBody()));
           try {
             return doExecute();
@@ -113,12 +113,12 @@ public abstract class AbstractODataStreamedRequest<V extends ODataResponse, T ex
         }
       }));
     } else {
-      ((HttpEntityEnclosingRequestBase) request).setEntity(
+      ((HttpUriRequestBase) request).setEntity(
               URIUtils.buildInputStreamEntity(odataClient, payloadManager.getBody()));
 
-      futureWrapper.setWrapped(odataClient.getConfiguration().getExecutor().submit(new Callable<HttpResponse>() {
+      futureWrapper.setWrapped(odataClient.getConfiguration().getExecutor().submit(new Callable<ClassicHttpResponse>() {
         @Override
-        public HttpResponse call() throws Exception { //NOSONAR
+        public ClassicHttpResponse call() throws Exception { //NOSONAR
           try {
             return doExecute();
           } finally {

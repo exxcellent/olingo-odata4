@@ -20,20 +20,20 @@ package org.apache.olingo.client.core.http;
 
 import java.net.URI;
 
-import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.HttpClient;
-import org.apache.http.conn.params.ConnRoutePNames;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.olingo.client.api.http.WrappingHttpClientFactory;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.olingo.client.api.http.ODataHttpClient;
 import org.apache.olingo.commons.api.http.HttpMethod;
 
 /**
  * Implementation for working behind an HTTP proxy (possibly requiring authentication); requires another concrete
  * {@link org.apache.olingo.client.api.http.HttpClientFactory} implementation acting as real HTTP client factory.
  */
-public class ProxyWrappingHttpClientFactory implements WrappingHttpClientFactory {
+public class ProxyWrappingHttpClientFactory extends AbstractHttpClientFactory<ODataHttpClient> {
 
   private final URI proxy;
 
@@ -41,57 +41,34 @@ public class ProxyWrappingHttpClientFactory implements WrappingHttpClientFactory
 
   private String proxyPassword;
 
-  private final DefaultHttpClientFactory wrapped;
-
-  public ProxyWrappingHttpClientFactory(final URI proxy) {
-    this(proxy, null, null, new DefaultHttpClientFactory());
-  }
-
   public ProxyWrappingHttpClientFactory(final URI proxy, final String proxyUsername, final String proxyPassword) {
-    this(proxy, proxyUsername, proxyPassword, new DefaultHttpClientFactory());
-  }
-
-  public ProxyWrappingHttpClientFactory(final URI proxy, final DefaultHttpClientFactory wrapped) {
-    this(proxy, null, null, wrapped);
-  }
-
-  public ProxyWrappingHttpClientFactory(final URI proxy,
-          final String proxyUsername, final String proxyPassword, final DefaultHttpClientFactory wrapped) {
-
+    super();
     this.proxy = proxy;
     this.proxyUsername = proxyUsername;
     this.proxyPassword = proxyPassword;
-    this.wrapped = wrapped;
   }
 
   @Override
-  public DefaultHttpClientFactory getWrappedHttpClientFactory() {
-    return this.wrapped;
-  }
-
-  @Override
-  public HttpClient create(final HttpMethod method, final URI uri) {
-    // Use wrapped factory to obtain an httpclient instance for given method and uri
-    final DefaultHttpClient httpclient = wrapped.create(method, uri);
-
+  public ODataHttpClient create(final HttpMethod method, final URI uri) {
     final HttpHost proxyHost = new HttpHost(proxy.getHost(), proxy.getPort());
+    final RequestConfig requestConfig = RequestConfig.custom()
+            .setProxy(proxyHost)
+            .build();
 
-    // Sets usage of HTTP proxy
-    httpclient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxyHost);
+    final org.apache.hc.client5.http.impl.classic.HttpClientBuilder builder = HttpClients.custom()
+            .setUserAgent(AbstractHttpClientFactory.USER_AGENT)
+            .setDefaultRequestConfig(requestConfig);
 
     // Sets proxy authentication, if credentials were provided
     if (proxyUsername != null && proxyPassword != null) {
-      httpclient.getCredentialsProvider().setCredentials(
+      final BasicCredentialsProvider credsProvider = new BasicCredentialsProvider();
+      credsProvider.setCredentials(
               new AuthScope(proxyHost),
-              new UsernamePasswordCredentials(proxyUsername, proxyPassword));
+              new UsernamePasswordCredentials(proxyUsername, proxyPassword.toCharArray()));
+      builder.setDefaultCredentialsProvider(credsProvider);
     }
 
-    return httpclient;
-  }
-
-  @Override
-  public void close(final HttpClient httpClient) {
-    wrapped.close(httpClient);
+    return DefaultHttpClientFactory.wrapHC5Client(builder.build());
   }
 
 }

@@ -18,13 +18,13 @@
  */
 package org.apache.olingo.client.core.edm.xml;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
 
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityContainer;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -42,26 +42,26 @@ class ClientCsdlEntityContainer extends CsdlEntityContainer implements Serializa
 
       final ClientCsdlEntityContainer entityContainer = new ClientCsdlEntityContainer();
 
-      for (; jp.getCurrentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
-        final JsonToken token = jp.getCurrentToken();
-        if (token == JsonToken.FIELD_NAME) {
-          if ("Name".equals(jp.getCurrentName())) {
-            entityContainer.setName(jp.nextTextValue());
-          } else if ("Extends".equals(jp.getCurrentName())) {
-            entityContainer.setExtendsContainer(jp.nextTextValue());
-          } else if ("EntitySet".equals(jp.getCurrentName())) {
+      for (; jp.currentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
+        final JsonToken token = jp.currentToken();
+        if (token == JsonToken.PROPERTY_NAME) {
+          if ("Name".equals(jp.currentName())) {
+            entityContainer.setName(nextTextValue(jp));
+          } else if ("Extends".equals(jp.currentName())) {
+            entityContainer.setExtendsContainer(nextTextValue(jp));
+          } else if ("EntitySet".equals(jp.currentName())) {
             jp.nextToken();
             entityContainer.getEntitySets().add(jp.readValueAs(ClientCsdlEntitySet.class));
-          } else if ("Singleton".equals(jp.getCurrentName())) {
+          } else if ("Singleton".equals(jp.currentName())) {
             jp.nextToken();
             entityContainer.getSingletons().add(jp.readValueAs(ClientCsdlSingleton.class));
-          } else if ("ActionImport".equals(jp.getCurrentName())) {
+          } else if ("ActionImport".equals(jp.currentName())) {
             jp.nextToken();
             entityContainer.getActionImports().add(jp.readValueAs(ClientCsdlActionImport.class));
-          } else if ("FunctionImport".equals(jp.getCurrentName())) {
+          } else if ("FunctionImport".equals(jp.currentName())) {
             jp.nextToken();
             entityContainer.getFunctionImports().add(jp.readValueAs(ClientCsdlFunctionImport.class));
-          } else if ("Annotation".equals(jp.getCurrentName())) {
+          } else if ("Annotation".equals(jp.currentName())) {
             jp.nextToken();
             entityContainer.getAnnotations().add(jp.readValueAs(ClientCsdlAnnotation.class));
           }

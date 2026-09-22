@@ -18,13 +18,14 @@
  */
 package org.apache.olingo.server.core.edm.provider;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
+import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.EdmException;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveType;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
@@ -32,12 +33,11 @@ import org.apache.olingo.commons.api.edm.EdmTypeDefinition;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.edm.constants.EdmTypeKind;
 import org.apache.olingo.commons.api.edm.provider.CsdlTypeDefinition;
-import org.apache.olingo.commons.core.edm.EdmProviderImpl;
 import org.apache.olingo.commons.core.edm.EdmTypeDefinitionImpl;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmPrimitiveTypeFactory;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmString;
 import org.apache.olingo.commons.core.edm.primitivetype.PrimitiveTypeBaseTest;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class EdmTypeDefinitionImplTest extends PrimitiveTypeBaseTest {
 
@@ -101,7 +101,7 @@ public class EdmTypeDefinitionImplTest extends PrimitiveTypeBaseTest {
     final CsdlTypeDefinition providerTypeDef =
         new CsdlTypeDefinition().setName("typeDef").setUnderlyingType(new FullQualifiedName("Edm", "String"));
     final EdmTypeDefinition typeDefImpl =
-        new EdmTypeDefinitionImpl(mock(EdmProviderImpl.class), typeDefName, providerTypeDef);
+        new EdmTypeDefinitionImpl(mock(Edm.class), typeDefName, providerTypeDef);
 
     assertEquals("name", typeDefImpl.getName());
     assertEquals("namespace", typeDefImpl.getNamespace());
@@ -131,7 +131,7 @@ public class EdmTypeDefinitionImplTest extends PrimitiveTypeBaseTest {
     FullQualifiedName typeDefName = new FullQualifiedName("namespace", "name");
     CsdlTypeDefinition providerTypeDef =
         new CsdlTypeDefinition().setName("typeDef").setUnderlyingType(new FullQualifiedName("wrong", "wrong"));
-    EdmTypeDefinitionImpl def = new EdmTypeDefinitionImpl(mock(EdmProviderImpl.class), typeDefName, providerTypeDef);
+    EdmTypeDefinitionImpl def = new EdmTypeDefinitionImpl(mock(Edm.class), typeDefName, providerTypeDef);
     try {
       def.getUnderlyingType();
       fail("Expected an EdmException");
@@ -144,7 +144,7 @@ public class EdmTypeDefinitionImplTest extends PrimitiveTypeBaseTest {
   public void nullTypeResultsInEdmException() throws Exception {
     FullQualifiedName typeDefName = new FullQualifiedName("namespace", "name");
     CsdlTypeDefinition providerTypeDef = new CsdlTypeDefinition().setName("typeDef");
-    EdmTypeDefinitionImpl def = new EdmTypeDefinitionImpl(mock(EdmProviderImpl.class), typeDefName, providerTypeDef);
+    EdmTypeDefinitionImpl def = new EdmTypeDefinitionImpl(mock(Edm.class), typeDefName, providerTypeDef);
     try {
       def.getUnderlyingType();
       fail("Expected an EdmException");

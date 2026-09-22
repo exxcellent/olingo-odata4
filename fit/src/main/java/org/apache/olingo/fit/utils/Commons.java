@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,13 +43,13 @@ import org.apache.olingo.fit.metadata.Metadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.core.json.JsonFactory;
+import tools.jackson.core.json.JsonReadFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.JsonNodeFactory;
+import tools.jackson.databind.node.ObjectNode;
 
 public abstract class Commons {
 
@@ -214,7 +215,7 @@ public abstract class Commons {
       IOUtils.closeQuietly(is);
 
       final ObjectMapper mapper = new ObjectMapper(
-          new JsonFactory().configure(JsonParser.Feature.ALLOW_NUMERIC_LEADING_ZEROS, true));
+          JsonFactory.builder().enable(JsonReadFeature.ALLOW_LEADING_ZEROS_FOR_NUMBERS).build());
       final JsonNode node =
           changeFormat((ObjectNode) mapper.readTree(new ByteArrayInputStream(bos.toByteArray())), target);
 
@@ -241,7 +242,7 @@ public abstract class Commons {
       toBeRemoved.add(Constants.get(ConstantKey.JSON_ID_NAME));
       toBeRemoved.add(Constants.get(ConstantKey.JSON_TYPE_NAME));
 
-      final Iterator<Map.Entry<String, JsonNode>> fields = node.fields();
+      final Iterator<Map.Entry<String, JsonNode>> fields = node.properties().iterator();
       while (fields.hasNext()) {
         final Map.Entry<String, JsonNode> field = fields.next();
         if (field.getKey().endsWith(Constants.get(ConstantKey.JSON_MEDIA_SUFFIX))
@@ -251,7 +252,7 @@ public abstract class Commons {
         } else if (field.getValue().isObject()) {
           changeFormat((ObjectNode) field.getValue(), target);
         } else if (field.getValue().isArray()) {
-          for (final Iterator<JsonNode> subItor = field.getValue().elements(); subItor.hasNext();) {
+          for (final Iterator<JsonNode> subItor = field.getValue().iterator(); subItor.hasNext();) {
             final JsonNode subNode = subItor.next();
             if (subNode.isObject()) {
               changeFormat((ObjectNode) subNode, target);
@@ -277,7 +278,7 @@ public abstract class Commons {
       if (is.available() <= 0) {
         return null;
       } else {
-        final String etag = IOUtils.toString(is);
+        final String etag = IOUtils.toString(is, StandardCharsets.UTF_8);
         IOUtils.closeQuietly(is);
         return etag;
       }

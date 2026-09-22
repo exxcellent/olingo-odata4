@@ -18,10 +18,12 @@
  */
 package org.apache.olingo.fit.tecsvc.http;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.olingo.client.api.ODataClient;
@@ -29,7 +31,7 @@ import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.fit.AbstractBaseTestITCase;
 import org.apache.olingo.fit.tecsvc.TecSvcConst;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class EmptyNavigationPropertiesITCase extends AbstractBaseTestITCase {
 
@@ -37,8 +39,8 @@ public class EmptyNavigationPropertiesITCase extends AbstractBaseTestITCase {
 
   @Test
   public void emptyNavigationManyFollowedByToOne() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim(32767)/NavPropertyETTwoPrimMany(32767)"
-        + "/NavPropertyETAllPrimOne?$format=json");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim(32767)/NavPropertyETTwoPrimMany(32767)"
+        + "/NavPropertyETAllPrimOne?$format=json").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name()); 
@@ -49,8 +51,8 @@ public class EmptyNavigationPropertiesITCase extends AbstractBaseTestITCase {
   
   @Test
   public void emptyNavigationManyFollowedByToMany() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim(32767)/NavPropertyETTwoPrimMany(32767)"
-        + "/NavPropertyETAllPrimMany?$format=json");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim(32767)/NavPropertyETTwoPrimMany(32767)"
+        + "/NavPropertyETAllPrimMany?$format=json").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name()); 
@@ -61,8 +63,8 @@ public class EmptyNavigationPropertiesITCase extends AbstractBaseTestITCase {
   
   @Test
   public void nonemptyNavigationManyFollowedByEmptyToOne() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim(32767)/NavPropertyETTwoPrimMany(-365)"
-        + "/NavPropertyETAllPrimOne?$format=json");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim(32767)/NavPropertyETTwoPrimMany(-365)"
+        + "/NavPropertyETAllPrimOne?$format=json").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name()); 
@@ -73,8 +75,8 @@ public class EmptyNavigationPropertiesITCase extends AbstractBaseTestITCase {
   
   @Test
   public void emptyNavigationOneFollowedByToMany() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESTwoPrim(32766)/NavPropertyETAllPrimOne"
-        + "/NavPropertyETTwoPrimMany?$format=json");
+    URL url = URI.create(SERVICE_URI + "ESTwoPrim(32766)/NavPropertyETAllPrimOne"
+        + "/NavPropertyETTwoPrimMany?$format=json").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name()); 
@@ -85,8 +87,8 @@ public class EmptyNavigationPropertiesITCase extends AbstractBaseTestITCase {
   
   @Test
   public void nonemptyNavigationManyFollowedByToManyNonExistingKey() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim(32767)/NavPropertyETTwoPrimMany(-365)"
-        + "/NavPropertyETAllPrimMany(123)?$format=json");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim(32767)/NavPropertyETTwoPrimMany(-365)"
+        + "/NavPropertyETAllPrimMany(123)?$format=json").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name()); 
@@ -97,7 +99,7 @@ public class EmptyNavigationPropertiesITCase extends AbstractBaseTestITCase {
   
   @Test
   public void emptyNavigationOne() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESTwoPrim(32766)/NavPropertyETAllPrimOne?$format=json");
+    URL url = URI.create(SERVICE_URI + "ESTwoPrim(32766)/NavPropertyETAllPrimOne?$format=json").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name()); 
@@ -108,7 +110,7 @@ public class EmptyNavigationPropertiesITCase extends AbstractBaseTestITCase {
   
   @Test
   public void nonExistingEntityToNavigationOne() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim(12345)/NavPropertyETTwoPrimOne?$format=json");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim(12345)/NavPropertyETTwoPrimOne?$format=json").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name()); 
@@ -119,14 +121,14 @@ public class EmptyNavigationPropertiesITCase extends AbstractBaseTestITCase {
   
   @Test
   public void emptyNavigationMany() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim(-32768)/NavPropertyETTwoPrimMany?$format=json");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim(-32768)/NavPropertyETTwoPrimMany?$format=json").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name()); 
     connection.connect();
 
     assertEquals(HttpStatusCode.OK.getStatusCode(), connection.getResponseCode());
-    assertNotNull(IOUtils.toString(connection.getInputStream()));
+    assertNotNull(IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8));
   }
   
   @Override

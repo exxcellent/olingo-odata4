@@ -19,6 +19,7 @@
 package org.apache.olingo.fit;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -31,8 +32,8 @@ import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.fit.server.TomcatTestServer;
 import org.apache.olingo.server.tecsvc.TechnicalServlet;
 import org.apache.olingo.server.tecsvc.async.TechnicalStatusMonitorServlet;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 public abstract class AbstractBaseTestITCase {
 
@@ -40,11 +41,12 @@ public abstract class AbstractBaseTestITCase {
 
   private static TomcatTestServer server;
 
-  @BeforeClass
+  @BeforeAll
   public static void init()
       throws LifecycleException, IOException, 
           InstantiationException, IllegalAccessException, 
-          ClassNotFoundException, ServletException {
+          ClassNotFoundException, ServletException, IllegalArgumentException, 
+          InvocationTargetException, NoSuchMethodException, SecurityException {
     server = TomcatTestServer.init(9080)
         .addServlet(TechnicalServlet.class, "/odata-server-tecsvc/odata.svc/*")
         .addServlet(TechnicalStatusMonitorServlet.class, "/odata-server-tecsvc/status/*")
@@ -55,7 +57,7 @@ public abstract class AbstractBaseTestITCase {
         .start();
   }
 
-  @AfterClass
+  @AfterAll
   public static void cleanUp() throws LifecycleException {
     server.invalidateAllSessions();
   }

@@ -25,60 +25,57 @@
 	<groupId>my.group.id</groupId>
 	<artifactId>DemoService-Write</artifactId>
 	<packaging>war</packaging>
-	<version>5.0.1-SNAPSHOT</version>
 
 	<name>${project.artifactId}-Webapp</name>
+
+	<parent>
+	  <groupId>org.apache.olingo</groupId>
+	  <artifactId>odata-tutorials</artifactId>
+	  <version>5.0.1-SNAPSHOT</version>
+	  <relativePath>..</relativePath>
+	</parent>
 
 	<build>
 		<finalName>DemoService</finalName>
 	</build>
 
-	<properties>
-		<javax.version>2.5</javax.version>
-		<odata.version>5.0.1-SNAPSHOT</odata.version>
-		<slf4j.version>1.7.7</slf4j.version>
-	</properties>
-
 	<dependencies>
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-			<version>${javax.version}</version>
+	        <groupId>jakarta.servlet</groupId>
+	        <artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.olingo</groupId>
 			<artifactId>odata-server-api</artifactId>
-			<version>${odata.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.olingo</groupId>
 			<artifactId>odata-server-core</artifactId>
-			<version>${odata.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.olingo</groupId>
 			<artifactId>odata-commons-api</artifactId>
-			<version>${odata.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.olingo</groupId>
 			<artifactId>odata-commons-core</artifactId>
-			<version>${odata.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
-			<version>${slf4j.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.7.11</version>
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>

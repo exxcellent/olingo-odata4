@@ -60,8 +60,9 @@ import org.apache.olingo.server.core.serializer.utils.CircleStreamBuffer;
 import org.apache.olingo.server.core.serializer.utils.ContentTypeHelper;
 import org.apache.olingo.server.core.serializer.utils.ContextURLBuilder;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.json.JsonFactory;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.ObjectWriteContext;
 
 public class EdmAssistedJsonSerializer implements EdmAssistedSerializer {
 
@@ -110,7 +111,7 @@ public class EdmAssistedJsonSerializer implements EdmAssistedSerializer {
     
     CircleStreamBuffer buffer = new CircleStreamBuffer();
     outputStream = buffer.getOutputStream();
-    try (JsonGenerator json = new JsonFactory().createGenerator(outputStream)) {
+    try (JsonGenerator json = new JsonFactory().createGenerator(ObjectWriteContext.empty(), outputStream)) {
       if (obj instanceof AbstractEntityCollection) {
         doSerialize(entityType, (AbstractEntityCollection) obj, contextURLString, metadataETag, json);
       } else if (obj instanceof Entity) {
@@ -146,27 +147,27 @@ public class EdmAssistedJsonSerializer implements EdmAssistedSerializer {
 
     if (entityCollection.getCount() != null) {
       if (isIEEE754Compatible) {
-        json.writeStringField(constants.getCount(), Integer.toString(entityCollection.getCount()));
+        json.writeStringProperty(constants.getCount(), Integer.toString(entityCollection.getCount()));
       } else {
-        json.writeNumberField(constants.getCount(), entityCollection.getCount());
+        json.writeNumberProperty(constants.getCount(), entityCollection.getCount());
       }
     }
     if (entityCollection.getDeltaLink() != null) {
-      json.writeStringField(constants.getDeltaLink(), entityCollection.getDeltaLink().toASCIIString());
+      json.writeStringProperty(constants.getDeltaLink(), entityCollection.getDeltaLink().toASCIIString());
     }
 
     for (final Annotation annotation : entityCollection.getAnnotations()) {
       valuable(json, annotation, '@' + annotation.getTerm(), null, null);
     }
 
-    json.writeArrayFieldStart(Constants.VALUE);
+    json.writeArrayPropertyStart(Constants.VALUE);
     for (final Entity entity : entityCollection) {
       doSerialize(entityType, entity, null, null, json);
     }
     json.writeEndArray();
 
     if (entityCollection.getNext() != null) {
-      json.writeStringField(constants.getNextLink(), entityCollection.getNext().toASCIIString());
+      json.writeStringProperty(constants.getNextLink(), entityCollection.getNext().toASCIIString());
     }
 
     json.writeEndObject();
@@ -195,10 +196,10 @@ public class EdmAssistedJsonSerializer implements EdmAssistedSerializer {
 
     if (!isODataMetadataNone &&
         entity.getEditLink() != null && entity.getEditLink().getHref() != null) {
-      json.writeStringField(constants.getEditLink(), entity.getEditLink().getHref());
+      json.writeStringProperty(constants.getEditLink(), entity.getEditLink().getHref());
 
       if (entity.isMediaEntity()) {
-        json.writeStringField(constants.getMediaReadLink(), entity.getEditLink().getHref() + "/$value");
+        json.writeStringProperty(constants.getMediaReadLink(), entity.getEditLink().getHref() + "/$value");
       }
     }
 
@@ -212,24 +213,24 @@ public class EdmAssistedJsonSerializer implements EdmAssistedSerializer {
       throws IOException, SerializerException {
     if (!isODataMetadataNone) {
       if (contextURLString != null) {
-        json.writeStringField(constants.getContext(), contextURLString);
+        json.writeStringProperty(constants.getContext(), contextURLString);
       }
       if (metadataETag != null) {
-        json.writeStringField(constants.getMetadataEtag(), metadataETag);
+        json.writeStringProperty(constants.getMetadataEtag(), metadataETag);
       }
       if (eTag != null) {
-        json.writeStringField(constants.getEtag(), eTag);
+        json.writeStringProperty(constants.getEtag(), eTag);
       }
       if(isODataMetadataFull){
         if (type != null) {
-          json.writeStringField(constants.getType(), type);
+          json.writeStringProperty(constants.getType(), type);
         }
         if (id == null) {
           if (writeNullId) {
-            json.writeNullField(constants.getId());
+            json.writeNullProperty(constants.getId());
           }
         } else {
-          json.writeStringField(constants.getId(), id.toASCIIString());
+          json.writeStringProperty(constants.getId(), id.toASCIIString());
         }
       }
     }
@@ -248,10 +249,10 @@ public class EdmAssistedJsonSerializer implements EdmAssistedSerializer {
           entityType == null || name == null || entityType.getNavigationProperty(name) == null ? null : entityType
               .getNavigationProperty(name).getType();
       if (link.getInlineEntity() != null) {
-        json.writeFieldName(name);
+        json.writeName(name);
         doSerialize(targetType, link.getInlineEntity(), null, null, json);
       } else if (link.getInlineEntitySet() != null) {
-        json.writeArrayFieldStart(name);
+        json.writeArrayPropertyStart(name);
         for (final Entity subEntry : link.getInlineEntitySet().getEntities()) {
           doSerialize(targetType, subEntry, null, null, json);
         }
@@ -348,7 +349,7 @@ public class EdmAssistedJsonSerializer implements EdmAssistedSerializer {
     json.writeStartObject();
 
     if (typeName != null && isODataMetadataFull) {
-      json.writeStringField(constants.getType(), typeName);
+      json.writeStringProperty(constants.getType(), typeName);
     }
 
     for (final Property property : value.getValue()) {
@@ -404,7 +405,7 @@ public class EdmAssistedJsonSerializer implements EdmAssistedSerializer {
       }
       
       if (typeName != null) {
-        json.writeStringField(name + constants.getType(), constructTypeExpression(typeName));
+        json.writeStringProperty(name + constants.getType(), constructTypeExpression(typeName));
       }
     }
 
@@ -412,7 +413,7 @@ public class EdmAssistedJsonSerializer implements EdmAssistedSerializer {
       valuable(json, annotation, name + '@' + annotation.getTerm(), null, null);
     }
 
-    json.writeFieldName(name);
+    json.writeName(name);
     value(json, valuable, type, edmProperty);
   }
 

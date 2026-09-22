@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonGenerator;
 
 /**
  * Server debug information.

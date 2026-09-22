@@ -198,12 +198,13 @@ public class TypedOperand extends VisitorOperand {
   }
   
   public <T> List<T> getTypedValueList(final Class<T> clazz) {
+    @SuppressWarnings("unchecked")
     List<Object> list = (List<Object>) value;
-    List<Object> newList = new ArrayList<Object>();
+    List<T> newList = new ArrayList<>();
     for (Object obj : list) {
       newList.add(clazz.cast(obj));
     }
-    return (List<T>) newList;
+    return newList;
   }
   
 

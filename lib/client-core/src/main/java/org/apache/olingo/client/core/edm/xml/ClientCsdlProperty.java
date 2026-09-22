@@ -18,15 +18,15 @@
  */
 package org.apache.olingo.client.core.edm.xml;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.olingo.commons.api.edm.geo.SRID;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -43,13 +43,13 @@ class ClientCsdlProperty extends CsdlProperty implements Serializable {
 
       final ClientCsdlProperty property = new ClientCsdlProperty();
 
-      for (; jp.getCurrentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
-        final JsonToken token = jp.getCurrentToken();
-        if (token == JsonToken.FIELD_NAME) {
-          if ("Name".equals(jp.getCurrentName())) {
-            property.setName(jp.nextTextValue());
-          } else if ("Type".equals(jp.getCurrentName())) {
-            String metadataTypeName = jp.nextTextValue();
+      for (; jp.currentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
+        final JsonToken token = jp.currentToken();
+        if (token == JsonToken.PROPERTY_NAME) {
+          if ("Name".equals(jp.currentName())) {
+            property.setName(nextTextValue(jp));
+          } else if ("Type".equals(jp.currentName())) {
+            String metadataTypeName = nextTextValue(jp);
             if (metadataTypeName.startsWith("Collection(")) {
               property.setType(metadataTypeName.substring(metadataTypeName.indexOf("(") + 1,
                       metadataTypeName.length() - 1));
@@ -58,28 +58,28 @@ class ClientCsdlProperty extends CsdlProperty implements Serializable {
               property.setType(metadataTypeName);
               property.setCollection(false);
             }
-          } else if ("Nullable".equals(jp.getCurrentName())) {
-            property.setNullable(BooleanUtils.toBoolean(jp.nextTextValue()));
-          } else if ("DefaultValue".equals(jp.getCurrentName())) {
-            property.setDefaultValue(jp.nextTextValue());
-          } else if ("MaxLength".equals(jp.getCurrentName())) {
-            final String maxLenght = jp.nextTextValue();
+          } else if ("Nullable".equals(jp.currentName())) {
+            property.setNullable(BooleanUtils.toBoolean(nextTextValue(jp)));
+          } else if ("DefaultValue".equals(jp.currentName())) {
+            property.setDefaultValue(nextTextValue(jp));
+          } else if ("MaxLength".equals(jp.currentName())) {
+            final String maxLenght = nextTextValue(jp);
             property.setMaxLength("max".equalsIgnoreCase(maxLenght) ? Integer.MAX_VALUE : Integer.valueOf(maxLenght));
-          } else if ("Precision".equals(jp.getCurrentName())) {
-            property.setPrecision(Integer.valueOf(jp.nextTextValue()));
-          } else if ("Scale".equals(jp.getCurrentName())) {
-            final String scale = jp.nextTextValue();
+          } else if ("Precision".equals(jp.currentName())) {
+            property.setPrecision(Integer.valueOf(nextTextValue(jp)));
+          } else if ("Scale".equals(jp.currentName())) {
+            final String scale = nextTextValue(jp);
             property.setScale("variable".equalsIgnoreCase(scale) || "floating".equalsIgnoreCase(scale) ?
                 0 : Integer.valueOf(scale));
             property.setScaleAsString(scale);
-          } else if ("Unicode".equals(jp.getCurrentName())) {
-            property.setUnicode(BooleanUtils.toBoolean(jp.nextTextValue()));
-          } else if ("SRID".equals(jp.getCurrentName())) {
-            final String srid = jp.nextTextValue();
+          } else if ("Unicode".equals(jp.currentName())) {
+            property.setUnicode(BooleanUtils.toBoolean(nextTextValue(jp)));
+          } else if ("SRID".equals(jp.currentName())) {
+            final String srid = nextTextValue(jp);
             if (srid != null) {
               property.setSrid(SRID.valueOf(srid));
             }
-          } else if ("Annotation".equals(jp.getCurrentName())) {
+          } else if ("Annotation".equals(jp.currentName())) {
             jp.nextToken();
             property.getAnnotations().add(jp.readValueAs(ClientCsdlAnnotation.class));
           }

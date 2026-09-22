@@ -19,19 +19,17 @@
 package org.apache.olingo.samples.client.core.http;
 
 import java.net.URI;
-import org.apache.http.client.UserTokenHandler;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.protocol.HttpContext;
-import org.apache.olingo.commons.api.http.HttpMethod;
+
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.olingo.client.api.http.ODataHttpClient;
 import org.apache.olingo.client.core.http.DefaultHttpClientFactory;
+import org.apache.olingo.commons.api.http.HttpMethod;
 
 /**
  * Shows how to work with stateful HTTP connections.
  * <br/>
- * HttpClient relies on <tt>UserTokenHandler</tt> interface to determine if the given execution context is user specific
- * or not. The token object returned by this handler is expected to uniquely identify the current user if the context is
- * user specific or to be null if the context does not contain any resources or details specific to the current user.
- * The user token will be used to ensure that user specific resources will not be shared with or reused by other users.
+ * In HC5, connection state management is handled automatically via connection pooling.
+ * User-specific connection state can be managed via HttpContext in request execution.
  * <a
  * href="http://svn.apache.org/repos/asf/httpcomponents/site/httpcomponents-client-4.2.x/tutorial/html/advanced.html#stateful_conn">More
  * information</a>.
@@ -39,19 +37,12 @@ import org.apache.olingo.client.core.http.DefaultHttpClientFactory;
 public class StatefulHttpClientFactory extends DefaultHttpClientFactory {
 
   @Override
-  public DefaultHttpClient create(final HttpMethod method, final URI uri) {
-    final DefaultHttpClient httpClient = super.create(method, uri);
-
-    httpClient.setUserTokenHandler(new UserTokenHandler() {
-
-      @Override
-      public Object getUserToken(final HttpContext context) {
-        return context.getAttribute("my-token");
-      }
-
-    });
-
-    return httpClient;
+  public ODataHttpClient create(final HttpMethod method, final URI uri) {
+    // In HC5, stateful connections are managed via connection pooling and HttpContext.
+    // User-token-based connection affinity of HC4 is replaced by connection pooling strategies.
+    return DefaultHttpClientFactory.wrapHC5Client(HttpClients.custom()
+        .setUserAgent(USER_AGENT)
+        .build());
   }
 
 }

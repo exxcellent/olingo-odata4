@@ -28,9 +28,12 @@ import org.apache.olingo.commons.api.ex.ODataError;
 import org.apache.olingo.commons.api.ex.ODataErrorDetail;
 import org.apache.olingo.server.api.serializer.SerializerException;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.ObjectMapper;
 
 public class ODataErrorSerializer {
+
+  private static final ObjectMapper MAPPER = new ObjectMapper();
 
   public void writeErrorDocument(final JsonGenerator json, final ODataError error)
       throws IOException, SerializerException {
@@ -39,14 +42,14 @@ public class ODataErrorSerializer {
           SerializerException.MessageKeys.NULL_INPUT);
     }
     json.writeStartObject();
-    json.writeFieldName(Constants.JSON_ERROR);
+    json.writeName(Constants.JSON_ERROR);
 
     json.writeStartObject();
     writeODataError(json, error.getCode(), error.getMessage(), error.getTarget());
     writeODataAdditionalProperties(json, error.getAdditionalProperties());
 
     if (error.getDetails() != null) {
-      json.writeArrayFieldStart(Constants.ERROR_DETAILS);
+      json.writeArrayPropertyStart(Constants.ERROR_DETAILS);
       for (ODataErrorDetail detail : error.getDetails()) {
         json.writeStartObject();
         writeODataError(json, detail.getCode(), detail.getMessage(), detail.getTarget());
@@ -68,7 +71,7 @@ public class ODataErrorSerializer {
 			  Object value = additionalProperty.getValue();
 			  if (value instanceof List) {
 				  List<Map<String, Object>> list = (List<Map<String, Object>>) value;
-				  json.writeArrayFieldStart(additionalProperty.getKey());
+				  json.writeArrayPropertyStart(additionalProperty.getKey());
 				  for (Map<String, Object> entry : list) {
 					  json.writeStartObject();
 					  writeODataAdditionalProperties(json, entry);
@@ -78,7 +81,8 @@ public class ODataErrorSerializer {
 			  } else if (value instanceof Map) {
 				  writeODataAdditionalProperties(json, (Map<String, Object>) value);
 			  } else {
-				  json.writeObjectField(additionalProperty.getKey(), value);
+				  json.writeName(additionalProperty.getKey());
+				  MAPPER.writeValue(json, value);
 			  }
 		  }
 	  }
@@ -86,14 +90,14 @@ public class ODataErrorSerializer {
 
 private void writeODataError(final JsonGenerator json, final String code, final String message, final String target)
       throws IOException {
-    json.writeFieldName(Constants.ERROR_CODE);
+    json.writeName(Constants.ERROR_CODE);
     if (code == null) {
       json.writeNull();
     } else {
       json.writeString(code);
     }
 
-    json.writeFieldName(Constants.ERROR_MESSAGE);
+    json.writeName(Constants.ERROR_MESSAGE);
     if (message == null) {
       json.writeNull();
     } else {
@@ -101,7 +105,7 @@ private void writeODataError(final JsonGenerator json, final String code, final 
     }
 
     if (target != null) {
-      json.writeStringField(Constants.ERROR_TARGET, target);
+      json.writeStringProperty(Constants.ERROR_TARGET, target);
     }
   }
 }

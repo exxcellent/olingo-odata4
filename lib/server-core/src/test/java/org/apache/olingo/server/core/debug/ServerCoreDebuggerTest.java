@@ -20,15 +20,16 @@ package org.apache.olingo.server.core.debug;
 
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -40,15 +41,15 @@ import org.apache.olingo.server.api.ODataResponse;
 import org.apache.olingo.server.api.debug.DebugInformation;
 import org.apache.olingo.server.api.debug.DebugSupport;
 import org.apache.olingo.server.api.debug.DefaultDebugSupport;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ServerCoreDebuggerTest {
 
   private final OData odata = OData.newInstance();
   private ServerCoreDebugger debugger;
 
-  @Before
+  @BeforeEach
   public void setupDebugger() {
     debugger = new ServerCoreDebugger(odata);
     DebugSupport processor = mock(DebugSupport.class);
@@ -103,7 +104,8 @@ public class ServerCoreDebuggerTest {
     debugger.resolveDebugMode(request);
     ODataResponse debugResponse = debugger.createDebugResponse(null, null, null, null, null);
     assertEquals(HttpStatusCode.INTERNAL_SERVER_ERROR.getStatusCode(), debugResponse.getStatusCode());
-    assertEquals("ODataLibrary: Could not assemble debug response.", IOUtils.toString(debugResponse.getContent()));
+    assertEquals("ODataLibrary: Could not assemble debug response.", 
+        IOUtils.toString(debugResponse.getContent(), StandardCharsets.UTF_8));
   }
 
   @Test
@@ -126,14 +128,16 @@ public class ServerCoreDebuggerTest {
     defaultDebugger.stopRuntimeMeasurement(handle);
     assertEquals(0, handle);
 
-    assertThat(IOUtils.toString(defaultDebugger.createDebugResponse(null, null, null, null, null).getContent()),
+    assertThat(IOUtils.toString(defaultDebugger.createDebugResponse(null, null, null, null, null)
+        .getContent(), StandardCharsets.UTF_8),
         allOf(containsString("\"runtime\""), containsString("\"someClass\""), containsString("\"someMethod\""),
             containsString("]}}")));
 
     request = mock(HttpServletRequest.class);
     when(request.getParameter(DebugSupport.ODATA_DEBUG_QUERY_PARAMETER)).thenReturn(DebugSupport.ODATA_DEBUG_HTML);
     defaultDebugger.resolveDebugMode(request);
-    assertThat(IOUtils.toString(defaultDebugger.createDebugResponse(null, null, null, null, null).getContent()),
+    assertThat(IOUtils.toString(defaultDebugger.createDebugResponse(null, null, null, null, null)
+        .getContent(), StandardCharsets.UTF_8),
         allOf(containsString(">Runtime<"), containsString(">someClass<"), containsString(">someMethod("),
             containsString("</html>")));
   }

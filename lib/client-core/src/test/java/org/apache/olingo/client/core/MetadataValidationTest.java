@@ -18,19 +18,19 @@
  */
 package org.apache.olingo.client.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
 import org.apache.olingo.client.api.serialization.ODataMetadataValidation;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.EdmException;
 import org.apache.olingo.commons.api.format.ContentType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class MetadataValidationTest extends AbstractTest {
   public static final String wrongBindingTarget = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
@@ -718,7 +718,8 @@ public class MetadataValidationTest extends AbstractTest {
     
     boolean checkException = false;
     try {
-        InputStream stream = new ByteArrayInputStream(invalidV4MetadataWithV2AndV4Schemas.getBytes("UTF-8"));
+        InputStream stream = new ByteArrayInputStream(invalidV4MetadataWithV2AndV4Schemas
+            .getBytes(StandardCharsets.UTF_8));
         final XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).
             toMetadata(stream);
         assertNotNull(metadata);
@@ -736,7 +737,7 @@ public class MetadataValidationTest extends AbstractTest {
   public void checkInValidV4XMLMetadataWithNoSchemas() {
 	  boolean checkException = false;
     try {
-      InputStream stream = new ByteArrayInputStream(invalidV4MetadataWithNoSchema.getBytes("UTF-8"));
+      InputStream stream = new ByteArrayInputStream(invalidV4MetadataWithNoSchema.getBytes(StandardCharsets.UTF_8));
       final XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).
           toMetadata(stream);
       assertNotNull(metadata);
@@ -756,7 +757,8 @@ public class MetadataValidationTest extends AbstractTest {
   public void checkInValidV4XMLMetadataWithNoSchemasample() {
 	  boolean checkException = false;
     try {
-      InputStream stream = new ByteArrayInputStream(validMetadataWithMultipleSchemaNamespaces.getBytes("UTF-8"));
+      InputStream stream = new ByteArrayInputStream(validMetadataWithMultipleSchemaNamespaces
+          .getBytes(StandardCharsets.UTF_8));
       final XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).
           toMetadata(stream);
       assertNotNull(metadata);
@@ -774,7 +776,7 @@ public class MetadataValidationTest extends AbstractTest {
   public void checkInValidV4XMLMetadataWithV2Schemas() {
 	
     try {
-      InputStream stream = new ByteArrayInputStream(invalidV4MetadataWithV2Schemas.getBytes("UTF-8"));
+      InputStream stream = new ByteArrayInputStream(invalidV4MetadataWithV2Schemas.getBytes(StandardCharsets.UTF_8));
       final XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).
           toMetadata(stream);
       assertNotNull(metadata);
@@ -801,7 +803,8 @@ public class MetadataValidationTest extends AbstractTest {
   @Test
   public void testIfV4ServiceWithNoEntityContainer() {
 	  try{
-		  InputStream stream = new ByteArrayInputStream(V4MetadataWithNoEntityContainer.getBytes("UTF-8"));
+		  InputStream stream = new ByteArrayInputStream(V4MetadataWithNoEntityContainer
+		      .getBytes(StandardCharsets.UTF_8));
 	      final XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).
 	          toMetadata(stream);
 	      assertNotNull(metadata);
@@ -904,15 +907,13 @@ public class MetadataValidationTest extends AbstractTest {
   }
   
   @Test 
-  public void testWrongEdm1() throws UnsupportedEncodingException {
+  public void testWrongEdm1() {
     try {
-      InputStream stream = new ByteArrayInputStream(wrongBindingTarget.getBytes("UTF-8"));
+      InputStream stream = new ByteArrayInputStream(wrongBindingTarget.getBytes(StandardCharsets.UTF_8));
       final Edm edm = client.getReader().readMetadata(stream);
       assertNotNull(edm);
       ODataMetadataValidation metadataValidator = client.metadataValidation();
       metadataValidator.validateMetadata(edm);
-    } catch (UnsupportedEncodingException e) {
-      throw e;
     } catch (RuntimeException e) {
       assertEquals(e.getMessage(), "Navigation Property Type "
           + "Microsoft.Exchange.Services.OData.Model.EmailMessage "
@@ -922,63 +923,55 @@ public class MetadataValidationTest extends AbstractTest {
   }
   
   @Test
-  public void testInvalidFunction() throws UnsupportedEncodingException {
+  public void testInvalidFunction() {
     try {
-      InputStream stream = new ByteArrayInputStream(invalidFunction.getBytes("UTF-8"));
+      InputStream stream = new ByteArrayInputStream(invalidFunction.getBytes(StandardCharsets.UTF_8));
       final Edm edm = client.getReader().readMetadata(stream);
       assertNotNull(edm);
       ODataMetadataValidation metadataValidator = client.metadataValidation();
       metadataValidator.validateMetadata(edm);
-    } catch (UnsupportedEncodingException e) {
-      throw e;
     } catch (RuntimeException e) {
       assertEquals(e.getMessage(), "Invalid Function Namespace1_Alias.UFCRTETTwoKeyNav");
     }
   }
   
   @Test
-  public void testInvalidFunctionInXMLMetadata1() throws UnsupportedEncodingException {
+  public void testInvalidFunctionInXMLMetadata1() {
     try {
-      InputStream stream = new ByteArrayInputStream(invalidFunction.getBytes("UTF-8"));
+      InputStream stream = new ByteArrayInputStream(invalidFunction.getBytes(StandardCharsets.UTF_8));
       final XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).
           toMetadata(stream);
       assertNotNull(metadata);
       ODataMetadataValidation metadataValidator = client.metadataValidation();
       metadataValidator.validateMetadata(metadata);
-    } catch (UnsupportedEncodingException e) {
-      throw e;
     } catch (RuntimeException e) {
       assertEquals(e.getMessage(), "Invalid Function Namespace1_Alias.UFCRTETTwoKeyNav");
     }
   }
   
   @Test
-  public void testInvalidActionInXMLMetadata1() throws UnsupportedEncodingException {
+  public void testInvalidActionInXMLMetadata1() {
     try {
-      InputStream stream = new ByteArrayInputStream(invalidAction.getBytes("UTF-8"));
+      InputStream stream = new ByteArrayInputStream(invalidAction.getBytes(StandardCharsets.UTF_8));
       final XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).
           toMetadata(stream);
       assertNotNull(metadata);
       ODataMetadataValidation metadataValidator = client.metadataValidation();
       metadataValidator.validateMetadata(metadata);
-    } catch (UnsupportedEncodingException e) {
-      throw e;
     } catch (RuntimeException e) {
       assertEquals(e.getMessage(), "Invalid Action Namespace1_Alias.UAETTwoKeyNavRTETTwoKeyNavParam");
     }
   }
   
   @Test
-  public void testWrongXMLMetadata1() throws UnsupportedEncodingException {
+  public void testWrongXMLMetadata1() {
     try {
-      InputStream stream = new ByteArrayInputStream(wrongBindingTarget.getBytes("UTF-8"));
+      InputStream stream = new ByteArrayInputStream(wrongBindingTarget.getBytes(StandardCharsets.UTF_8));
       final XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).
           toMetadata(stream);
       assertNotNull(metadata);
       ODataMetadataValidation metadataValidator = client.metadataValidation();
       metadataValidator.validateMetadata(metadata);
-    } catch (UnsupportedEncodingException e) {
-      throw e;
     } catch (RuntimeException e) {
       assertEquals(e.getMessage(), "Navigation Property Type "
           + "Microsoft.Exchange.Services.OData.Model.EmailMessage "
@@ -988,31 +981,27 @@ public class MetadataValidationTest extends AbstractTest {
   }
   
   @Test 
-  public void testWrongEdm2() throws UnsupportedEncodingException {
+  public void testWrongEdm2() {
     try {
-      InputStream stream = new ByteArrayInputStream(xmlWithNonKeyEntity.getBytes("UTF-8"));
+      InputStream stream = new ByteArrayInputStream(xmlWithNonKeyEntity.getBytes(StandardCharsets.UTF_8));
       final Edm edm = client.getReader().readMetadata(stream);
       assertNotNull(edm);
       ODataMetadataValidation metadataValidator = client.metadataValidation();
       metadataValidator.validateMetadata(edm);
-    } catch (UnsupportedEncodingException e) {
-      throw e;
     } catch (RuntimeException e) {
       assertEquals(e.getMessage(), "Missing key for EntityType Entity");
     }
   }
   
   @Test 
-  public void testWrongEdm3() throws UnsupportedEncodingException {
+  public void testWrongEdm3() {
     try {
       InputStream stream = new ByteArrayInputStream(
-          xmlWithWrongNamespaceInBindingPath.getBytes("UTF-8"));
+          xmlWithWrongNamespaceInBindingPath.getBytes(StandardCharsets.UTF_8));
       final Edm edm = client.getReader().readMetadata(stream);
       assertNotNull(edm);
       ODataMetadataValidation metadataValidator = client.metadataValidation();
       metadataValidator.validateMetadata(edm);
-    } catch (UnsupportedEncodingException e) {
-      throw e;
     } catch (RuntimeException e) {
       assertEquals(e.getMessage(), "The fully Qualified type OData.Model.Human mentioned "
           + "in navigation binding path not found ");
@@ -1020,16 +1009,14 @@ public class MetadataValidationTest extends AbstractTest {
   }
   
   @Test
-  public void testWrongEdm4() throws UnsupportedEncodingException {
+  public void testWrongEdm4() {
     try {
       InputStream stream = new ByteArrayInputStream(
-          xmlWithWrongComplexBaseType.getBytes("UTF-8"));
+          xmlWithWrongComplexBaseType.getBytes(StandardCharsets.UTF_8));
       final Edm edm = client.getReader().readMetadata(stream);
       assertNotNull(edm);
       ODataMetadataValidation metadataValidator = client.metadataValidation();
       metadataValidator.validateMetadata(edm);
-    } catch (UnsupportedEncodingException e) {
-      throw e;
     } catch (EdmException e) {
       assertEquals(e.getMessage(), "Can't find base type"
           + " with name: OData.Model.Animal for complex type: Human");
@@ -1037,152 +1024,121 @@ public class MetadataValidationTest extends AbstractTest {
   }
   
   @Test
-  public void testWrongEdm5() throws UnsupportedEncodingException {
+  public void testWrongEdm5() {
     try {
       InputStream stream = new ByteArrayInputStream(
-          xmlWithNonKeyEntity1.getBytes("UTF-8"));
+          xmlWithNonKeyEntity1.getBytes(StandardCharsets.UTF_8));
       final Edm edm = client.getReader().readMetadata(stream);
       assertNotNull(edm);
       ODataMetadataValidation metadataValidator = client.metadataValidation();
       metadataValidator.validateMetadata(edm);
-    } catch (UnsupportedEncodingException e) {
-      throw e;
     } catch (RuntimeException e) {
       assertEquals(e.getMessage(), "Missing key for EntityType User");
     }
   }
   
   @Test
-  public void testWrongEdm6() throws UnsupportedEncodingException {
+  public void testWrongEdm6() {
     try {
       InputStream stream = new ByteArrayInputStream(
-          xmlWithIncorrectReferentialConstraint1.getBytes("UTF-8"));
+          xmlWithIncorrectReferentialConstraint1.getBytes(StandardCharsets.UTF_8));
       final Edm edm = client.getReader().readMetadata(stream);
       assertNotNull(edm);
       ODataMetadataValidation metadataValidator = client.metadataValidation();
       metadataValidator.validateMetadata(edm);
-    } catch (UnsupportedEncodingException e) {
-      throw e;
     } catch (RuntimeException e) {
       assertEquals(e.getMessage(), "Property name PropertyInt1 not part of the source entity.");
     }
   }
   
   @Test
-  public void testWrongEdm7() throws UnsupportedEncodingException {
+  public void testWrongEdm7() {
     try {
       InputStream stream = new ByteArrayInputStream(
-          xmlWithIncorrectReferentialConstraint2.getBytes("UTF-8"));
+          xmlWithIncorrectReferentialConstraint2.getBytes(StandardCharsets.UTF_8));
       final Edm edm = client.getReader().readMetadata(stream);
       assertNotNull(edm);
       ODataMetadataValidation metadataValidator = client.metadataValidation();
       metadataValidator.validateMetadata(edm);
-    } catch (UnsupportedEncodingException e) {
-      throw e;
     } catch (RuntimeException e) {
       assertEquals(e.getMessage(), "Property name PropertyInt1 not part of the target entity.");
     }
   }
   
   @Test
-  public void testEdmWithBaseEntityAsBindingTarget() throws UnsupportedEncodingException {
-    try {
-      InputStream stream = new ByteArrayInputStream(
-          xmlWithBaseEntityAsBindingTarget.getBytes("UTF-8"));
-      final Edm edm = client.getReader().readMetadata(stream);
-      assertNotNull(edm);
-      ODataMetadataValidation metadataValidator = client.metadataValidation();
-      metadataValidator.validateMetadata(edm);
-    } catch (UnsupportedEncodingException e) {
-      throw e;
-    }
+  public void testEdmWithBaseEntityAsBindingTarget() {
+    InputStream stream = new ByteArrayInputStream(
+        xmlWithBaseEntityAsBindingTarget.getBytes(StandardCharsets.UTF_8));
+    final Edm edm = client.getReader().readMetadata(stream);
+    assertNotNull(edm);
+    ODataMetadataValidation metadataValidator = client.metadataValidation();
+    metadataValidator.validateMetadata(edm);
   }
   
   @Test
-  public void testEdmWithBasicXML() throws UnsupportedEncodingException {
-    try {
-      InputStream stream = new ByteArrayInputStream(
-          basicXml.getBytes("UTF-8"));
-      final Edm edm = client.getReader().readMetadata(stream);
-      assertNotNull(edm);
-      ODataMetadataValidation metadataValidator = client.metadataValidation();
-      metadataValidator.validateMetadata(edm);
-    } catch (UnsupportedEncodingException e) {
-      throw e;
-    }
+  public void testEdmWithBasicXML() {
+    InputStream stream = new ByteArrayInputStream(
+        basicXml.getBytes(StandardCharsets.UTF_8));
+    final Edm edm = client.getReader().readMetadata(stream);
+    assertNotNull(edm);
+    ODataMetadataValidation metadataValidator = client.metadataValidation();
+    metadataValidator.validateMetadata(edm);
   }
   
   @Test
-  public void testEdmWithActionAndFunctionImportXML() throws UnsupportedEncodingException {
-    try {
-      InputStream stream = new ByteArrayInputStream(
-          basicActionImportAndFunctionImport.getBytes("UTF-8"));
-      final Edm edm = client.getReader().readMetadata(stream);
-      assertNotNull(edm);
-      ODataMetadataValidation metadataValidator = client.metadataValidation();
-      metadataValidator.validateMetadata(edm);
-    } catch (UnsupportedEncodingException e) {
-      throw e;
-    }
+  public void testEdmWithActionAndFunctionImportXML() {
+    InputStream stream = new ByteArrayInputStream(
+        basicActionImportAndFunctionImport.getBytes(StandardCharsets.UTF_8));
+    final Edm edm = client.getReader().readMetadata(stream);
+    assertNotNull(edm);
+    ODataMetadataValidation metadataValidator = client.metadataValidation();
+    metadataValidator.validateMetadata(edm);
   }
   
   @Test
-  public void testEdmWithNavPropInBaseType() throws UnsupportedEncodingException {
-    try {
-      InputStream stream = new ByteArrayInputStream(
-          xmlWithNavPropInBaseType.getBytes("UTF-8"));
-      final Edm edm = client.getReader().readMetadata(stream);
-      assertNotNull(edm);
-      ODataMetadataValidation metadataValidator = client.metadataValidation();
-      metadataValidator.validateMetadata(edm);
-    } catch (UnsupportedEncodingException e) {
-      throw e;
-    }
+  public void testEdmWithNavPropInBaseType() {
+    InputStream stream = new ByteArrayInputStream(
+        xmlWithNavPropInBaseType.getBytes(StandardCharsets.UTF_8));
+    final Edm edm = client.getReader().readMetadata(stream);
+    assertNotNull(edm);
+    ODataMetadataValidation metadataValidator = client.metadataValidation();
+    metadataValidator.validateMetadata(edm);
   }
   
   @Test
-  public void testEdmWithtestEdmWithActionAndFunctionImport() 
-      throws UnsupportedEncodingException {
-    try {
-      InputStream stream = new ByteArrayInputStream(
-          xmlWithActionsAndFunctionsHavingReturnedEntitiesInDiffNamespace.getBytes("UTF-8"));
-      final Edm edm = client.getReader().readMetadata(stream);
-      assertNotNull(edm);
-      ODataMetadataValidation metadataValidator = client.metadataValidation();
-      metadataValidator.validateMetadata(edm);
-    } catch (UnsupportedEncodingException e) {
-      throw e;
-    }
+  public void testEdmWithtestEdmWithActionAndFunctionImport() {
+    InputStream stream = new ByteArrayInputStream(
+        xmlWithActionsAndFunctionsHavingReturnedEntitiesInDiffNamespace.getBytes(StandardCharsets.UTF_8));
+    final Edm edm = client.getReader().readMetadata(stream);
+    assertNotNull(edm);
+    ODataMetadataValidation metadataValidator = client.metadataValidation();
+    metadataValidator.validateMetadata(edm);
   }
   
   @Test
-  public void testWrongXMLMetadata2() throws UnsupportedEncodingException {
+  public void testWrongXMLMetadata2() {
     try {
-      InputStream stream = new ByteArrayInputStream(xmlWithNonKeyEntity.getBytes("UTF-8"));
+      InputStream stream = new ByteArrayInputStream(xmlWithNonKeyEntity.getBytes(StandardCharsets.UTF_8));
       final XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).
           toMetadata(stream);
       assertNotNull(metadata);
       ODataMetadataValidation metadataValidator = client.metadataValidation();
       metadataValidator.validateMetadata(metadata);
-    } catch (UnsupportedEncodingException e) {
-      throw e;
     } catch (RuntimeException e) {
       assertEquals(e.getMessage(), "Missing key for EntityType Entity");
     }
   }
   
   @Test 
-  public void testWrongXMLMetadata3() throws UnsupportedEncodingException {
+  public void testWrongXMLMetadata3() {
     try {
       InputStream stream = new ByteArrayInputStream(
-          xmlWithWrongNamespaceInBindingTarget.getBytes("UTF-8"));
+          xmlWithWrongNamespaceInBindingTarget.getBytes(StandardCharsets.UTF_8));
       final XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).
           toMetadata(stream);
       assertNotNull(metadata);
       ODataMetadataValidation metadataValidator = client.metadataValidation();
       metadataValidator.validateMetadata(metadata);
-    } catch (UnsupportedEncodingException e) {
-      throw e;
     } catch (RuntimeException e) {
       assertEquals(e.getMessage(), "Container with FullyQualifiedName "
           + "Model.EntityContainer1 not found.");
@@ -1190,17 +1146,15 @@ public class MetadataValidationTest extends AbstractTest {
   }
   
   @Test
-  public void testWrongXMLMetadata4() throws UnsupportedEncodingException {
+  public void testWrongXMLMetadata4() {
     try {
       InputStream stream = new ByteArrayInputStream(
-          xmlWithWrongNamespaceInBindingPath.getBytes("UTF-8"));
+          xmlWithWrongNamespaceInBindingPath.getBytes(StandardCharsets.UTF_8));
       final XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).
           toMetadata(stream);
       assertNotNull(metadata);
       ODataMetadataValidation metadataValidator = client.metadataValidation();
       metadataValidator.validateMetadata(metadata);
-    } catch (UnsupportedEncodingException e) {
-      throw e;
     } catch (RuntimeException e) {
       assertEquals(e.getMessage(), "The fully Qualified type OData."
           + "Model.Human mentioned in navigation binding path not found ");
@@ -1208,68 +1162,60 @@ public class MetadataValidationTest extends AbstractTest {
   }
   
   @Test
-  public void testWrongXMLMetadata5() throws UnsupportedEncodingException {
+  public void testWrongXMLMetadata5() {
     try {
       InputStream stream = new ByteArrayInputStream(
-          xmlWithInvalidEntityTypeNamespace.getBytes("UTF-8"));
+          xmlWithInvalidEntityTypeNamespace.getBytes(StandardCharsets.UTF_8));
       final XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).
           toMetadata(stream);
       assertNotNull(metadata);
       ODataMetadataValidation metadataValidator = client.metadataValidation();
       metadataValidator.validateMetadata(metadata);
-    } catch (UnsupportedEncodingException e) {
-      throw e;
     } catch (RuntimeException e) {
       assertEquals(e.getMessage(), "Invalid Entity Type OData.Model.Customer");
     }
   }
   
   @Test
-  public void testWrongXMLMetadata6() throws UnsupportedEncodingException {
+  public void testWrongXMLMetadata6() {
     try {
       InputStream stream = new ByteArrayInputStream(
-          xmlWithWrongComplexBaseType.getBytes("UTF-8"));
+          xmlWithWrongComplexBaseType.getBytes(StandardCharsets.UTF_8));
       final XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).
           toMetadata(stream);
       assertNotNull(metadata);
       ODataMetadataValidation metadataValidator = client.metadataValidation();
       metadataValidator.validateMetadata(metadata);
-    } catch (UnsupportedEncodingException e) {
-      throw e;
     } catch (RuntimeException e) {
       assertEquals(e.getMessage(), "Invalid Complex BaseType OData.Model.Animal");
     }
   }
   
   @Test
-  public void testWrongXMLMetadata7() throws UnsupportedEncodingException {
+  public void testWrongXMLMetadata7() {
     try {
       InputStream stream = new ByteArrayInputStream(
-          xmlWithNonKeyEntity1.getBytes("UTF-8"));
+          xmlWithNonKeyEntity1.getBytes(StandardCharsets.UTF_8));
       final XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).
           toMetadata(stream);
       assertNotNull(metadata);
       ODataMetadataValidation metadataValidator = client.metadataValidation();
       metadataValidator.validateMetadata(metadata);
-    } catch (UnsupportedEncodingException e) {
-      throw e;
     } catch (RuntimeException e) {
       assertEquals(e.getMessage(), "Missing key for EntityType User");
     }
   }
   
   @Test 
-  public void testWrongXMLMetadata8() throws UnsupportedEncodingException {
+  public void testWrongXMLMetadata8() {
     try {
       InputStream stream = new ByteArrayInputStream(
-          xmlWithWrongBindingTarget.getBytes("UTF-8"));
+          xmlWithWrongBindingTarget.getBytes(StandardCharsets.UTF_8));
       final XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).
           toMetadata(stream);
       assertNotNull(metadata);
       ODataMetadataValidation metadataValidator = client.metadataValidation();
       metadataValidator.validateMetadata(metadata);
-    } catch (UnsupportedEncodingException e) {
-      throw e;
     } catch (RuntimeException e) {
       assertEquals(e.getMessage(), "Navigation Property Target HumanCities is not part "
           + "of the same container Microsoft.Exchange.Services.OData.Model.EntityContainer");
@@ -1277,47 +1223,37 @@ public class MetadataValidationTest extends AbstractTest {
   }
   
   @Test
-  public void testXMLMetadataBaseEntityAsBindingTaget() throws UnsupportedEncodingException {
-    try {
-      InputStream stream = new ByteArrayInputStream(
-          xmlWithBaseEntityAsBindingTarget.getBytes("UTF-8"));
-      final XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).
-          toMetadata(stream);
-      assertNotNull(metadata);
-      ODataMetadataValidation metadataValidator = client.metadataValidation();
-      metadataValidator.validateMetadata(metadata);
-    } catch (UnsupportedEncodingException e) {
-      throw e;
-    }
+  public void testXMLMetadataBaseEntityAsBindingTaget() {
+    InputStream stream = new ByteArrayInputStream(
+        xmlWithBaseEntityAsBindingTarget.getBytes(StandardCharsets.UTF_8));
+    final XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).
+        toMetadata(stream);
+    assertNotNull(metadata);
+    ODataMetadataValidation metadataValidator = client.metadataValidation();
+    metadataValidator.validateMetadata(metadata);
   }
   
   @Test
-  public void testBasicXMLMetadata10() throws UnsupportedEncodingException {
-    try {
-      InputStream stream = new ByteArrayInputStream(
-          basicXml.getBytes("UTF-8"));
-      final XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).
-          toMetadata(stream);
-      assertNotNull(metadata);
-      ODataMetadataValidation metadataValidator = client.metadataValidation();
-      metadataValidator.validateMetadata(metadata);
-    } catch (UnsupportedEncodingException e) {
-      throw e;
-    }
+  public void testBasicXMLMetadata10() {
+    InputStream stream = new ByteArrayInputStream(
+        basicXml.getBytes(StandardCharsets.UTF_8));
+    final XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).
+        toMetadata(stream);
+    assertNotNull(metadata);
+    ODataMetadataValidation metadataValidator = client.metadataValidation();
+    metadataValidator.validateMetadata(metadata);
   }
   
   @Test 
-  public void testWrongXMLMetadata11() throws UnsupportedEncodingException {
+  public void testWrongXMLMetadata11() {
     try {
       InputStream stream = new ByteArrayInputStream(
-          xmlWithWrongBindingTarget1.getBytes("UTF-8"));
+          xmlWithWrongBindingTarget1.getBytes(StandardCharsets.UTF_8));
       final XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).
           toMetadata(stream);
       assertNotNull(metadata);
       ODataMetadataValidation metadataValidator = client.metadataValidation();
       metadataValidator.validateMetadata(metadata);
-    } catch (UnsupportedEncodingException e) {
-      throw e;
     } catch (RuntimeException e) {
       assertEquals(e.getMessage(), "Target Entity Set mentioned in navigationBindingProperty "
           + "not found in the container EntityContainer1");
@@ -1325,98 +1261,81 @@ public class MetadataValidationTest extends AbstractTest {
   }
   
   @Test
-  public void testWrongXMLMetadata12() throws UnsupportedEncodingException {
+  public void testWrongXMLMetadata12() {
     try {
       InputStream stream = new ByteArrayInputStream(
-          xmlWithIncorrectReferentialConstraint1.getBytes("UTF-8"));
+          xmlWithIncorrectReferentialConstraint1.getBytes(StandardCharsets.UTF_8));
       final XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).
           toMetadata(stream);
       assertNotNull(metadata);
       ODataMetadataValidation metadataValidator = client.metadataValidation();
       metadataValidator.validateMetadata(metadata);
-    } catch (UnsupportedEncodingException e) {
-      throw e;
     } catch (RuntimeException e) {
       assertEquals(e.getMessage(), "Property name PropertyInt1 not part of the source entity.");
     }
   }
   
   @Test
-  public void testWrongXMLMetadata13() throws UnsupportedEncodingException {
+  public void testWrongXMLMetadata13() {
     try {
       InputStream stream = new ByteArrayInputStream(
-          xmlWithIncorrectReferentialConstraint2.getBytes("UTF-8"));
+          xmlWithIncorrectReferentialConstraint2.getBytes(StandardCharsets.UTF_8));
       final XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).
           toMetadata(stream);
       assertNotNull(metadata);
       ODataMetadataValidation metadataValidator = client.metadataValidation();
       metadataValidator.validateMetadata(metadata);
-    } catch (UnsupportedEncodingException e) {
-      throw e;
     } catch (RuntimeException e) {
       assertEquals(e.getMessage(), "Property name PropertyInt1 not part of the target entity.");
     }
   }
   
   @Test
-  public void XMLMetadataActionImportAndFunctionImport() throws UnsupportedEncodingException {
-    try {
-      InputStream stream = new ByteArrayInputStream(
-          basicActionImportAndFunctionImport.getBytes("UTF-8"));
-      final XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).
-          toMetadata(stream);
-      assertNotNull(metadata);
-      ODataMetadataValidation metadataValidator = client.metadataValidation();
-      metadataValidator.validateMetadata(metadata);
-    } catch (UnsupportedEncodingException e) {
-      throw e;
-    }
+  public void XMLMetadataActionImportAndFunctionImport() {
+    InputStream stream = new ByteArrayInputStream(
+        basicActionImportAndFunctionImport.getBytes(StandardCharsets.UTF_8));
+    final XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).
+        toMetadata(stream);
+    assertNotNull(metadata);
+    ODataMetadataValidation metadataValidator = client.metadataValidation();
+    metadataValidator.validateMetadata(metadata);
   }
   
   @Test
-  public void XMLMetadataWithNavigationPropertyInBaseType() throws UnsupportedEncodingException {
-    try {
-      InputStream stream = new ByteArrayInputStream(
-          xmlWithNavPropInBaseType.getBytes("UTF-8"));
-      final XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).
-          toMetadata(stream);
-      assertNotNull(metadata);
-      ODataMetadataValidation metadataValidator = client.metadataValidation();
-      metadataValidator.validateMetadata(metadata);
-    } catch (UnsupportedEncodingException e) {
-      throw e;
-    }
+  public void XMLMetadataWithNavigationPropertyInBaseType() {
+    InputStream stream = new ByteArrayInputStream(
+        xmlWithNavPropInBaseType.getBytes(StandardCharsets.UTF_8));
+    final XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).
+        toMetadata(stream);
+    assertNotNull(metadata);
+    ODataMetadataValidation metadataValidator = client.metadataValidation();
+    metadataValidator.validateMetadata(metadata);
   }
   
   @Test
-  public void testEdmWithSingleton() 
-      throws UnsupportedEncodingException {
+  public void testEdmWithSingleton() {
     try {
       InputStream stream = new ByteArrayInputStream(
-          basicXmlWithSingleton.getBytes("UTF-8"));
+          basicXmlWithSingleton.getBytes(StandardCharsets.UTF_8));
       final Edm edm = client.getReader().readMetadata(stream);
       assertNotNull(edm);
       ODataMetadataValidation metadataValidator = client.metadataValidation();
       metadataValidator.validateMetadata(edm);
-    } catch (UnsupportedEncodingException e) {
-      throw e;
     } catch (RuntimeException e) {
       assertEquals(e.getMessage(), "Validations of Singletons are not supported: SINav");
     }
   }
     
     @Test
-    public void XMLMetadataWithSingleton() throws UnsupportedEncodingException {
+    public void XMLMetadataWithSingleton() {
       try {
         InputStream stream = new ByteArrayInputStream(
-            basicXmlWithSingleton.getBytes("UTF-8"));
+            basicXmlWithSingleton.getBytes(StandardCharsets.UTF_8));
         final XMLMetadata metadata = client.getDeserializer(ContentType.APPLICATION_XML).
             toMetadata(stream);
         assertNotNull(metadata);
         ODataMetadataValidation metadataValidator = client.metadataValidation();
         metadataValidator.validateMetadata(metadata);
-      } catch (UnsupportedEncodingException e) {
-        throw e;
       } catch (RuntimeException e) {
         assertEquals(e.getMessage(), "Validations of Singletons are not supported: SINav");
       }

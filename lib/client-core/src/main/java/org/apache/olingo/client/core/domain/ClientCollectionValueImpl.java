@@ -57,7 +57,7 @@ public class ClientCollectionValueImpl<OV extends ClientValue> extends AbstractC
 
   @Override
   public Collection<Object> asJavaCollection() {
-    final List<Object> result = new ArrayList<>();
+    final List<Object> result = new ArrayList<>(values.size());
     for (ClientValue value : values) {
       if (value.isPrimitive()) {
         result.add(value.asPrimitive().toValue());

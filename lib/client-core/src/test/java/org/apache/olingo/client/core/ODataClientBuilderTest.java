@@ -22,13 +22,13 @@ import org.apache.olingo.client.api.EdmEnabledODataClient;
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.api.ODataClientBuilder;
 import org.apache.olingo.commons.api.edm.Edm;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * The ODataClientBuilderTest must be done in the core library because for test reason it is necessary
@@ -54,7 +54,7 @@ public class ODataClientBuilderTest {
 
   @Test
   public void testSystemProperty() {
-    //CHECKSTYLE:OFF
+    // CHECKSTYLE:OFF
     System.setProperty(ODataClientBuilder.ODATA_CLIENT_IMPL_SYS_PROPERTY, MyODataClient.class.getName());
     ODataClient client = ODataClientBuilder.createClient();
     assertNotNull(client);
@@ -80,7 +80,7 @@ public class ODataClientBuilderTest {
 
     System.clearProperty(ODataClientBuilder.ODATA_CLIENT_IMPL_SYS_PROPERTY);
     System.clearProperty(ODataClientBuilder.ODATA_EMD_CLIENT_IMPL_SYS_PROPERTY);
-    //CHECKSTYLE:ON
+    // CHECKSTYLE:ON
   }
 
   public static class MyODataClient extends ODataClientImpl {

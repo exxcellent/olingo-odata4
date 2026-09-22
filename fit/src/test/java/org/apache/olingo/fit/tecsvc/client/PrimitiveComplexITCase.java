@@ -18,13 +18,14 @@
  */
 package org.apache.olingo.fit.tecsvc.client;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.net.URI;
 import java.util.Iterator;
 
@@ -50,7 +51,7 @@ import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class PrimitiveComplexITCase extends AbstractParamTecSvcITCase {
 
@@ -89,7 +90,7 @@ public class PrimitiveComplexITCase extends AbstractParamTecSvcITCase {
     saveCookieHeader(response);
 
     if (isJson()) {
-      String actualResult = IOUtils.toString(response.getRawResponse(), "UTF-8");
+      String actualResult = IOUtils.toString(response.getRawResponse(), StandardCharsets.UTF_8);
       assertTrue(actualResult.startsWith("{\"@odata.context\":\"../$metadata#ESTwoPrim(32766)/PropertyString\","));
       assertTrue(actualResult.endsWith("\"value\":\"Test String1\"}"));
     } else {
@@ -178,7 +179,7 @@ public class PrimitiveComplexITCase extends AbstractParamTecSvcITCase {
     saveCookieHeader(response);
 
     if (isJson()) {
-      String actualResult = IOUtils.toString(response.getRawResponse(), "UTF-8");
+      String actualResult = IOUtils.toString(response.getRawResponse(), StandardCharsets.UTF_8);
       assertTrue(actualResult.startsWith("{\"@odata.context\":\"../$metadata#ESMixPrimCollComp(7)/PropertyComp\","));
       assertTrue(actualResult.endsWith("\"PropertyInt16\":222,\"PropertyString\":\"TEST B\"}"));
     } else {
@@ -386,7 +387,7 @@ public class PrimitiveComplexITCase extends AbstractParamTecSvcITCase {
 
     final ClientPrimitiveValue value = response.getBody();
     assertNotNull(value);
-    assertEquals("Test String1", IOUtils.toString((InputStream) value.toValue(), "UTF-8"));
+    assertEquals("Test String1", IOUtils.toString((InputStream) value.toValue(), StandardCharsets.UTF_8));
   }
 
   @Test

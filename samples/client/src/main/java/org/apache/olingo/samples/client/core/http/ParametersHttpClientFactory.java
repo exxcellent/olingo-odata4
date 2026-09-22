@@ -19,11 +19,12 @@
 package org.apache.olingo.samples.client.core.http;
 
 import java.net.URI;
+import java.util.concurrent.TimeUnit;
 
-import org.apache.http.HttpVersion;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.CoreProtocolPNames;
-import org.apache.http.params.HttpConnectionParams;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.util.Timeout;
+import org.apache.olingo.client.api.http.ODataHttpClient;
 import org.apache.olingo.client.core.http.DefaultHttpClientFactory;
 import org.apache.olingo.commons.api.http.HttpMethod;
 
@@ -38,17 +39,17 @@ import org.apache.olingo.commons.api.http.HttpMethod;
 public class ParametersHttpClientFactory extends DefaultHttpClientFactory {
 
   @Override
-  public DefaultHttpClient create(final HttpMethod method, final URI uri) {
-    final DefaultHttpClient httpClient = super.create(method, uri);
-
-    httpClient.getParams().setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_0);
-    httpClient.getParams().setParameter(CoreProtocolPNames.HTTP_CONTENT_CHARSET, "UTF-8");
-
+  public ODataHttpClient create(final HttpMethod method, final URI uri) {
     final int timeout = 1000;
-    HttpConnectionParams.setConnectionTimeout(httpClient.getParams(), timeout);
-    HttpConnectionParams.setSoTimeout(httpClient.getParams(), timeout);
+    final RequestConfig requestConfig = RequestConfig.custom()
+        .setConnectionRequestTimeout(Timeout.of(timeout, TimeUnit.MILLISECONDS))
+        .setResponseTimeout(Timeout.of(timeout, TimeUnit.MILLISECONDS))
+        .build();
 
-    return httpClient;
+    return DefaultHttpClientFactory.wrapHC5Client(HttpClients.custom()
+        .setUserAgent(USER_AGENT)
+        .setDefaultRequestConfig(requestConfig)
+        .build());
   }
 
 }

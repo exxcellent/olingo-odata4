@@ -18,10 +18,10 @@
  */
 package org.apache.olingo.client.core.edm.xml;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 import org.apache.olingo.commons.api.edm.provider.CsdlEnumMember;
 
@@ -40,14 +40,14 @@ class ClientCsdlEnumMember extends CsdlEnumMember implements Serializable {
 
       final CsdlEnumMember member = new CsdlEnumMember();
 
-      for (; jp.getCurrentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
-        final JsonToken token = jp.getCurrentToken();
-        if (token == JsonToken.FIELD_NAME) {
-          if ("Name".equals(jp.getCurrentName())) {
-            member.setName(jp.nextTextValue());
-          } else if ("Value".equals(jp.getCurrentName())) {
-            member.setValue(jp.nextTextValue());
-          } else if ("Annotation".equals(jp.getCurrentName())) {
+      for (; jp.currentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
+        final JsonToken token = jp.currentToken();
+        if (token == JsonToken.PROPERTY_NAME) {
+          if ("Name".equals(jp.currentName())) {
+            member.setName(nextTextValue(jp));
+          } else if ("Value".equals(jp.currentName())) {
+            member.setValue(nextTextValue(jp));
+          } else if ("Annotation".equals(jp.currentName())) {
             jp.nextToken();
             member.getAnnotations().add(jp.readValueAs(ClientCsdlAnnotation.class));
           }

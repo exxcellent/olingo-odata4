@@ -18,12 +18,12 @@
  */
 package org.apache.olingo.server.core.deserializer.json;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -62,8 +62,8 @@ import org.apache.olingo.server.api.deserializer.DeserializerException;
 import org.apache.olingo.server.api.deserializer.DeserializerResult;
 import org.apache.olingo.server.api.deserializer.ODataDeserializer;
 import org.apache.olingo.server.core.deserializer.AbstractODataDeserializerTest;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.mockito.Mockito;
 
 public class ODataJsonDeserializerEntityTest extends AbstractODataDeserializerTest {
@@ -107,15 +107,15 @@ public class ODataJsonDeserializerEntityTest extends AbstractODataDeserializerTe
     assertNotNull(properties);
     assertEquals(16, properties.size());
 
-    assertEquals(new Short((short) 32767), entity.getProperty("PropertyInt16").getValue());
+    assertEquals(Short.valueOf((short) 32767), entity.getProperty("PropertyInt16").getValue());
     assertEquals("First Resource - positive values", entity.getProperty("PropertyString").getValue());
-    assertEquals(new Boolean(true), entity.getProperty("PropertyBoolean").getValue());
-    assertEquals(new Short((short) 255), entity.getProperty("PropertyByte").getValue());
-    assertEquals(new Byte((byte) 127), entity.getProperty("PropertySByte").getValue());
-    assertEquals(new Integer(2147483647), entity.getProperty("PropertyInt32").getValue());
-    assertEquals(new Long(9223372036854775807l), entity.getProperty("PropertyInt64").getValue());
-    assertEquals(new Float(1.79E20), entity.getProperty("PropertySingle").getValue());
-    assertEquals(new Double(-1.79E19), entity.getProperty("PropertyDouble").getValue());
+    assertEquals(Boolean.TRUE, entity.getProperty("PropertyBoolean").getValue());
+    assertEquals(Short.valueOf((short) 255), entity.getProperty("PropertyByte").getValue());
+    assertEquals(Byte.valueOf((byte) 127), entity.getProperty("PropertySByte").getValue());
+    assertEquals(Integer.valueOf(2147483647), entity.getProperty("PropertyInt32").getValue());
+    assertEquals(Long.valueOf(9223372036854775807L), entity.getProperty("PropertyInt64").getValue());
+    assertEquals(Float.valueOf(1.79E20f), entity.getProperty("PropertySingle").getValue());
+    assertEquals(Double.valueOf(-1.79E19), entity.getProperty("PropertyDouble").getValue());
     assertEquals(new BigDecimal(34), entity.getProperty("PropertyDecimal").getValue());
     assertNotNull(entity.getProperty("PropertyBinary").getValue());
     assertNotNull(entity.getProperty("PropertyDate").getValue());
@@ -138,18 +138,20 @@ public class ODataJsonDeserializerEntityTest extends AbstractODataDeserializerTe
     List<Property> properties = entity.getProperties();
     assertNotNull(properties);
     assertEquals(3, properties.size());
-    assertEquals(new Short((short) 32767), entity.getProperty("PropertyInt16").getValue());
+    assertEquals(Short.valueOf((short) 32767), entity.getProperty("PropertyInt16").getValue());
     assertEquals("First Resource - positive values", entity.getProperty("PropertyString").getValue());
     assertNotNull(entity.getProperty("AdditionalPropertyString_5").getValue());
   }
   
-  @Test(expected=DeserializerException.class)
+  @Test
   public void derivedEntityETTwoPrimError() throws Exception {
-    String entityString =
-        "{  \"PropertyInt16\":32767," +
-            "\"PropertyString\":\"First Resource - positive values\"," +
-            "\"AdditionalPropertyString_5\":\"Additional\"}";
-   deserialize(entityString, "ETTwoPrim");
+      assertThrows(DeserializerException.class, () -> {
+      String entityString =
+          "{  \"PropertyInt16\":32767," +
+              "\"PropertyString\":\"First Resource - positive values\"," +
+              "\"AdditionalPropertyString_5\":\"Additional\"}";
+     deserialize(entityString, "ETTwoPrim");
+      });
   }
 
   @Test
@@ -251,7 +253,7 @@ public class ODataJsonDeserializerEntityTest extends AbstractODataDeserializerTe
     assertNotNull(properties);
     assertEquals(2, properties.size());
 
-    assertEquals(new Short((short) 32767), entity.getProperty("PropertyInt16").getValue());
+    assertEquals(Short.valueOf((short) 32767), entity.getProperty("PropertyInt16").getValue());
 
     assertNotNull(entity.getProperty("PropertyComp"));
     assertNotNull(entity.getProperty("PropertyComp") instanceof List);
@@ -282,20 +284,20 @@ public class ODataJsonDeserializerEntityTest extends AbstractODataDeserializerTe
         +  "}}}";
     final Entity result = deserialize(payload, "ETFourKeyAlias");
     
-    Assert.assertNotNull(result);
+    assertNotNull(result);
     Property propertyCompComp = result.getProperty("PropertyCompComp");
-    Assert.assertEquals("PropertyCompComp", propertyCompComp.getName());   
-    Assert.assertEquals("olingo.odata.test1.CTCompComp", propertyCompComp.getType());
-    Assert.assertTrue(propertyCompComp.isComplex());
+    assertEquals("PropertyCompComp", propertyCompComp.getName());   
+    assertEquals("olingo.odata.test1.CTCompComp", propertyCompComp.getType());
+    assertTrue(propertyCompComp.isComplex());
     
     ComplexValue complexValuePropComp = propertyCompComp.asComplex();    
     Property propertyComp = getCVProperty(complexValuePropComp, "PropertyComp");
-    Assert.assertEquals("PropertyComp", propertyComp.getName()); 
-    Assert.assertEquals("olingo.odata.test1.CTBase", propertyComp.getType());
-    Assert.assertTrue(propertyComp.isComplex());  
+    assertEquals("PropertyComp", propertyComp.getName()); 
+    assertEquals("olingo.odata.test1.CTBase", propertyComp.getType());
+    assertTrue(propertyComp.isComplex());  
     
     final ComplexValue cvAdditionalString = propertyComp.asComplex();
-    Assert.assertEquals("Test123",getCVProperty(cvAdditionalString, "AdditionalPropString").asPrimitive());
+    assertEquals("Test123",getCVProperty(cvAdditionalString, "AdditionalPropString").asPrimitive());
   }  
   
   @Test
@@ -316,15 +318,15 @@ public class ODataJsonDeserializerEntityTest extends AbstractODataDeserializerTe
         "   \n" + 
         "}";
     final Entity result = deserialize(payload, "ETKeyPrimNav");
-    Assert.assertNotNull(result);
+    assertNotNull(result);
     Link navProperty = result.getNavigationLink("NavPropertyETKeyPrimNavOne");
-    Assert.assertNotNull(navProperty);
+    assertNotNull(navProperty);
     Entity e = navProperty.getInlineEntity();
-    Assert.assertNotNull(e);
-    Assert.assertEquals("olingo.odata.test1.ETKeyPrimNavDerived", e.getType());
-    Assert.assertEquals(new Short((short)32767), e.getProperty("PropertyInt16").getValue());
-    Assert.assertEquals("First Resource - first", e.getProperty("PropertyString").getValue());
-    Assert.assertEquals(true, e.getProperty("PropertyBoolean").getValue());
+    assertNotNull(e);
+    assertEquals("olingo.odata.test1.ETKeyPrimNavDerived", e.getType());
+    assertEquals(Short.valueOf((short) 32767), e.getProperty("PropertyInt16").getValue());
+    assertEquals("First Resource - first", e.getProperty("PropertyString").getValue());
+    assertEquals(true, e.getProperty("PropertyBoolean").getValue());
   }
     
   @Test
@@ -349,7 +351,7 @@ public class ODataJsonDeserializerEntityTest extends AbstractODataDeserializerTe
         "   \n" +
         "}";
     final Entity entity = deserialize(payload, "ETDeriveCollComp");
-    Assert.assertNotNull(entity);
+    assertNotNull(entity);
     List<Property> properties = entity.getProperties();
     assertNotNull(properties);
     assertEquals(2, properties.size());
@@ -401,7 +403,7 @@ public class ODataJsonDeserializerEntityTest extends AbstractODataDeserializerTe
         "   \n" +
         "}";
     final Entity entity = deserialize(payload, "ETDeriveCollComp");
-    Assert.assertNotNull(entity);
+    assertNotNull(entity);
     List<Property> properties = entity.getProperties();
     assertNotNull(properties);
     assertEquals(3, properties.size());
@@ -431,26 +433,28 @@ public class ODataJsonDeserializerEntityTest extends AbstractODataDeserializerTe
     }
   }
   
-  @Test(expected = DeserializerException.class)
+  @Test
   public void derivedEntityESCompCollDerivedError() throws Exception {
-    final String payload = "{\n" +
-        "   \"@odata.context\": \"$metadata#ESCompCollDerived/$entity\",\n" +
-        "   \"@odata.metadataEtag\":\"W/metadataETag\",\n" +
-        "   \"@odata.etag\":\"W/32767\",\n" +
-        "   \"PropertyInt16\":32767,\n" +
-        "   \"CollPropertyCompAno@odata.type\": \"#Collection(olingo.odata.test1.CTTwoPrimAno)\",\n" +
-        "   \"CollPropertyCompAno\": [\n" +
-        "      {\n" +
-        "            \"PropertyString\": \"TEST9876\",\n" +
-        "            \"AdditionalPropString\": \"Additional9876\"\n" +
-        "        },\n" +
-        "        {\n" +
-        "            \"PropertyString\": \"TEST1234\"\n" +
-        "        }\n" +
-        "    ]\n" +
-        "   \n" +
-        "}";
-     deserialize(payload, "ETDeriveCollComp");
+      assertThrows(DeserializerException.class, () -> {
+      final String payload = "{\n" +
+          "   \"@odata.context\": \"$metadata#ESCompCollDerived/$entity\",\n" +
+          "   \"@odata.metadataEtag\":\"W/metadataETag\",\n" +
+          "   \"@odata.etag\":\"W/32767\",\n" +
+          "   \"PropertyInt16\":32767,\n" +
+          "   \"CollPropertyCompAno@odata.type\": \"#Collection(olingo.odata.test1.CTTwoPrimAno)\",\n" +
+          "   \"CollPropertyCompAno\": [\n" +
+          "      {\n" +
+          "            \"PropertyString\": \"TEST9876\",\n" +
+          "            \"AdditionalPropString\": \"Additional9876\"\n" +
+          "        },\n" +
+          "        {\n" +
+          "            \"PropertyString\": \"TEST1234\"\n" +
+          "        }\n" +
+          "    ]\n" +
+          "   \n" +
+          "}";
+       deserialize(payload, "ETDeriveCollComp");
+      });
   }
   private Property getCVProperty(ComplexValue cv, String name) {
     for (Property p : cv.getValue()) {

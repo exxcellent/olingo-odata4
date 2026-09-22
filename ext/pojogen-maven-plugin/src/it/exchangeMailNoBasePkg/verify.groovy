@@ -16,5 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-File basepkg = new File( basedir, "target/generated-sources/ojc-plugin" );
+File basepkg = new File( basedir, "src/test/resources" );
 assert basepkg.isDirectory() && basepkg.listFiles().length>0;

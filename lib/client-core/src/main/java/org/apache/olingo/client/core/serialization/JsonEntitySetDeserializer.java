@@ -21,7 +21,6 @@ package org.apache.olingo.client.core.serialization;
 import java.io.IOException;
 import java.net.URI;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,9 +32,9 @@ import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.data.Operation;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Reads JSON string into an entity set.
@@ -50,7 +49,7 @@ public class JsonEntitySetDeserializer extends JsonDeserializer {
 
   protected ResWrap<EntityCollection> doDeserialize(final JsonParser parser) throws IOException {
 
-    final ObjectNode tree = (ObjectNode) parser.getCodec().readTree(parser);
+    final ObjectNode tree = (ObjectNode) MAPPER.readTree(parser);
 
     if (!tree.has(Constants.VALUE)) {
       return null;
@@ -60,10 +59,10 @@ public class JsonEntitySetDeserializer extends JsonDeserializer {
 
     URI contextURL;
     if (tree.hasNonNull(Constants.JSON_CONTEXT)) {
-      contextURL = URI.create(tree.get(Constants.JSON_CONTEXT).textValue());
+      contextURL = URI.create(tree.get(Constants.JSON_CONTEXT).stringValue());
       tree.remove(Constants.JSON_CONTEXT);
     } else if (tree.hasNonNull(Constants.JSON_METADATA)) {
-      contextURL = URI.create(tree.get(Constants.JSON_METADATA).textValue());
+      contextURL = URI.create(tree.get(Constants.JSON_METADATA).stringValue());
       tree.remove(Constants.JSON_METADATA);
     } else {
       contextURL = null;
@@ -74,7 +73,7 @@ public class JsonEntitySetDeserializer extends JsonDeserializer {
 
     final String metadataETag;
     if (tree.hasNonNull(Constants.JSON_METADATA_ETAG)) {
-      metadataETag = tree.get(Constants.JSON_METADATA_ETAG).textValue();
+      metadataETag = tree.get(Constants.JSON_METADATA_ETAG).stringValue();
       tree.remove(Constants.JSON_METADATA_ETAG);
     } else {
       metadataETag = null;
@@ -85,11 +84,11 @@ public class JsonEntitySetDeserializer extends JsonDeserializer {
       tree.remove(Constants.JSON_COUNT);
     }
     if (tree.hasNonNull(Constants.JSON_NEXT_LINK)) {
-      entitySet.setNext(URI.create(tree.get(Constants.JSON_NEXT_LINK).textValue()));
+      entitySet.setNext(URI.create(tree.get(Constants.JSON_NEXT_LINK).stringValue()));
       tree.remove(Constants.JSON_NEXT_LINK);
     }
     if (tree.hasNonNull(Constants.JSON_DELTA_LINK)) {
-      entitySet.setDeltaLink(URI.create(tree.get(Constants.JSON_DELTA_LINK).textValue()));
+      entitySet.setDeltaLink(URI.create(tree.get(Constants.JSON_DELTA_LINK).stringValue()));
       tree.remove(Constants.JSON_DELTA_LINK);
     }
 
@@ -97,20 +96,19 @@ public class JsonEntitySetDeserializer extends JsonDeserializer {
       final JsonEntityDeserializer entityDeserializer = new JsonEntityDeserializer(serverMode);
       for (JsonNode jsonNode : tree.get(Constants.VALUE)) {
         entitySet.getEntities().add(
-            entityDeserializer.doDeserialize(jsonNode.traverse(parser.getCodec())).getPayload());
+            entityDeserializer.doDeserialize(MAPPER.treeAsTokens(jsonNode)).getPayload());
       }
       tree.remove(Constants.VALUE);
     }
     final Set<String> toRemove = new HashSet<>();
     // any remaining entry is supposed to be an annotation or is ignored
-    for (final Iterator<Map.Entry<String, JsonNode>> itor = tree.fields(); itor.hasNext();) {
-      final Map.Entry<String, JsonNode> field = itor.next();
+    for (final Map.Entry<String, JsonNode> field : tree.properties()) {
       if (field.getKey().charAt(0) == '@') {
         final Annotation annotation = new Annotation();
         annotation.setTerm(field.getKey().substring(1));
 
         try {
-          value(annotation, field.getValue(), parser.getCodec());
+          value(annotation, field.getValue());
         } catch (final EdmPrimitiveTypeException e) {
           throw new IOException(e);
         }
@@ -120,8 +118,8 @@ public class JsonEntitySetDeserializer extends JsonDeserializer {
         operation.setMetadataAnchor(field.getKey());
 
         final ObjectNode opNode = (ObjectNode) tree.get(field.getKey());
-        operation.setTitle(opNode.get(Constants.ATTR_TITLE).asText());
-        operation.setTarget(URI.create(opNode.get(Constants.ATTR_TARGET).asText()));
+        operation.setTitle(opNode.get(Constants.ATTR_TITLE).asString());
+        operation.setTarget(URI.create(opNode.get(Constants.ATTR_TARGET).asString()));
         entitySet.getOperations().add(operation);
         toRemove.add(field.getKey());
       }

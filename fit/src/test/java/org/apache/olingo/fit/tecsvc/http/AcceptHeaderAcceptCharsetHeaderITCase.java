@@ -26,17 +26,18 @@ import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.fit.AbstractBaseTestITCase;
 import org.apache.olingo.fit.tecsvc.TecSvcConst;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URI;
 import java.nio.charset.Charset;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class AcceptHeaderAcceptCharsetHeaderITCase extends AbstractBaseTestITCase {
 
@@ -44,7 +45,7 @@ public class AcceptHeaderAcceptCharsetHeaderITCase extends AbstractBaseTestITCas
   
   @Test
   public void validAcceptHeader() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -59,7 +60,7 @@ public class AcceptHeaderAcceptCharsetHeaderITCase extends AbstractBaseTestITCas
   
   @Test
   public void invalidAcceptHeader1() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -75,7 +76,7 @@ public class AcceptHeaderAcceptCharsetHeaderITCase extends AbstractBaseTestITCas
   
   @Test
   public void invalidAcceptHeader2() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -91,7 +92,7 @@ public class AcceptHeaderAcceptCharsetHeaderITCase extends AbstractBaseTestITCas
   
   @Test
   public void validAcceptCharsetHeader() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -115,7 +116,7 @@ public class AcceptHeaderAcceptCharsetHeaderITCase extends AbstractBaseTestITCas
   
   @Test
   public void invalidAcceptCharsetHeader1() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -131,7 +132,7 @@ public class AcceptHeaderAcceptCharsetHeaderITCase extends AbstractBaseTestITCas
   
   @Test
   public void invalidAcceptCharsetHeader2() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -146,7 +147,7 @@ public class AcceptHeaderAcceptCharsetHeaderITCase extends AbstractBaseTestITCas
   
   @Test
   public void unsupportedAcceptHeaderWithSupportedAcceptCharsetHeader() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -170,7 +171,7 @@ public class AcceptHeaderAcceptCharsetHeaderITCase extends AbstractBaseTestITCas
   
   @Test
   public void supportedAcceptHeaderWithUnSupportedAcceptCharsetHeader() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -187,7 +188,7 @@ public class AcceptHeaderAcceptCharsetHeaderITCase extends AbstractBaseTestITCas
   
   @Test
   public void validFormatWithAcceptCharsetHeader() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim?$format=json");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim?$format=json").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -210,7 +211,7 @@ public class AcceptHeaderAcceptCharsetHeaderITCase extends AbstractBaseTestITCas
   
   @Test
   public void validFormatWithUnsupportedAcceptCharsetHeader() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim?$format=json");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim?$format=json").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -226,7 +227,7 @@ public class AcceptHeaderAcceptCharsetHeaderITCase extends AbstractBaseTestITCas
   
   @Test
   public void validFormatWithIllegalAcceptCharsetHeader() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim?$format=json");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim?$format=json").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -242,7 +243,7 @@ public class AcceptHeaderAcceptCharsetHeaderITCase extends AbstractBaseTestITCas
   
   @Test
   public void multipleValuesInAcceptCharsetHeader1() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -266,7 +267,7 @@ public class AcceptHeaderAcceptCharsetHeaderITCase extends AbstractBaseTestITCas
   
   @Test
   public void multipleValuesInAcceptCharsetHeader2() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim"); 
+    URL url = URI.create(SERVICE_URI + "ESAllPrim").toURL(); 
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -289,7 +290,7 @@ public class AcceptHeaderAcceptCharsetHeaderITCase extends AbstractBaseTestITCas
   
   @Test
   public void multipleValuesInAcceptHeader1() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -311,7 +312,7 @@ public class AcceptHeaderAcceptCharsetHeaderITCase extends AbstractBaseTestITCas
   
   @Test
   public void multipleValuesInAcceptHeaderWithOneIncorrectValue() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -327,7 +328,7 @@ public class AcceptHeaderAcceptCharsetHeaderITCase extends AbstractBaseTestITCas
   
   @Test
   public void multipleValuesInAcceptHeaderWithIncorrectParam() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -344,7 +345,7 @@ public class AcceptHeaderAcceptCharsetHeaderITCase extends AbstractBaseTestITCas
   
   @Test
   public void multipleValuesInAcceptHeaderWithIncorrectCharset() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -361,7 +362,7 @@ public class AcceptHeaderAcceptCharsetHeaderITCase extends AbstractBaseTestITCas
   
   @Test
   public void acceptHeaderWithIncorrectParams() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -377,7 +378,7 @@ public class AcceptHeaderAcceptCharsetHeaderITCase extends AbstractBaseTestITCas
   
   @Test
   public void formatWithIllegalCharset1() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim?$format=application/json;charset=abc");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim?$format=application/json;charset=abc").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -391,7 +392,7 @@ public class AcceptHeaderAcceptCharsetHeaderITCase extends AbstractBaseTestITCas
   
   @Test
   public void formatWithWrongParams() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim?$format=application/json;abc=xyz");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim?$format=application/json;abc=xyz").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -405,7 +406,7 @@ public class AcceptHeaderAcceptCharsetHeaderITCase extends AbstractBaseTestITCas
   
   @Test
   public void validFormatWithIncorrectParamsInAcceptCharsetHeader() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim?$format=json");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim?$format=json").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -420,7 +421,7 @@ public class AcceptHeaderAcceptCharsetHeaderITCase extends AbstractBaseTestITCas
   
   @Test
   public void validFormatWithIncorrectAcceptCharsetHeader() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim?$format=json");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim?$format=json").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -435,7 +436,7 @@ public class AcceptHeaderAcceptCharsetHeaderITCase extends AbstractBaseTestITCas
   
   @Test
   public void validFormatWithIncorrectMultipleAcceptCharsetHeader1() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim?$format=json");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim?$format=json").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -450,7 +451,7 @@ public class AcceptHeaderAcceptCharsetHeaderITCase extends AbstractBaseTestITCas
   
   @Test
   public void validFormatWithIncorrectMultipleAcceptCharsetHeader2() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim?$format=json");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim?$format=json").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -465,7 +466,7 @@ public class AcceptHeaderAcceptCharsetHeaderITCase extends AbstractBaseTestITCas
   
   @Test
   public void validFormatWithIncorrectQParamInAcceptCharsetHeader() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim?$format=json");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim?$format=json").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -480,7 +481,7 @@ public class AcceptHeaderAcceptCharsetHeaderITCase extends AbstractBaseTestITCas
   
   @Test
   public void validFormatWithIncorrectParamInAcceptCharsetHeader() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim?$format=json");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim?$format=json").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -495,7 +496,7 @@ public class AcceptHeaderAcceptCharsetHeaderITCase extends AbstractBaseTestITCas
   
   @Test
   public void validFormatWithIncorrectCharset() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim?$format=application/json;charset=utf<8");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim?$format=application/json;charset=utf*8").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -503,17 +504,17 @@ public class AcceptHeaderAcceptCharsetHeaderITCase extends AbstractBaseTestITCas
     connection.connect();
 
     try {
-      assertEquals(HttpStatusCode.BAD_REQUEST.getStatusCode(), connection.getResponseCode());
-      final String content = IOUtils.toString(connection.getInputStream(), Charset.defaultCharset());
-      Assert.fail("Expect IOException.");
+      assertEquals(HttpStatusCode.NOT_ACCEPTABLE.getStatusCode(), connection.getResponseCode());
+      IOUtils.toString(connection.getInputStream(), Charset.defaultCharset());
+      fail("Expect IOException.");
     } catch (IOException e) {
-      assertTrue(e.getMessage().contains("application/json;charset=utf<8"));
+      assertTrue(e.getMessage().contains("application/json;charset=utf*8"));
     }
   }
   
   @Test
   public void formatWithAcceptCharset() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim?$format=application/json;charset=utf-8");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim?$format=application/json;charset=utf-8").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());

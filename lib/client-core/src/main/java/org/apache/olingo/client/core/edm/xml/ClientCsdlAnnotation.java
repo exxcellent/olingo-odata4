@@ -24,10 +24,10 @@ import java.io.Serializable;
 import org.apache.olingo.client.core.edm.xml.annotation.ClientCsdlDynamicExpression;
 import org.apache.olingo.commons.api.edm.provider.CsdlAnnotation;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(using = ClientCsdlAnnotation.AnnotationDeserializer.class)
 public class ClientCsdlAnnotation extends CsdlAnnotation implements Serializable {
@@ -42,14 +42,14 @@ public class ClientCsdlAnnotation extends CsdlAnnotation implements Serializable
 
       final ClientCsdlAnnotation annotation = new ClientCsdlAnnotation();
 
-      for (; jp.getCurrentToken() != null && jp.getCurrentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
-        final JsonToken token = jp.getCurrentToken();
-        if (token == JsonToken.FIELD_NAME) {
-          if ("Term".equals(jp.getCurrentName())) {
-            annotation.setTerm(jp.nextTextValue());
-          } else if ("Qualifier".equals(jp.getCurrentName())) {
-            annotation.setQualifier(jp.nextTextValue());
-          } else if ("Annotation".equals(jp.getCurrentName())) {
+      for (; jp.currentToken() != null && jp.currentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
+        final JsonToken token = jp.currentToken();
+        if (token == JsonToken.PROPERTY_NAME) {
+          if ("Term".equals(jp.currentName())) {
+            annotation.setTerm(nextTextValue(jp));
+          } else if ("Qualifier".equals(jp.currentName())) {
+            annotation.setQualifier(nextTextValue(jp));
+          } else if ("Annotation".equals(jp.currentName())) {
             jp.nextToken();
             annotation.getAnnotations().add(jp.readValueAs(ClientCsdlAnnotation.class));
           } else if (isAnnotationConstExprConstruct(jp)) {

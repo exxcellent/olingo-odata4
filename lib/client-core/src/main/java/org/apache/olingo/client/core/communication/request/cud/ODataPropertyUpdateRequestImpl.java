@@ -22,14 +22,14 @@ import java.io.InputStream;
 import java.net.URI;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.api.communication.request.cud.ODataPropertyUpdateRequest;
 import org.apache.olingo.client.api.communication.response.ODataPropertyUpdateResponse;
 import org.apache.olingo.client.api.data.ResWrap;
 import org.apache.olingo.client.api.domain.ClientProperty;
+import org.apache.olingo.client.api.http.ODataHttpClient;
 import org.apache.olingo.client.api.serialization.ODataDeserializerException;
 import org.apache.olingo.client.api.serialization.ODataSerializerException;
 import org.apache.olingo.client.core.communication.request.AbstractODataBasicRequest;
@@ -74,7 +74,7 @@ public class ODataPropertyUpdateRequestImpl extends AbstractODataBasicRequest<OD
   @Override
   public ODataPropertyUpdateResponse execute() {
     final InputStream input = getPayload();
-    ((HttpEntityEnclosingRequestBase) request).setEntity(URIUtils.buildInputStreamEntity(odataClient, input));
+    ((HttpUriRequestBase) request).setEntity(URIUtils.buildInputStreamEntity(odataClient, input));
 
     try {
       return new ODataPropertyUpdateResponseImpl(odataClient, httpClient, doExecute());
@@ -99,8 +99,8 @@ public class ODataPropertyUpdateRequestImpl extends AbstractODataBasicRequest<OD
 
     private ClientProperty resProperty = null;
 
-    private ODataPropertyUpdateResponseImpl(final ODataClient odataClient, final HttpClient httpClient,
-            final HttpResponse res) {
+    private ODataPropertyUpdateResponseImpl(final ODataClient odataClient, final ODataHttpClient httpClient,
+            final ClassicHttpResponse res) {
 
       super(odataClient, httpClient, res);
     }

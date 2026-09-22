@@ -20,13 +20,14 @@ package org.apache.olingo.fit.tecsvc.client;
 
 import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.olingo.client.api.communication.ODataClientErrorException;
@@ -54,7 +55,7 @@ import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.http.HttpHeader;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.fit.tecsvc.TecSvcConst;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ConditionalITCase extends AbstractParamTecSvcITCase {
 
@@ -63,7 +64,7 @@ public class ConditionalITCase extends AbstractParamTecSvcITCase {
   private final URI uriProperty = getClient().newURIBuilder(uriEntity.toASCIIString())
       .appendPropertySegment("PropertyComp").appendPropertySegment("PropertyDuration").build();
   private final URI uriPropertyValue = getClient().newURIBuilder(
-          uriProperty.toASCIIString()).appendValueSegment().build();
+      uriProperty.toASCIIString()).appendValueSegment().build();
   private final URI uriMedia = getClient().newURIBuilder(TecSvcConst.BASE_URI)
       .appendEntitySetSegment("ESMedia").appendKeySegment(1).appendValueSegment().build();
 
@@ -148,8 +149,8 @@ public class ConditionalITCase extends AbstractParamTecSvcITCase {
 
   @Test
   public void updateMediaWithWrongIfMatch() throws Exception {
-    ODataMediaEntityUpdateRequest<ClientEntity> request =
-            getClient().getCUDRequestFactory().getMediaEntityUpdateRequest(uriMedia, IOUtils.toInputStream("ignored"));
+    ODataMediaEntityUpdateRequest<ClientEntity> request = getClient().getCUDRequestFactory()
+        .getMediaEntityUpdateRequest(uriMedia, IOUtils.toInputStream("ignored", StandardCharsets.UTF_8));
     request.setIfMatch("W/\"42\"");
 
     try {
@@ -193,8 +194,8 @@ public class ConditionalITCase extends AbstractParamTecSvcITCase {
 
   @Test
   public void readPropertyNotModified() throws Exception {
-    ODataPropertyRequest<ClientProperty> request =
-            getClient().getRetrieveRequestFactory().getPropertyRequest(uriProperty);
+    ODataPropertyRequest<ClientProperty> request = getClient().getRetrieveRequestFactory()
+        .getPropertyRequest(uriProperty);
     request.setIfNoneMatch("W/\"0\"");
     setCookieHeader(request);
     final ODataRetrieveResponse<ClientProperty> response = request.execute();
@@ -214,10 +215,10 @@ public class ConditionalITCase extends AbstractParamTecSvcITCase {
 
   @Test
   public void updatePropertyWithoutIfMatch() throws Exception {
-    final ODataPropertyUpdateRequest request =
-            getClient().getCUDRequestFactory().getPropertyPrimitiveValueUpdateRequest( uriProperty,
+    final ODataPropertyUpdateRequest request = getClient().getCUDRequestFactory()
+        .getPropertyPrimitiveValueUpdateRequest(uriProperty,
             getFactory().newPrimitiveProperty("PropertyDuration",
-            getFactory().newPrimitiveValueBuilder().buildString("PT42S")));
+                getFactory().newPrimitiveValueBuilder().buildString("PT42S")));
     executeAndExpectError(request, HttpStatusCode.PRECONDITION_REQUIRED);
   }
 

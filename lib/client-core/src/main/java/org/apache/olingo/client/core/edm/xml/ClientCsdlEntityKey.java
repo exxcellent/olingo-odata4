@@ -23,14 +23,14 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
 
 import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmItem;
 import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(using = ClientCsdlEntityKey.EntityKeyDeserializer.class)
 class ClientCsdlEntityKey extends CsdlAbstractEdmItem implements Serializable {
@@ -50,10 +50,10 @@ class ClientCsdlEntityKey extends CsdlAbstractEdmItem implements Serializable {
 
       final ClientCsdlEntityKey entityKey = new ClientCsdlEntityKey();
 
-      for (; jp.getCurrentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
-        final JsonToken token = jp.getCurrentToken();
+      for (; jp.currentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
+        final JsonToken token = jp.currentToken();
 
-        if (token == JsonToken.FIELD_NAME && "PropertyRef".equals(jp.getCurrentName())) {
+        if (token == JsonToken.PROPERTY_NAME && "PropertyRef".equals(jp.currentName())) {
           jp.nextToken();
           entityKey.getPropertyRefs().add(jp.readValueAs(ClientCsdlPropertyRef.class));
         }

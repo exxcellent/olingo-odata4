@@ -20,24 +20,14 @@ package org.apache.olingo.client.core.android.http;
 
 import java.net.URI;
 
-import org.apache.http.client.HttpClient;
 import org.apache.olingo.client.core.http.AbstractHttpClientFactory;
 import org.apache.olingo.commons.api.http.HttpMethod;
 
-import android.net.http.AndroidHttpClient;
-
-public class AndroidHttpClientFactory extends AbstractHttpClientFactory {
+public class AndroidHttpClientFactory extends AbstractHttpClientFactory<AndroidBridgeClient> {
 
     @Override
-    public AndroidHttpClient create(final HttpMethod method, final URI uri) {
-        return AndroidHttpClient.newInstance(USER_AGENT);
-    }
-
-    @Override
-    public void close(final HttpClient httpClient) {
-        if (httpClient instanceof AndroidHttpClient) {
-            ((AndroidHttpClient) httpClient).close();
-        }
+    public AndroidBridgeClient create(final HttpMethod method, final URI uri) {
+        return new AndroidBridgeClient(USER_AGENT);
     }
 
 }

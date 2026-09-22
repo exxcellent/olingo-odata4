@@ -22,29 +22,28 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.utils.HttpClientUtils;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpStatus;
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.api.communication.request.batch.ODataBatchLineIterator;
 import org.apache.olingo.client.api.communication.response.ODataResponse;
 import org.apache.olingo.client.api.http.NoContentException;
+import org.apache.olingo.client.api.http.ODataHttpClient;
 import org.apache.olingo.client.core.ConfigurationImpl;
-import org.apache.olingo.client.core.communication.util.PipedInputStream;
-import org.apache.olingo.client.core.communication.util.PipedOutputStream;
 import org.apache.olingo.client.core.communication.request.batch.ODataBatchController;
 import org.apache.olingo.client.core.communication.request.batch.ODataBatchLineIteratorImpl;
 import org.apache.olingo.client.core.communication.request.batch.ODataBatchUtilities;
-import org.apache.olingo.commons.api.Constants;
+import org.apache.olingo.client.core.communication.util.PipedInputStream;
+import org.apache.olingo.client.core.communication.util.PipedOutputStream;
 import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 import org.apache.olingo.commons.api.http.HttpHeader;
 import org.slf4j.Logger;
@@ -67,12 +66,12 @@ public abstract class AbstractODataResponse implements ODataResponse {
   /**
    * HTTP client.
    */
-  protected final HttpClient httpClient;
+  protected final ODataHttpClient httpClient;
 
   /**
    * HTTP response.
    */
-  protected final HttpResponse res;
+  protected final ClassicHttpResponse res;
 
   /**
    * Response headers.
@@ -108,7 +107,7 @@ public abstract class AbstractODataResponse implements ODataResponse {
   private byte[] inputContent = null;
 
   public AbstractODataResponse(
-      final ODataClient odataClient, final HttpClient httpclient, final HttpResponse res) {
+      final ODataClient odataClient, final ODataHttpClient httpclient, final ClassicHttpResponse res) {
 
     this.odataClient = odataClient;
     this.httpClient = httpclient;
@@ -151,16 +150,22 @@ public abstract class AbstractODataResponse implements ODataResponse {
   }
 
   @Override
-  public final ODataResponse initFromHttpResponse(final HttpResponse res) {
+  public final ODataResponse initFromHttpResponse(final ClassicHttpResponse res) {
     try {
       this.payload = res.getEntity() == null ? null : res.getEntity().getContent();
       this.inputContent = null;
     } catch (final IllegalStateException | IOException e) {
-      HttpClientUtils.closeQuietly(res);
+      if (res instanceof CloseableHttpResponse) {
+        try {
+          ((CloseableHttpResponse) res).close();
+        } catch (IOException ignore) {
+          //ignore
+        }
+      }
       LOG.error("Error retrieving payload", e);
       throw new ODataRuntimeException(e);
     }
-    for (Header header : res.getAllHeaders()) {
+    for (Header header : res.getHeaders()) {
       final Collection<String> headerValues;
       if (headers.containsKey(header.getName())) {
         headerValues = headers.get(header.getName());
@@ -172,8 +177,8 @@ public abstract class AbstractODataResponse implements ODataResponse {
       headerValues.add(header.getValue());
     }
 
-    statusCode = res.getStatusLine().getStatusCode();
-    statusMessage = res.getStatusLine().getReasonPhrase();
+    statusCode = res.getCode();
+    statusMessage = res.getReasonPhrase();
 
     hasBeenInitialized = true;
     return this;
@@ -208,7 +213,7 @@ public abstract class AbstractODataResponse implements ODataResponse {
       }
 
       final ODataBatchLineIteratorImpl batchLineIterator =
-          new ODataBatchLineIteratorImpl(IOUtils.lineIterator(part, Constants.UTF8));
+          new ODataBatchLineIteratorImpl(IOUtils.lineIterator(part, StandardCharsets.UTF_8));
 
       final Map.Entry<Integer, String> partResponseLine = ODataBatchUtilities.readResponseLine(batchLineIterator);
       LOG.debug("Retrieved async item response {}", partResponseLine);
@@ -224,7 +229,7 @@ public abstract class AbstractODataResponse implements ODataResponse {
       final ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
       while (batchLineIterator.hasNext()) {
-        bos.write(batchLineIterator.nextLine().getBytes(Constants.UTF8));
+        bos.write(batchLineIterator.nextLine().getBytes(StandardCharsets.UTF_8));
         bos.write(CRLF);
       }
 
@@ -246,7 +251,7 @@ public abstract class AbstractODataResponse implements ODataResponse {
   @Override
   public void close() {
     closeHttpResponse();
-    odataClient.getConfiguration().getHttpClientFactory().close(httpClient);
+    httpClient.close();
 
     if (batchInfo != null) {
       batchInfo.setValidBatch(false);
@@ -254,7 +259,7 @@ public abstract class AbstractODataResponse implements ODataResponse {
   }
 
   protected void closeHttpResponse() {
-    if(res != null && res instanceof CloseableHttpResponse) {
+    if (res instanceof CloseableHttpResponse) {
       try {
         ((CloseableHttpResponse) res).close();
       } catch (IOException e) {
@@ -306,7 +311,7 @@ public abstract class AbstractODataResponse implements ODataResponse {
         inputStream = new ByteArrayInputStream(inputContent);
         return inputStream;
       } catch (IOException e) {
-        HttpClientUtils.closeQuietly(res);
+        closeHttpResponse();
         LOG.error("Error retrieving payload", e);
         throw new ODataRuntimeException(e);
       }

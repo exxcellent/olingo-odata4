@@ -18,17 +18,18 @@
  */
 package org.apache.olingo.client.core.serialization;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.io.InputStream;
 
 import org.apache.olingo.client.api.data.ResWrap;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityCollection;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class AtomDeserializerTest {
 
@@ -79,7 +80,7 @@ public class AtomDeserializerTest {
         " </entry>";
 
     final AtomDeserializer deserializer = new AtomDeserializer();
-    final InputStream in = new ByteArrayInputStream(content.getBytes("UTF-8"));
+    final InputStream in = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
     final ResWrap<Entity> entity = deserializer.toEntity(in);
 
     assertNotNull(entity);
@@ -167,14 +168,14 @@ public class AtomDeserializerTest {
         "    </content>\r\n" +
         " </entry>";
     final AtomDeserializer deserializer = new AtomDeserializer();
-    final InputStream in = new ByteArrayInputStream(content.getBytes("UTF-8"));
+    final InputStream in = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
     final ResWrap<Entity> entity = deserializer.toEntity(in);
 
     assertNotNull(entity);
     final Entity inlineEntity = entity.getPayload().getNavigationLink("Supplier").getInlineEntity();
     assertNotNull(inlineEntity);
 
-    assertEquals(new Integer(0), inlineEntity.getProperty("ID").getValue());
+    assertEquals(Integer.valueOf(0), inlineEntity.getProperty("ID").getValue());
     assertEquals("Exotic Liquids", inlineEntity.getProperty("Name").getValue());
   }
 
@@ -226,7 +227,7 @@ public class AtomDeserializerTest {
         "    </content>\r\n" +
         " </entry>";
     final AtomDeserializer deserializer = new AtomDeserializer();
-    final InputStream in = new ByteArrayInputStream(content.getBytes("UTF-8"));
+    final InputStream in = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
     final ResWrap<Entity> entity = deserializer.toEntity(in);
 
     assertNotNull(entity);
@@ -317,7 +318,7 @@ public class AtomDeserializerTest {
         "    </content>\r\n" +
         " </entry>";
     final AtomDeserializer deserializer = new AtomDeserializer();
-    final InputStream in = new ByteArrayInputStream(content.getBytes("UTF-8"));
+    final InputStream in = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
     final ResWrap<Entity> entity = deserializer.toEntity(in);
 
     assertNotNull(entity);

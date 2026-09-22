@@ -81,7 +81,7 @@ public class TransactionalPersistenceManagerImpl extends AbstractPersistenceMana
     // This should be 202 for service version <= 3.0 and 200 for service version >= 4.0 but it seems that
     // many service implementations are not fully compliant in this respect.
     if (response.getStatusCode() != 202 && response.getStatusCode() != 200) {
-      throw new ODataServerErrorException(new ResponseStatusLine(response), response.getRawResponse());
+      throw new ODataServerErrorException(ResponseStatusLine.of(response), response.getRawResponse());
     }
 
     if (!items.isEmpty()) {
@@ -109,7 +109,7 @@ public class TransactionalPersistenceManagerImpl extends AbstractPersistenceMana
           ContentType contentType = ContentType.fromAcceptHeader(request.getAccept());
           errors.add(new ODataResponseError(ODataErrorResponseChecker.checkResponse(
                   service.getClient(),
-                  new ResponseStatusLine(res),
+                  ResponseStatusLine.of(res),
                   res.getRawResponse(),
                   contentType), index, requests.get(index)));
           if (!service.getClient().getConfiguration().isContinueOnError()) {

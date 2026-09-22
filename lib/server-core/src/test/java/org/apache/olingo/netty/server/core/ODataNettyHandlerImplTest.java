@@ -18,16 +18,17 @@
  */
 package org.apache.olingo.netty.server.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.server.api.ODataLibraryException;
 import org.apache.olingo.server.api.ODataRequest;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
 
@@ -56,13 +57,16 @@ public class ODataNettyHandlerImplTest {
     for (String[] m : mm) {
 
       HttpRequest hr = mock(HttpRequest.class);
-      io.netty.handler.codec.http.HttpMethod hm = mock(io.netty.handler.codec.http.HttpMethod.class);
+      io.netty.handler.codec.http.HttpMethod hm = io.netty.handler.codec.http.HttpMethod.valueOf(m[0]);
       when(hr.method()).thenReturn(hm);
-      when(hm.name()).thenReturn(m[0]);
-      HttpHeaders hh = mock(HttpHeaders.class);
+      HttpHeaders hh = new DefaultHttpHeaders();
+      if (m[1] != null) {
+        hh.set("X-HTTP-Method", m[1]);
+      }
+      if (m[2] != null) {
+        hh.set("X-HTTP-Method-Override", m[2]);
+      }
       when(hr.headers()).thenReturn(hh);
-      when(hh.get("X-HTTP-Method")).thenReturn(m[1]);
-      when(hh.get("X-HTTP-Method-Override")).thenReturn(m[2]);
 
       assertEquals(HttpMethod.valueOf(m[3]), ODataNettyHandlerImpl.extractMethod(hr));
     }
@@ -79,14 +83,17 @@ public class ODataNettyHandlerImplTest {
     for (String[] m : mm) {
 
       HttpRequest hr = mock(HttpRequest.class);
-      io.netty.handler.codec.http.HttpMethod hm = mock(io.netty.handler.codec.http.HttpMethod.class);
+      io.netty.handler.codec.http.HttpMethod hm = io.netty.handler.codec.http.HttpMethod.valueOf(m[0]);
       when(hr.method()).thenReturn(hm);
 
-      when(hm.name()).thenReturn(m[0]);
-      HttpHeaders hh = mock(HttpHeaders.class);
+      HttpHeaders hh = new DefaultHttpHeaders();
+      if (m[1] != null) {
+        hh.set("X-HTTP-Method", m[1]);
+      }
+      if (m[2] != null) {
+        hh.set("X-HTTP-Method-Override", m[2]);
+      }
       when(hr.headers()).thenReturn(hh);
-      when(hh.get("X-HTTP-Method")).thenReturn(m[1]);
-      when(hh.get("X-HTTP-Method-Override")).thenReturn(m[2]);
 
       try {
         ODataNettyHandlerImpl.extractMethod(hr);
@@ -101,7 +108,7 @@ public class ODataNettyHandlerImplTest {
   public void extractUriForNettyRequests() {
 
     //@formatter:off (Eclipse formatter)
-    //CHECKSTYLE:OFF (Maven checkstyle)
+    // CHECKSTYLE:OFF (Maven checkstyle)
     String [][] uris = {
         /* 0: cp         1: sr          2: od       3: qp        4: spl  */
         {  "",           "",          "",          "",         "0"},

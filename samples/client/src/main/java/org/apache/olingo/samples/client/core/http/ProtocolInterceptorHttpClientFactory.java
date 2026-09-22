@@ -18,17 +18,12 @@
  */
 package org.apache.olingo.samples.client.core.http;
 
-import java.io.IOException;
 import java.net.URI;
-import org.apache.http.HttpException;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpResponseInterceptor;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.protocol.HttpContext;
-import org.apache.olingo.commons.api.http.HttpMethod;
+
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.olingo.client.api.http.ODataHttpClient;
 import org.apache.olingo.client.core.http.DefaultHttpClientFactory;
+import org.apache.olingo.commons.api.http.HttpMethod;
 
 /**
  * Shows how to install HTTP protocol interceptors, an easy handle to hook into HTTP request / response processing.
@@ -46,30 +41,18 @@ import org.apache.olingo.client.core.http.DefaultHttpClientFactory;
 public class ProtocolInterceptorHttpClientFactory extends DefaultHttpClientFactory {
 
   @Override
-  public DefaultHttpClient create(final HttpMethod method, final URI uri) {
-
-    final DefaultHttpClient httpClient = super.create(method, uri);
-
-    httpClient.addRequestInterceptor(new HttpRequestInterceptor() {
-
-      @Override
-      public void process(final HttpRequest request, final HttpContext context) throws HttpException, IOException {
-        request.addHeader("CUSTOM_HEADER", "CUSTOM VALUE");
-      }
-
-    });
-
-    httpClient.addResponseInterceptor(new HttpResponseInterceptor() {
-
-      @Override
-      public void process(final HttpResponse response, final HttpContext context) throws HttpException, IOException {
-        if ("ANOTHER CUSTOM VALUE".equals(response.getFirstHeader("ANOTHER_CUSTOM_HEADER"))) {
-          // do something
-        }
-      }
-    });
-
-    return httpClient;
+  public ODataHttpClient create(final HttpMethod method, final URI uri) {
+    return DefaultHttpClientFactory.wrapHC5Client(HttpClients.custom()
+        .setUserAgent(USER_AGENT)
+        .addRequestInterceptorLast((request, entity, context) ->
+            request.addHeader("CUSTOM_HEADER", "CUSTOM VALUE"))
+        .addResponseInterceptorLast((response, entity, context) -> {
+          if (response.containsHeader("ANOTHER_CUSTOM_HEADER")
+              && "ANOTHER CUSTOM VALUE".equals(response.getFirstHeader("ANOTHER_CUSTOM_HEADER").getValue())) {
+            // do something
+          }
+        })
+        .build());
   }
 
 }

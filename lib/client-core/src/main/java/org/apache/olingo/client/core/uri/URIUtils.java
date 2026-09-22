@@ -23,7 +23,6 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Collection;
@@ -35,25 +34,22 @@ import java.util.regex.Pattern;
 import javax.xml.datatype.Duration;
 
 import org.apache.commons.codec.binary.Hex;
-import org.apache.olingo.commons.core.Encoder;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.AbstractHttpEntity;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.entity.InputStreamEntity;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.io.entity.ByteArrayEntity;
+import org.apache.hc.core5.http.io.entity.InputStreamEntity;
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.api.domain.ClientValue;
 import org.apache.olingo.client.api.http.HttpClientFactory;
-import org.apache.olingo.client.api.http.WrappingHttpClientFactory;
 import org.apache.olingo.client.api.uri.SegmentType;
 import org.apache.olingo.client.core.http.BasicAuthHttpClientFactory;
 import org.apache.olingo.commons.api.Constants;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.api.edm.geo.Geospatial;
 import org.apache.olingo.commons.api.ex.ODataRuntimeException;
+import org.apache.olingo.commons.core.Encoder;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmBinary;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDateTimeOffset;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDecimal;
@@ -266,21 +262,15 @@ public final class URIUtils {
 
   public static boolean shouldUseRepeatableHttpBodyEntry(final ODataClient client) {
     // returns true for authentication request in case of http401 which needs retry so requires being repeatable.
-    HttpClientFactory httpclientFactory = client.getConfiguration().getHttpClientFactory();
+    HttpClientFactory<?> httpclientFactory = client.getConfiguration().getHttpClientFactory();
     if (httpclientFactory instanceof BasicAuthHttpClientFactory) {
       return true;
-    } else if (httpclientFactory instanceof WrappingHttpClientFactory) {
-      WrappingHttpClientFactory tmp = (WrappingHttpClientFactory) httpclientFactory;
-      if (tmp.getWrappedHttpClientFactory() instanceof BasicAuthHttpClientFactory) {
-        return true;
-      }
     }
 
     return false;
   }
 
   public static HttpEntity buildInputStreamEntity(final ODataClient client, final InputStream input) {
-    AbstractHttpEntity entity;
     boolean useChunked = client.getConfiguration().isUseChuncked();
 
     if (shouldUseRepeatableHttpBodyEntry(client) || !useChunked) {
@@ -292,33 +282,30 @@ public final class URIUtils {
         throw new ODataRuntimeException("While reading input for not chunked encoding", e);
       }
 
-      entity = new ByteArrayEntity(bytes);
+      // In HC5, chunked is set at construction time via the boolean parameter
+      if (!useChunked && bytes.length >= 0) {
+        useChunked = bytes.length < 0; // never true; keep false for byte array
+      }
+      return new ByteArrayEntity(bytes, null, useChunked);
     } else {
-      entity = new InputStreamEntity(input, -1);
+      return new InputStreamEntity(input, -1L, null);
     }
-
-    if (!useChunked && entity.getContentLength() < 0) {
-      useChunked = true;
-    }
-    // both entities can be sent in chunked way or not
-    entity.setChunked(useChunked);
-
-    return entity;
   }
 
   public static URI addValueSegment(final URI uri) {
-    final URI res;
     if (uri.getPath().endsWith(SegmentType.VALUE.getValue())) {
-      res = uri;
-    } else {
-      try {
-        res = new URIBuilder(uri).setPath(uri.getPath() + "/" + SegmentType.VALUE.getValue()).build();
-      } catch (URISyntaxException e) {
-        throw new IllegalArgumentException(e);
-      }
+      return uri;
     }
-
-    return res;
+    // HC5 URIBuilder.setPath() percent-encodes sub-delimiters like '(', ')' and '$',
+    // which would break JAX-RS path matching on the server side.
+    // Instead, append directly to the raw (already-encoded) URI string.
+    final String valueSegment = "/" + SegmentType.VALUE.getValue();
+    final String rawUri = uri.toASCIIString();
+    if (uri.getRawQuery() != null) {
+      final int qPos = rawUri.lastIndexOf('?');
+      return URI.create(rawUri.substring(0, qPos) + valueSegment + rawUri.substring(qPos));
+    }
+    return URI.create(rawUri + valueSegment);
   }
 
   public static URI buildFunctionInvokeURI(final URI uri, final Map<String, ClientValue> parameters) {

@@ -21,7 +21,7 @@ package org.apache.olingo.server.core.debug;
 import java.io.IOException;
 import java.io.Writer;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonGenerator;
 
 /**
  * Debug information.

@@ -18,11 +18,12 @@
  */
 package org.apache.olingo.server.core.serializer.xml;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
 import org.apache.commons.io.IOUtils;
@@ -40,13 +41,13 @@ import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.core.ServiceMetadataImpl;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 public class ServiceDocumentXmlSerializerTest {
   private static ODataSerializer serializer;
 
-  @BeforeClass
+  @BeforeAll
   public static void init() throws SerializerException {
     serializer = OData.newInstance().createSerializer(ContentType.APPLICATION_ATOM_XML);
   }
@@ -70,7 +71,7 @@ public class ServiceDocumentXmlSerializerTest {
         + "metadata:context=\"http://host/svc/$metadata\">"
         + "<app:workspace><atom:title>service.test</atom:title></app:workspace>"
         + "</app:service>",
-        IOUtils.toString(serializer.serviceDocument(metadata, "http://host/svc").getContent()));
+        IOUtils.toString(serializer.serviceDocument(metadata, "http://host/svc").getContent(), StandardCharsets.UTF_8));
   }
 
   @Test
@@ -79,7 +80,7 @@ public class ServiceDocumentXmlSerializerTest {
     ServiceMetadata serviceMetadata = new ServiceMetadataImpl(provider,
         Collections.<EdmxReference> emptyList(), null);
     InputStream metadataStream = serializer.serviceDocument(serviceMetadata, "http://host/svc").getContent();
-    String metadata = IOUtils.toString(metadataStream);
+    String metadata = IOUtils.toString(metadataStream, StandardCharsets.UTF_8);
     assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
         + "<app:service xmlns:atom=\"http://www.w3.org/2005/Atom\" "
         + "xmlns:app=\"http://www.w3.org/2007/app\" "

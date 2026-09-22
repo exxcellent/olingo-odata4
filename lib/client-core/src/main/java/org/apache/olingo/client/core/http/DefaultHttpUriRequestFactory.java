@@ -20,11 +20,11 @@ package org.apache.olingo.client.core.http;
 
 import java.net.URI;
 
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.hc.client5.http.classic.methods.HttpDelete;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.classic.methods.HttpPut;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.apache.olingo.client.api.http.HttpUriRequestFactory;
 import org.apache.olingo.commons.api.http.HttpMethod;
 
@@ -34,8 +34,8 @@ import org.apache.olingo.commons.api.http.HttpMethod;
 public class DefaultHttpUriRequestFactory implements HttpUriRequestFactory {
 
   @Override
-  public HttpUriRequest create(final HttpMethod method, final URI uri) {
-    HttpUriRequest result;
+  public HttpUriRequestBase create(final HttpMethod method, final URI uri) {
+    HttpUriRequestBase result;
 
     switch (method) {
       case POST:

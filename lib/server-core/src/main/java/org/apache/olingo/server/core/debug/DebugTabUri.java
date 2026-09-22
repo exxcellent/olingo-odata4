@@ -66,10 +66,9 @@ import org.apache.olingo.server.api.uri.queryoption.apply.Search;
 import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
 import org.apache.olingo.server.api.uri.queryoption.search.SearchExpression;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * URI parser debug information.
@@ -91,12 +90,12 @@ public class DebugTabUri implements DebugTab {
   public void appendJson(final JsonGenerator gen) throws IOException {
     gen.writeStartObject();
 
-    gen.writeStringField("kind", uriInfo.getKind().name());
+    gen.writeStringProperty("kind", uriInfo.getKind().name());
     if (uriInfo.getKind() == UriInfoKind.resource) {
-      gen.writeFieldName("uriResourceParts");
+      gen.writeName("uriResourceParts");
       appendURIResourceParts(gen, uriInfo.getUriResourceParts());
     } else if (uriInfo.getKind() == UriInfoKind.crossjoin) {
-      gen.writeFieldName("entitySetNames");
+      gen.writeName("entitySetNames");
       gen.writeStartArray();
       for (final String name : uriInfo.asUriInfoCrossjoin().getEntitySetNames()) {
         gen.writeString(name);
@@ -105,21 +104,21 @@ public class DebugTabUri implements DebugTab {
     } else if (uriInfo.getKind() == UriInfoKind.entityId) {
       appendType(gen, "typeCast", uriInfo.asUriInfoEntityId().getEntityTypeCast());
     }
-    
+
     if (uriInfo.getDeltaTokenOption() != null) {
-      gen.writeStringField("deltatoken", uriInfo.getDeltaTokenOption().getValue());
+      gen.writeStringProperty("deltatoken", uriInfo.getDeltaTokenOption().getValue());
     }
-    
+
     if (uriInfo.getFormatOption() != null) {
-      gen.writeStringField("format", uriInfo.getFormatOption().getFormat());
+      gen.writeStringProperty("format", uriInfo.getFormatOption().getFormat());
     }
 
     if (uriInfo.getIdOption() != null) {
-      gen.writeStringField("id", uriInfo.getIdOption().getValue());
+      gen.writeStringProperty("id", uriInfo.getIdOption().getValue());
     }
 
     if (uriInfo.getSkipTokenOption() != null) {
-      gen.writeStringField("skiptoken", uriInfo.getSkipTokenOption().getValue());
+      gen.writeStringProperty("skiptoken", uriInfo.getSkipTokenOption().getValue());
     }
 
     appendCommonJsonObjects(gen, uriInfo.getCountOption(), uriInfo.getSkipOption(), uriInfo.getTopOption(),
@@ -127,12 +126,12 @@ public class DebugTabUri implements DebugTab {
         uriInfo.getSearchOption(), uriInfo.getApplyOption());
 
     if (!uriInfo.getAliases().isEmpty()) {
-      gen.writeFieldName("aliases");
+      gen.writeName("aliases");
       DebugResponseHelperImpl.appendJsonTable(gen, getQueryOptionsMap(uriInfo.getAliases()));
     }
 
     if (!uriInfo.getCustomQueryOptions().isEmpty()) {
-      gen.writeFieldName("customQueryOptions");
+      gen.writeName("customQueryOptions");
       DebugResponseHelperImpl.appendJsonTable(gen, getQueryOptionsMap(uriInfo.getCustomQueryOptions()));
     }
 
@@ -146,48 +145,48 @@ public class DebugTabUri implements DebugTab {
       final ApplyOption applyOption)
       throws IOException {
     if (countOption != null) {
-      gen.writeBooleanField("isCount", countOption.getValue());
+      gen.writeName("isCount"); gen.writeBoolean(countOption.getValue());
     }
 
     if (skipOption != null) {
-      gen.writeNumberField("skip", skipOption.getValue());
+      gen.writeNumberProperty("skip", skipOption.getValue());
     }
 
     if (topOption != null) {
-      gen.writeNumberField("top", topOption.getValue());
+      gen.writeNumberProperty("top", topOption.getValue());
     }
 
     if (filterOption != null) {
-      gen.writeFieldName("filter");
+      gen.writeName("filter");
       appendExpressionJson(gen, filterOption.getExpression());
     }
 
     if (orderByOption != null && !orderByOption.getOrders().isEmpty()) {
-      gen.writeFieldName("orderby");
+      gen.writeName("orderby");
       gen.writeStartObject();
-      gen.writeStringField("nodeType", "orderCollection");
-      gen.writeFieldName("orders");
+      gen.writeStringProperty("nodeType", "orderCollection");
+      gen.writeName("orders");
       appendOrderByItemsJson(gen, orderByOption.getOrders());
       gen.writeEndObject();
     }
 
     if (selectOption != null && !selectOption.getSelectItems().isEmpty()) {
-      gen.writeFieldName("select");
+      gen.writeName("select");
       appendSelectedPropertiesJson(gen, selectOption.getSelectItems());
     }
 
     if (expandOption != null && !expandOption.getExpandItems().isEmpty()) {
-      gen.writeFieldName("expand");
+      gen.writeName("expand");
       appendExpandedPropertiesJson(gen, expandOption.getExpandItems());
     }
 
     if (searchOption != null) {
-      gen.writeFieldName("search");
+      gen.writeName("search");
       appendSearchJson(gen, searchOption.getSearchExpression());
     }
 
     if (applyOption != null) {
-      gen.writeFieldName("apply");
+      gen.writeName("apply");
       appendApplyItemsJson(gen, applyOption.getApplyItems());
     }
   }
@@ -197,11 +196,11 @@ public class DebugTabUri implements DebugTab {
     gen.writeStartArray();
     for (UriResource resource : uriResourceParts) {
       gen.writeStartObject();
-      gen.writeStringField("uriResourceKind", resource.getKind().toString());
-      gen.writeStringField("segment", resource.toString());
+      gen.writeStringProperty("uriResourceKind", resource.getKind().toString());
+      gen.writeStringProperty("segment", resource.toString());
       if (resource instanceof UriResourcePartTyped) {
         appendType(gen, "type", ((UriResourcePartTyped) resource).getType());
-        gen.writeBooleanField("isCollection", ((UriResourcePartTyped) resource).isCollection());
+        gen.writeName("isCollection"); gen.writeBoolean(((UriResourcePartTyped) resource).isCollection());
       }
       if (resource instanceof UriResourceEntitySet) {
         appendParameters(gen, "keys", ((UriResourceEntitySet) resource).getKeyPredicates());
@@ -228,7 +227,7 @@ public class DebugTabUri implements DebugTab {
 
   private void appendType(JsonGenerator json, final String name, final EdmType type) throws IOException {
     if (type != null) {
-      json.writeStringField(name, type.getFullQualifiedName().getFullQualifiedNameAsString());
+      json.writeStringProperty(name, type.getFullQualifiedName().getFullQualifiedNameAsString());
     }
   }
 
@@ -240,7 +239,7 @@ public class DebugTabUri implements DebugTab {
         parameterMap.put(parameter.getName(),
             parameter.getText() == null ? parameter.getAlias() : parameter.getText());
       }
-      gen.writeFieldName(name);
+      gen.writeName(name);
       DebugResponseHelperImpl.appendJsonTable(gen, parameterMap);
     }
   }
@@ -249,9 +248,9 @@ public class DebugTabUri implements DebugTab {
     gen.writeStartArray();
     for (final OrderByItem item : orders) {
       gen.writeStartObject();
-      gen.writeStringField("nodeType", "order");
-      gen.writeStringField("sortorder", item.isDescending() ? "desc" : "asc");
-      gen.writeFieldName("expression");
+      gen.writeStringProperty("nodeType", "order");
+      gen.writeStringProperty("sortorder", item.isDescending() ? "desc" : "asc");
+      gen.writeName("expression");
       appendExpressionJson(gen, item.getExpression());
       gen.writeEndObject();
     }
@@ -271,18 +270,18 @@ public class DebugTabUri implements DebugTab {
     gen.writeStartObject();
 
     if (item.isStar()) {
-      gen.writeBooleanField("star", item.isStar());
+      gen.writeName("star"); gen.writeBoolean(item.isStar());
     } else if (item.getResourcePath() != null && !item.getResourcePath().getUriResourceParts().isEmpty()) {
-      gen.writeFieldName("expandPath");
+      gen.writeName("expandPath");
       appendURIResourceParts(gen, item.getResourcePath().getUriResourceParts());
     }
 
     if (item.isRef()) {
-      gen.writeBooleanField("isRef", item.isRef());
+      gen.writeName("isRef"); gen.writeBoolean(item.isRef());
     }
 
     if (item.getLevelsOption() != null) {
-      gen.writeFieldName("levels");
+      gen.writeName("levels");
       if (item.getLevelsOption().isMax()) {
         gen.writeString("max");
       } else {
@@ -341,19 +340,19 @@ public class DebugTabUri implements DebugTab {
   private void appendSearchJson(final JsonGenerator json, final SearchExpression searchExpression) throws IOException {
     json.writeStartObject();
     if (searchExpression.isSearchTerm()) {
-      json.writeStringField("nodeType", "searchTerm");
-      json.writeStringField("searchTerm", searchExpression.asSearchTerm().getSearchTerm());
+      json.writeStringProperty("nodeType", "searchTerm");
+      json.writeStringProperty("searchTerm", searchExpression.asSearchTerm().getSearchTerm());
     } else if (searchExpression.isSearchBinary()) {
-      json.writeStringField("nodeType", "binary");
-      json.writeStringField("operator", searchExpression.asSearchBinary().getOperator().toString());
-      json.writeFieldName("left");
+      json.writeStringProperty("nodeType", "binary");
+      json.writeStringProperty("operator", searchExpression.asSearchBinary().getOperator().toString());
+      json.writeName("left");
       appendSearchJson(json, searchExpression.asSearchBinary().getLeftOperand());
-      json.writeFieldName("right");
+      json.writeName("right");
       appendSearchJson(json, searchExpression.asSearchBinary().getRightOperand());
     } else if (searchExpression.isSearchUnary()) {
-      json.writeStringField("nodeType", "unary");
-      json.writeStringField("operator", searchExpression.asSearchUnary().getOperator().toString());
-      json.writeFieldName("operand");
+      json.writeStringProperty("nodeType", "unary");
+      json.writeStringProperty("operator", searchExpression.asSearchUnary().getOperator().toString());
+      json.writeName("operand");
       appendSearchJson(json, searchExpression.asSearchUnary().getOperand());
     }
     json.writeEndObject();
@@ -370,32 +369,32 @@ public class DebugTabUri implements DebugTab {
   private void appendApplyItemJson(JsonGenerator json, final ApplyItem item) throws IOException {
     json.writeStartObject();
 
-    json.writeStringField("kind", item.getKind().name());
+    json.writeStringProperty("kind", item.getKind().name());
     switch (item.getKind()) {
     case AGGREGATE:
       appendAggregateJson(json, (Aggregate) item);
       break;
     case BOTTOM_TOP:
-      json.writeStringField("method", ((BottomTop) item).getMethod().name());
-      json.writeFieldName("number");
+      json.writeStringProperty("method", ((BottomTop) item).getMethod().name());
+      json.writeName("number");
       appendExpressionJson(json, ((BottomTop) item).getNumber());
-      json.writeFieldName("value");
+      json.writeName("value");
       appendExpressionJson(json, ((BottomTop) item).getValue());
       break;
     case COMPUTE:
-      json.writeFieldName("compute");
+      json.writeName("compute");
       json.writeStartArray();
       for (final ComputeExpression computeExpression : ((Compute) item).getExpressions()) {
         json.writeStartObject();
-        json.writeFieldName("expression");
+        json.writeName("expression");
         appendExpressionJson(json, computeExpression.getExpression());
-        json.writeStringField("as", computeExpression.getAlias());
+        json.writeStringProperty("as", computeExpression.getAlias());
         json.writeEndObject();
       }
       json.writeEndArray();
       break;
     case CONCAT:
-      json.writeFieldName("concat");
+      json.writeName("concat");
       json.writeStartArray();
       for (final ApplyOption option : ((Concat) item).getApplyOptions()) {
         appendApplyItemsJson(json, option.getApplyItems());
@@ -403,7 +402,7 @@ public class DebugTabUri implements DebugTab {
       json.writeEndArray();
       break;
     case CUSTOM_FUNCTION:
-      json.writeStringField("name",
+      json.writeStringProperty("name",
           ((CustomFunction) item).getFunction().getFullQualifiedName().getFullQualifiedNameAsString());
       appendParameters(json, "parameters", ((CustomFunction) item).getParameters());
       break;
@@ -414,7 +413,7 @@ public class DebugTabUri implements DebugTab {
       appendCommonJsonObjects(json, null, null, null, ((Filter) item).getFilterOption(), null, null, null, null, null);
       break;
     case GROUP_BY:
-      json.writeFieldName("groupBy");
+      json.writeName("groupBy");
       appendGroupByItemsJson(json, ((GroupBy) item).getGroupByItems());
       appendCommonJsonObjects(json, null, null, null, null, null, null, null, null, ((GroupBy) item).getApplyOption());
       break;
@@ -433,12 +432,12 @@ public class DebugTabUri implements DebugTab {
     for (final GroupByItem groupByItem : groupByItems) {
       json.writeStartObject();
       if (!groupByItem.getPath().isEmpty()) {
-        json.writeFieldName("path");
+        json.writeName("path");
         appendURIResourceParts(json, groupByItem.getPath());
       }
-      json.writeBooleanField("isRollupAll", groupByItem.isRollupAll());
+      json.writeName("isRollupAll"); json.writeBoolean(groupByItem.isRollupAll());
       if (!groupByItem.getRollup().isEmpty()) {
-        json.writeFieldName("rollup");
+        json.writeName("rollup");
         appendGroupByItemsJson(json, groupByItem.getRollup());
       }
       json.writeEndObject();
@@ -447,7 +446,7 @@ public class DebugTabUri implements DebugTab {
   }
 
   private void appendAggregateJson(JsonGenerator json, final Aggregate aggregate) throws IOException {
-    json.writeFieldName("aggregate");
+    json.writeName("aggregate");
     appendAggregateExpressionsJson(json, aggregate.getExpressions());
   }
 
@@ -467,28 +466,28 @@ public class DebugTabUri implements DebugTab {
     } else {
       json.writeStartObject();
       if (!aggregateExpression.getPath().isEmpty()) {
-        json.writeFieldName("path");
+        json.writeName("path");
         appendURIResourceParts(json, aggregateExpression.getPath());
       }
       if (aggregateExpression.getExpression() != null) {
-        json.writeFieldName("expression");
+        json.writeName("expression");
         appendExpressionJson(json, aggregateExpression.getExpression());
       }
       if (aggregateExpression.getStandardMethod() != null) {
-        json.writeStringField("standardMethod", aggregateExpression.getStandardMethod().name());
+        json.writeStringProperty("standardMethod", aggregateExpression.getStandardMethod().name());
       }
       if (aggregateExpression.getCustomMethod() != null) {
-        json.writeStringField("customMethod", aggregateExpression.getCustomMethod().getFullQualifiedNameAsString());
+        json.writeStringProperty("customMethod", aggregateExpression.getCustomMethod().getFullQualifiedNameAsString());
       }
       if (aggregateExpression.getAlias() != null) {
-        json.writeStringField("as", aggregateExpression.getAlias());
+        json.writeStringProperty("as", aggregateExpression.getAlias());
       }
       if (aggregateExpression.getInlineAggregateExpression() != null) {
-        json.writeFieldName("inlineAggregateExpression");
+        json.writeName("inlineAggregateExpression");
         appendAggregateExpressionJson(json, aggregateExpression.getInlineAggregateExpression());
       }
       if (!aggregateExpression.getFrom().isEmpty()) {
-        json.writeFieldName("from");
+        json.writeName("from");
         appendAggregateExpressionsJson(json, aggregateExpression.getFrom());
       }
       json.writeEndObject();
@@ -497,12 +496,12 @@ public class DebugTabUri implements DebugTab {
 
   @Override
   public void appendHtml(final Writer writer) throws IOException {
-    // factory for JSON generators (the object mapper is necessary to write expression trees)
-    final JsonFactory jsonFactory = new ObjectMapper().getFactory();
+    // object mapper for JSON generators (necessary to write expression trees)
+    final ObjectMapper objectMapper = new ObjectMapper();
     if (uriInfo.getKind() == UriInfoKind.resource) {
       writer.append("<h2>Resource Path</h2>\n")
           .append("<ul>\n<li class=\"json\">");
-      try (JsonGenerator json = jsonFactory.createGenerator(writer).useDefaultPrettyPrinter()) {
+      try (JsonGenerator json = objectMapper.createGenerator(writer)) {
         appendURIResourceParts(json, uriInfo.getUriResourceParts());
         json.close();
         writer.append("\n</li>\n</ul>\n");
@@ -527,7 +526,7 @@ public class DebugTabUri implements DebugTab {
     if (uriInfo.getSearchOption() != null) {
       writer.append("<h2>Search Option</h2>\n")
           .append("<ul>\n<li class=\"json\">");
-      try (JsonGenerator json = jsonFactory.createGenerator(writer).useDefaultPrettyPrinter()) {
+      try (JsonGenerator json = objectMapper.createGenerator(writer)) {
         appendSearchJson(json, uriInfo.getSearchOption().getSearchExpression());
         json.close();
         writer.append("\n</li>\n</ul>\n");
@@ -537,7 +536,7 @@ public class DebugTabUri implements DebugTab {
     if (uriInfo.getFilterOption() != null) {
       writer.append("<h2>Filter Option</h2>\n")
           .append("<ul>\n<li class=\"json\">");
-      try (JsonGenerator json = jsonFactory.createGenerator(writer).useDefaultPrettyPrinter()) {
+      try (JsonGenerator json = objectMapper.createGenerator(writer)) {
         appendExpressionJson(json, uriInfo.getFilterOption().getExpression());
         json.close();
         writer.append("\n</li>\n</ul>\n");
@@ -547,7 +546,7 @@ public class DebugTabUri implements DebugTab {
     if (uriInfo.getOrderByOption() != null) {
       writer.append("<h2>OrderBy Option</h2>\n")
           .append("<ul>\n<li class=\"json\">");
-      try (JsonGenerator json = jsonFactory.createGenerator(writer).useDefaultPrettyPrinter()) {
+      try (JsonGenerator json = objectMapper.createGenerator(writer)) {
         appendOrderByItemsJson(json, uriInfo.getOrderByOption().getOrders());
         json.close();
         writer.append("\n</li>\n</ul>\n");
@@ -557,7 +556,7 @@ public class DebugTabUri implements DebugTab {
     if (uriInfo.getExpandOption() != null) {
       writer.append("<h2>Expand Option</h2>\n")
           .append("<ul>\n<li class=\"json\">");
-      try (JsonGenerator json = jsonFactory.createGenerator(writer).useDefaultPrettyPrinter()) {
+      try (JsonGenerator json = objectMapper.createGenerator(writer)) {
         appendExpandedPropertiesJson(json, uriInfo.getExpandOption().getExpandItems());
         json.close();
         writer.append("\n</li>\n</ul>\n");
@@ -576,7 +575,7 @@ public class DebugTabUri implements DebugTab {
     if (uriInfo.getApplyOption() != null) {
       writer.append("<h2>Apply Option</h2>\n")
           .append("<ul>\n<li class=\"json\">");
-      try (JsonGenerator json = jsonFactory.createGenerator(writer).useDefaultPrettyPrinter()) {
+      try (JsonGenerator json = objectMapper.createGenerator(writer)) {
         appendApplyItemsJson(json, uriInfo.getApplyOption().getApplyItems());
         json.close();
         writer.append("\n</li>\n</ul>\n");

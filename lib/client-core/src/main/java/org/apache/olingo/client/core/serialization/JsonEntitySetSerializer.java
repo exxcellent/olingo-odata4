@@ -28,7 +28,7 @@ import org.apache.olingo.commons.api.data.EntityCollection;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.api.format.ContentType;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonGenerator;
 
 public class JsonEntitySetSerializer extends JsonSerializer {
 
@@ -50,30 +50,30 @@ public class JsonEntitySetSerializer extends JsonSerializer {
 
     if (serverMode && !isODataMetadataNone) {
       if (container.getContextURL() != null) {
-        jgen.writeStringField(Constants.JSON_CONTEXT, container.getContextURL().toASCIIString());
+        jgen.writeStringProperty(Constants.JSON_CONTEXT, container.getContextURL().toASCIIString());
       }
 
       if (container.getMetadataETag() != null) {
-        jgen.writeStringField(Constants.JSON_METADATA_ETAG, container.getMetadataETag());
+        jgen.writeStringProperty(Constants.JSON_METADATA_ETAG, container.getMetadataETag());
       }
     }
 
     if (entitySet.getId() != null && isODataMetadataFull) {
-      jgen.writeStringField(Constants.JSON_ID, entitySet.getId().toASCIIString());
+      jgen.writeStringProperty(Constants.JSON_ID, entitySet.getId().toASCIIString());
     }
     final Integer count = entitySet.getCount() == null ? entitySet.getEntities().size() : entitySet.getCount();
     if (isIEEE754Compatible) {
-      jgen.writeStringField(Constants.JSON_COUNT, Integer.toString(count));
+      jgen.writeStringProperty(Constants.JSON_COUNT, Integer.toString(count));
     } else {
-      jgen.writeNumberField(Constants.JSON_COUNT, count);
+      jgen.writeNumberProperty(Constants.JSON_COUNT, count.intValue());
     }
     if (serverMode) {
       if (entitySet.getNext() != null) {
-        jgen.writeStringField(Constants.JSON_NEXT_LINK,
+        jgen.writeStringProperty(Constants.JSON_NEXT_LINK,
             entitySet.getNext().toASCIIString());
       }
       if (entitySet.getDeltaLink() != null && !isODataMetadataNone) {
-        jgen.writeStringField(Constants.JSON_DELTA_LINK,
+        jgen.writeStringProperty(Constants.JSON_DELTA_LINK,
             entitySet.getDeltaLink().toASCIIString());
       }
     }
@@ -82,7 +82,7 @@ public class JsonEntitySetSerializer extends JsonSerializer {
       valuable(jgen, annotation, "@" + annotation.getTerm());
     }
 
-    jgen.writeArrayFieldStart(Constants.VALUE);
+    jgen.writeArrayPropertyStart(Constants.VALUE);
     final JsonEntitySerializer entitySerializer = new JsonEntitySerializer(serverMode, contentType);
     for (Entity entity : entitySet.getEntities()) {
       entitySerializer.doSerialize(entity, jgen);

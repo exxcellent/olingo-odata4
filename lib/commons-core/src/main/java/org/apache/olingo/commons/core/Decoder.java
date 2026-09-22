@@ -18,7 +18,7 @@
  */
 package org.apache.olingo.commons.core;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Decodes a Java String containing a percent-encoded UTF-8 String value
@@ -81,10 +81,6 @@ public class Decoder {
       throw new IllegalArgumentException();
     }
 
-    try {
-      return new String(result, 0, position, "UTF-8");
-    } catch (UnsupportedEncodingException e) {
-      throw new IllegalArgumentException(e);
-    }
+    return new String(result, 0, position, StandardCharsets.UTF_8);
   }
 }

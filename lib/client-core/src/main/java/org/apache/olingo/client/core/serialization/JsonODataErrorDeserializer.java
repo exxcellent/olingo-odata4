@@ -21,16 +21,16 @@ package org.apache.olingo.client.core.serialization;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.olingo.commons.api.Constants;
 import org.apache.olingo.commons.api.ex.ODataError;
 import org.apache.olingo.commons.api.ex.ODataErrorDetail;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 public class JsonODataErrorDeserializer extends JsonDeserializer {
 
@@ -42,29 +42,29 @@ public class JsonODataErrorDeserializer extends JsonDeserializer {
 
     final ODataError error = new ODataError();
 
-    final ObjectNode tree = parser.getCodec().readTree(parser);
+    final ObjectNode tree = (ObjectNode) MAPPER.readTree(parser);
     if (tree.has(Constants.JSON_ERROR)) {
       final JsonNode errorNode = tree.get(Constants.JSON_ERROR);
 
       if (errorNode.has(Constants.ERROR_CODE)) {
-        error.setCode(errorNode.get(Constants.ERROR_CODE).textValue());
+        error.setCode(errorNode.get(Constants.ERROR_CODE).stringValue());
       }
       if (errorNode.has(Constants.ERROR_MESSAGE)) {
         final JsonNode message = errorNode.get(Constants.ERROR_MESSAGE);
         if (message.isValueNode()) {
-          error.setMessage(message.textValue());
+          error.setMessage(message.stringValue());
         } else if (message.isObject()) {
-          error.setMessage(message.get(Constants.VALUE).asText());
+          error.setMessage(message.get(Constants.VALUE).asString());
         }
       }
       if (errorNode.has(Constants.ERROR_TARGET)) {
-        error.setTarget(errorNode.get(Constants.ERROR_TARGET).textValue());
+        error.setTarget(errorNode.get(Constants.ERROR_TARGET).stringValue());
       }
       if (errorNode.hasNonNull(Constants.ERROR_DETAILS)) {
         List<ODataErrorDetail> details = new ArrayList<>();
         JsonODataErrorDetailDeserializer detailDeserializer = new JsonODataErrorDetailDeserializer(serverMode);
         for (JsonNode jsonNode : errorNode.get(Constants.ERROR_DETAILS)) {
-          details.add(detailDeserializer.doDeserialize(jsonNode.traverse(parser.getCodec()))
+          details.add(detailDeserializer.doDeserialize(MAPPER.treeAsTokens(jsonNode))
               .getPayload());
         }
 
@@ -73,10 +73,8 @@ public class JsonODataErrorDeserializer extends JsonDeserializer {
       if (errorNode.hasNonNull(Constants.ERROR_INNERERROR)) {
         HashMap<String, String> innerErrorMap = new HashMap<>();
         final JsonNode innerError = errorNode.get(Constants.ERROR_INNERERROR);
-        for (final Iterator<String> itor = innerError.fieldNames(); itor.hasNext();) {
-          final String keyTmp = itor.next();
-          final String val = innerError.get(keyTmp).toString();
-          innerErrorMap.put(keyTmp, val);
+        for (final Map.Entry<String, JsonNode> entry : innerError.properties()) {
+          innerErrorMap.put(entry.getKey(), entry.getValue().toString());
         }
         error.setInnerError(innerErrorMap);
       }

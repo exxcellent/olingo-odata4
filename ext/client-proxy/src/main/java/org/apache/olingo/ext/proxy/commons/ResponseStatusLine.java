@@ -18,31 +18,17 @@
  */
 package org.apache.olingo.ext.proxy.commons;
 
-import org.apache.http.ProtocolVersion;
-import org.apache.http.StatusLine;
+import org.apache.hc.core5.http.HttpVersion;
+import org.apache.hc.core5.http.message.StatusLine;
 import org.apache.olingo.client.api.communication.response.ODataResponse;
 
-class ResponseStatusLine implements StatusLine {
+final class ResponseStatusLine {
 
-  private final ODataResponse response;
-
-  public ResponseStatusLine(final ODataResponse response) {
-    this.response = response;
+  private ResponseStatusLine() {
   }
 
-  @Override
-  public ProtocolVersion getProtocolVersion() {
-    return null;
-  }
-
-  @Override
-  public int getStatusCode() {
-    return response.getStatusCode();
-  }
-
-  @Override
-  public String getReasonPhrase() {
-    return response.getStatusMessage();
+  static StatusLine of(final ODataResponse response) {
+    return new StatusLine(HttpVersion.HTTP_1_1, response.getStatusCode(), response.getStatusMessage());
   }
 
 }

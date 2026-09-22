@@ -1280,7 +1280,7 @@ public class MetadataParser {
           in = schemaURL.openStream();
         } else {
           if (xmlBase != null) {
-            URL schemaURL = new URL(xmlBase+referenceUri.toString());
+            URL schemaURL = URI.create(xmlBase+referenceUri.toString()).toURL();
             in = schemaURL.openStream();
           } else {
             in = this.getClass().getClassLoader().getResourceAsStream(referenceUri.getPath());

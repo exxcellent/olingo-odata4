@@ -28,8 +28,6 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Proxy;
@@ -154,13 +152,10 @@ public final class ClassUtils {
     return ((Namespace) annotation).value();
   }
 
-  public static Void returnVoid()
-          throws NoSuchMethodException, InstantiationException, IllegalAccessException,
-          IllegalArgumentException, InvocationTargetException {
-
-    final Constructor<Void> voidConstructor = Void.class.getDeclaredConstructor();
-    voidConstructor.setAccessible(true);
-    return voidConstructor.newInstance();
+  public static Void returnVoid() {
+    // Java 21 module system blocks setAccessible on java.lang.Void constructor.
+    // Returning null is correct: for void proxy methods the JVM ignores the return value.
+    return null;
   }
 
   public static Type[] getTypeArguments(final Type type) {

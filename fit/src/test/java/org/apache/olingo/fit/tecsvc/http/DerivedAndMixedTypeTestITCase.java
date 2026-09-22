@@ -18,11 +18,12 @@
  */
 package org.apache.olingo.fit.tecsvc.http;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URI;
 import java.nio.charset.Charset;
 
 import org.apache.commons.io.IOUtils;
@@ -33,7 +34,7 @@ import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.fit.AbstractBaseTestITCase;
 import org.apache.olingo.fit.tecsvc.TecSvcConst;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class DerivedAndMixedTypeTestITCase extends AbstractBaseTestITCase {
 
@@ -41,7 +42,7 @@ public class DerivedAndMixedTypeTestITCase extends AbstractBaseTestITCase {
 
   @Test
   public void queryESCompCollDerivedJson() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESCompCollDerived?$format=json");
+    URL url = URI.create(SERVICE_URI + "ESCompCollDerived?$format=json").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -54,16 +55,16 @@ public class DerivedAndMixedTypeTestITCase extends AbstractBaseTestITCase {
 
     assertTrue(content.contains(
         "[{\"PropertyInt16\":32767,\"PropertyCompAno\":null,\"CollPropertyCompAno\":[{\"PropertyString\":" +
-        "\"TEST9876\"}]},{\"PropertyInt16\":12345,\"PropertyCompAno\":{\"@odata.type\":" +
-        "\"#olingo.odata.test1.CTBaseAno\",\"PropertyString\":\"Num111\",\"AdditionalPropString\":" +
-        "\"Test123\"},\"CollPropertyCompAno\":[{\"@odata.type\":\"#olingo.odata.test1.CTBaseAno\"," +
-        "\"PropertyString\":\"TEST12345\",\"AdditionalPropString\":\"Additional12345\"}," +
-        "{\"PropertyString\":\"TESTabcd\"}]}]}" ));
+            "\"TEST9876\"}]},{\"PropertyInt16\":12345,\"PropertyCompAno\":{\"@odata.type\":" +
+            "\"#olingo.odata.test1.CTBaseAno\",\"PropertyString\":\"Num111\",\"AdditionalPropString\":" +
+            "\"Test123\"},\"CollPropertyCompAno\":[{\"@odata.type\":\"#olingo.odata.test1.CTBaseAno\"," +
+            "\"PropertyString\":\"TEST12345\",\"AdditionalPropString\":\"Additional12345\"}," +
+            "{\"PropertyString\":\"TESTabcd\"}]}]}"));
   }
 
   @Test
   public void queryESCompCollDerivedXml() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESCompCollDerived?$format=xml");
+    URL url = URI.create(SERVICE_URI + "ESCompCollDerived?$format=xml").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -80,12 +81,12 @@ public class DerivedAndMixedTypeTestITCase extends AbstractBaseTestITCase {
         "<d:CollPropertyCompAno m:type=\"#Collection(olingo.odata.test1.CTTwoPrimAno)\">" +
         "<m:element m:type=\"olingo.odata.test1.CTBaseAno\">" +
         "<d:PropertyString>TEST12345</d:PropertyString>" +
-        "<d:AdditionalPropString>Additional12345</d:AdditionalPropString>" ));
+        "<d:AdditionalPropString>Additional12345</d:AdditionalPropString>"));
   }
 
   @Test
   public void queryESAllPrimDerivedJson() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrimDerived(0)?$expand=NavPropertyETTwoPrimMany&$format=json");
+    URL url = URI.create(SERVICE_URI + "ESAllPrimDerived(0)?$expand=NavPropertyETTwoPrimMany&$format=json").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -97,12 +98,12 @@ public class DerivedAndMixedTypeTestITCase extends AbstractBaseTestITCase {
     assertTrue(content.contains("\"@odata.type\":\"#olingo.odata.test1.ETBase\"," +
         "\"PropertyInt16\":32766," +
         "\"PropertyString\":\"Test String1\"," +
-        "\"AdditionalPropertyString_5\":\"Additional String1\"" ));
+        "\"AdditionalPropertyString_5\":\"Additional String1\""));
   }
-  
+
   @Test
   public void queryESAllPrimDerivedXml() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrimDerived(0)?$expand=NavPropertyETTwoPrimMany&$format=xml");
+    URL url = URI.create(SERVICE_URI + "ESAllPrimDerived(0)?$expand=NavPropertyETTwoPrimMany&$format=xml").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -114,13 +115,13 @@ public class DerivedAndMixedTypeTestITCase extends AbstractBaseTestITCase {
     assertTrue(content.contains("term=\"#olingo.odata.test1.ETBase\"/>"));
     assertTrue(content.contains(
         "<d:PropertyInt16 m:type=\"Int16\">32766</d:PropertyInt16>" +
-        "<d:PropertyString>Test String1</d:PropertyString>" +
-        "<d:AdditionalPropertyString_5>Additional String1</d:AdditionalPropertyString_5>"));
+            "<d:PropertyString>Test String1</d:PropertyString>" +
+            "<d:AdditionalPropertyString_5>Additional String1</d:AdditionalPropertyString_5>"));
   }
-  
+
   @Test
   public void queryESCompCollDerivedJsonNone() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESCompCollDerived");
+    URL url = URI.create(SERVICE_URI + "ESCompCollDerived").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -134,15 +135,16 @@ public class DerivedAndMixedTypeTestITCase extends AbstractBaseTestITCase {
 
     assertTrue(content.contains(
         "[{\"PropertyInt16\":32767,\"PropertyCompAno\":null,\"CollPropertyCompAno\":[{\"PropertyString\":" +
-        "\"TEST9876\"}]},{\"PropertyInt16\":12345,\"PropertyCompAno\":{"+
-        "\"PropertyString\":\"Num111\",\"AdditionalPropString\":" +
-        "\"Test123\"},\"CollPropertyCompAno\":[{" +
-        "\"PropertyString\":\"TEST12345\",\"AdditionalPropString\":\"Additional12345\"}," +
-        "{\"PropertyString\":\"TESTabcd\"}]}]}" ));
+            "\"TEST9876\"}]},{\"PropertyInt16\":12345,\"PropertyCompAno\":{" +
+            "\"PropertyString\":\"Num111\",\"AdditionalPropString\":" +
+            "\"Test123\"},\"CollPropertyCompAno\":[{" +
+            "\"PropertyString\":\"TEST12345\",\"AdditionalPropString\":\"Additional12345\"}," +
+            "{\"PropertyString\":\"TESTabcd\"}]}]}"));
   }
+
   @Test
   public void queryESCompCollDerivedJsonFull() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESCompCollDerived");
+    URL url = URI.create(SERVICE_URI + "ESCompCollDerived").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestProperty(HttpHeader.ACCEPT, "application/json;odata.metadata=full");
@@ -150,7 +152,7 @@ public class DerivedAndMixedTypeTestITCase extends AbstractBaseTestITCase {
     connection.connect();
 
     assertEquals(HttpStatusCode.OK.getStatusCode(), connection.getResponseCode());
-    assertEquals(ContentType.JSON_FULL_METADATA, 
+    assertEquals(ContentType.JSON_FULL_METADATA,
         ContentType.create(connection.getHeaderField(HttpHeader.CONTENT_TYPE)));
 
     final String content = IOUtils.toString(connection.getInputStream(), Charset.defaultCharset());
@@ -166,7 +168,7 @@ public class DerivedAndMixedTypeTestITCase extends AbstractBaseTestITCase {
         "\"CollPropertyCompAno@odata.type\":\"#Collection(olingo.odata.test1.CTTwoPrimAno)\",\"CollPropertyCompAno\":" +
         "[{\"@odata.type\":\"#olingo.odata.test1.CTBaseAno\"," +
         "\"PropertyString\":\"TEST12345\",\"AdditionalPropString\":\"Additional12345\"}," +
-        "{\"@odata.type\":\"#olingo.odata.test1.CTTwoPrimAno\",\"PropertyString\":\"TESTabcd\"}]}]}" ));
+        "{\"@odata.type\":\"#olingo.odata.test1.CTTwoPrimAno\",\"PropertyString\":\"TESTabcd\"}]}]}"));
   }
 
   @Override
@@ -176,8 +178,8 @@ public class DerivedAndMixedTypeTestITCase extends AbstractBaseTestITCase {
 
   @Test
   public void queryESMixPrimWithLambdaDerived_JsonFull_Olingo1122() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESMixPrimCollComp?$filter=CollPropertyComp/any"
-        + "(f:f/olingo.odata.test1.CTBase/AdditionalPropString%20eq%20%27ADD%20TEST%27)");
+    URL url = URI.create(SERVICE_URI + "ESMixPrimCollComp?$filter=CollPropertyComp/any"
+        + "(f:f/olingo.odata.test1.CTBase/AdditionalPropString%20eq%20%27ADD%20TEST%27)").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -185,7 +187,7 @@ public class DerivedAndMixedTypeTestITCase extends AbstractBaseTestITCase {
     connection.connect();
 
     assertEquals(HttpStatusCode.OK.getStatusCode(), connection.getResponseCode());
-    assertEquals(ContentType.JSON_FULL_METADATA, 
+    assertEquals(ContentType.JSON_FULL_METADATA,
         ContentType.create(connection.getHeaderField(HttpHeader.CONTENT_TYPE)));
 
     final String content = IOUtils.toString(connection.getInputStream(), Charset.defaultCharset());
@@ -253,11 +255,11 @@ public class DerivedAndMixedTypeTestITCase extends AbstractBaseTestITCase {
         + "\"target\":\"ESMixPrimCollComp(0)/olingo.odata.test1.BAETMixPrimCollCompRTCTTwoPrim\"}}]";
     assertTrue(content.contains(actualContent));
   }
-  
+
   @Test
   public void queryESMixPrimWithLambdaDerived_JsonMinimal_Olingo1122() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESMixPrimCollComp?$filter=CollPropertyComp/any"
-        + "(f:f/olingo.odata.test1.CTBase/AdditionalPropString%20eq%20%27ADD%20TEST%27)");
+    URL url = URI.create(SERVICE_URI + "ESMixPrimCollComp?$filter=CollPropertyComp/any"
+        + "(f:f/olingo.odata.test1.CTBase/AdditionalPropString%20eq%20%27ADD%20TEST%27)").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -265,7 +267,7 @@ public class DerivedAndMixedTypeTestITCase extends AbstractBaseTestITCase {
     connection.connect();
 
     assertEquals(HttpStatusCode.OK.getStatusCode(), connection.getResponseCode());
-    assertEquals(ContentType.JSON, 
+    assertEquals(ContentType.JSON,
         ContentType.create(connection.getHeaderField(HttpHeader.CONTENT_TYPE)));
 
     final String content = IOUtils.toString(connection.getInputStream(), Charset.defaultCharset());
@@ -302,10 +304,10 @@ public class DerivedAndMixedTypeTestITCase extends AbstractBaseTestITCase {
         + "\"PropertyInt16\":789,\"PropertyString\":\"TEST 3\","
         + "\"AdditionalPropString\":\"ADD TEST\"}]}]"));
   }
-  
+
   @Test
   public void queryESTwoPrimWithEntityTypeCast() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESTwoPrim(111)/olingo.odata.test1.ETBase");
+    URL url = URI.create(SERVICE_URI + "ESTwoPrim(111)/olingo.odata.test1.ETBase").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -313,7 +315,7 @@ public class DerivedAndMixedTypeTestITCase extends AbstractBaseTestITCase {
     connection.connect();
 
     assertEquals(HttpStatusCode.OK.getStatusCode(), connection.getResponseCode());
-    assertEquals(ContentType.JSON_FULL_METADATA, 
+    assertEquals(ContentType.JSON_FULL_METADATA,
         ContentType.create(connection.getHeaderField(HttpHeader.CONTENT_TYPE)));
 
     final String content = IOUtils.toString(connection.getInputStream(), Charset.defaultCharset());
@@ -324,11 +326,11 @@ public class DerivedAndMixedTypeTestITCase extends AbstractBaseTestITCase {
         + "\"PropertyString\":\"TEST A\","
         + "\"AdditionalPropertyString_5\":\"TEST A 0815\""));
   }
-  
+
   @Test
   public void queryESTwoPrimWithEntityTypeCastInFilter() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESTwoPrim?$filter=olingo.odata.test1.ETBase/"
-        + "AdditionalPropertyString_5%20eq%20%27TEST%20A%200815%27");
+    URL url = URI.create(SERVICE_URI + "ESTwoPrim?$filter=olingo.odata.test1.ETBase/"
+        + "AdditionalPropertyString_5%20eq%20%27TEST%20A%200815%27").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -336,7 +338,7 @@ public class DerivedAndMixedTypeTestITCase extends AbstractBaseTestITCase {
     connection.connect();
 
     assertEquals(HttpStatusCode.OK.getStatusCode(), connection.getResponseCode());
-    assertEquals(ContentType.JSON_FULL_METADATA, 
+    assertEquals(ContentType.JSON_FULL_METADATA,
         ContentType.create(connection.getHeaderField(HttpHeader.CONTENT_TYPE)));
 
     final String content = IOUtils.toString(connection.getInputStream(), Charset.defaultCharset());
@@ -350,10 +352,11 @@ public class DerivedAndMixedTypeTestITCase extends AbstractBaseTestITCase {
         + "{\"title\":\"olingo.odata.test1.BAETBaseETTwoBaseRTETTwoBase\","
         + "\"target\":\"ESBase(111)/olingo.odata.test1.BAETBaseETTwoBaseRTETTwoBase\"}}]"));
   }
-  
+
   @Test
   public void queryESAllPrimWithEntityTypeCastInExpand() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim(0)?$expand=NavPropertyETTwoPrimOne/olingo.odata.test1.ETBase");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim(0)?$expand=NavPropertyETTwoPrimOne/olingo.odata.test1.ETBase")
+        .toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -361,7 +364,7 @@ public class DerivedAndMixedTypeTestITCase extends AbstractBaseTestITCase {
     connection.connect();
 
     assertEquals(HttpStatusCode.OK.getStatusCode(), connection.getResponseCode());
-    assertEquals(ContentType.JSON, 
+    assertEquals(ContentType.JSON,
         ContentType.create(connection.getHeaderField(HttpHeader.CONTENT_TYPE)));
 
     final String content = IOUtils.toString(connection.getInputStream(), Charset.defaultCharset());

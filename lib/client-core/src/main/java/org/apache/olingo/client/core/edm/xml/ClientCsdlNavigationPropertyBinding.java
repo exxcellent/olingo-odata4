@@ -18,10 +18,10 @@
  */
 package org.apache.olingo.client.core.edm.xml;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 import org.apache.olingo.commons.api.edm.provider.CsdlNavigationPropertyBinding;
 
@@ -53,13 +53,13 @@ class ClientCsdlNavigationPropertyBinding extends CsdlNavigationPropertyBinding 
 
       final ClientCsdlNavigationPropertyBinding member = new ClientCsdlNavigationPropertyBinding();
 
-      for (; jp.getCurrentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
-        final JsonToken token = jp.getCurrentToken();
-        if (token == JsonToken.FIELD_NAME) {
-          if ("Path".equals(jp.getCurrentName())) {
-            member.setPath(jp.nextTextValue());
-          } else if ("Target".equals(jp.getCurrentName())) {
-            member.setTarget(jp.nextTextValue());
+      for (; jp.currentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
+        final JsonToken token = jp.currentToken();
+        if (token == JsonToken.PROPERTY_NAME) {
+          if ("Path".equals(jp.currentName())) {
+            member.setPath(nextTextValue(jp));
+          } else if ("Target".equals(jp.currentName())) {
+            member.setTarget(nextTextValue(jp));
           }
         }
       }

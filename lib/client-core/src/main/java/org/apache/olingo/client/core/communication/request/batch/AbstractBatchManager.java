@@ -19,10 +19,11 @@
 package org.apache.olingo.client.core.communication.request.batch;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.http.HttpResponse;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.olingo.client.api.communication.request.ODataBatchableRequest;
 import org.apache.olingo.client.api.communication.request.batch.ODataBatchRequest;
 import org.apache.olingo.client.api.communication.request.batch.ODataBatchRequestItem;
@@ -38,7 +39,7 @@ import org.apache.olingo.client.core.communication.request.Wrapper;
 public abstract class AbstractBatchManager extends AbstractODataStreamManager<ODataBatchResponse> {
 
   protected final boolean continueOnError;
-  private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+  private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
   private final ODataBatchRequestContext batchRequestController = new ODataBatchRequestContext();
 
   /**
@@ -52,7 +53,7 @@ public abstract class AbstractBatchManager extends AbstractODataStreamManager<OD
   protected final ODataBatchRequest req;
 
   protected AbstractBatchManager(final ODataBatchRequest req,
-      final Wrapper<Future<HttpResponse>> futureWrap, final boolean continueOnError) {
+      final Wrapper<Future<ClassicHttpResponse>> futureWrap, final boolean continueOnError) {
 
     super(futureWrap);
     this.req = req;

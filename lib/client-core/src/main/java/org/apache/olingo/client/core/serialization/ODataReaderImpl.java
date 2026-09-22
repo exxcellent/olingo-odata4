@@ -20,6 +20,7 @@ package org.apache.olingo.client.core.serialization;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -124,7 +125,7 @@ public class ODataReaderImpl implements ODataReader {
             reference.cast(client.getObjectFactory().newPrimitiveValueBuilder().
                 setType(ContentType.parse(format).equals(ContentType.TEXT_PLAIN)
                     ? EdmPrimitiveTypeKind.String : EdmPrimitiveTypeKind.Stream).
-                setValue(IOUtils.toString(src)) // TODO: set correct value
+                setValue(IOUtils.toString(src, StandardCharsets.UTF_8)) // TODO: set correct value
                 .build()));
       } else if (XMLMetadata.class.isAssignableFrom(reference)) {
         res = new ResWrap<>(

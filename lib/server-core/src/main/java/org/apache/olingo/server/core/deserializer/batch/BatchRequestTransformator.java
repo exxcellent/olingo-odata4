@@ -24,6 +24,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
@@ -132,7 +133,7 @@ public class BatchRequestTransformator {
       final String charsetValue = contentType.getParameter(ContentType.PARAMETER_CHARSET);
       if (charsetValue == null) {
         if (contentType.isCompatible(ContentType.APPLICATION_JSON) || contentType.getSubtype().contains("xml")) {
-          return Charset.forName("UTF-8");
+          return StandardCharsets.UTF_8;
         }
       } else {
         return Charset.forName(charsetValue);

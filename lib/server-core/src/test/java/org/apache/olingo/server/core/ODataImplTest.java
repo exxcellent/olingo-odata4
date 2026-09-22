@@ -18,7 +18,7 @@
  */
 package org.apache.olingo.server.core;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +28,8 @@ import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.api.deserializer.DeserializerException;
 import org.apache.olingo.server.api.serializer.SerializerException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.mockito.Mockito;
 
 public class ODataImplTest {
@@ -61,52 +62,68 @@ public class ODataImplTest {
     assertNotNull(odata.createDeserializer(ContentType.APPLICATION_XML));
   }
   
-  @Test(expected=DeserializerException.class)
+  @Test
   public void deserializerWithoutContentType() throws DeserializerException {
-    odata.createDeserializer(null);
+      assertThrows(DeserializerException.class, () -> {
+      odata.createDeserializer(null);
+      });
   }
   
-  @Test(expected=DeserializerException.class)
+  @Test
   public void deserializerWithoutContentTypeAndWithVersions() throws DeserializerException {
-    List<String> versions = new ArrayList<String>();
-    versions.add("4.01");
-    odata.createDeserializer(null, versions);
+      assertThrows(DeserializerException.class, () -> {
+      List<String> versions = new ArrayList<String>();
+      versions.add("4.01");
+      odata.createDeserializer(null, versions);
+      });
   }
   
-  @Test(expected=SerializerException.class)
+  @Test
   public void deltaSerializer() throws SerializerException {
-    List<String> versions = new ArrayList<String>();
-    versions.add("4.01");
-    odata.createEdmDeltaSerializer(null, versions);
+      assertThrows(SerializerException.class, () -> {
+      List<String> versions = new ArrayList<String>();
+      versions.add("4.01");
+      odata.createEdmDeltaSerializer(null, versions);
+      });
   }
   
-  @Test(expected=SerializerException.class)
+  @Test
   public void edmAssitedSerializer() throws SerializerException {    
-    odata.createEdmAssistedSerializer(null);
+      assertThrows(SerializerException.class, () -> {
+      odata.createEdmAssistedSerializer(null);
+      });
   }
   
-  @Test(expected=DeserializerException.class)
+  @Test
   public void deserializer1() throws DeserializerException {
-    List<String> versions = new ArrayList<String>();
-    versions.add("4.01");
-    odata.createDeserializer(null, null, versions);
+      assertThrows(DeserializerException.class, () -> {
+      List<String> versions = new ArrayList<String>();
+      versions.add("4.01");
+      odata.createDeserializer(null, null, versions);
+      });
   }
   
-  @Test(expected=DeserializerException.class)
+  @Test
   public void deserializer2() throws DeserializerException {
-    odata.createDeserializer(null, Mockito.mock(ServiceMetadata.class));
+      assertThrows(DeserializerException.class, () -> {
+      odata.createDeserializer(null, Mockito.mock(ServiceMetadata.class));
+      });
   }
   
-  @Test(expected=SerializerException.class)
+  @Test
   public void serializerWithVersions() throws SerializerException {
-    List<String> versions = new ArrayList<String>();
-    versions.add("4.01");
-    odata.createSerializer(null, versions);
+      assertThrows(SerializerException.class, () -> {
+      List<String> versions = new ArrayList<String>();
+      versions.add("4.01");
+      odata.createSerializer(null, versions);
+      });
   }
   
-  @Test(expected=SerializerException.class)
+  @Test
   public void serializer() throws SerializerException {
-    odata.createSerializer(null);
+      assertThrows(SerializerException.class, () -> {
+      odata.createSerializer(null);
+      });
   }
   
   @Test

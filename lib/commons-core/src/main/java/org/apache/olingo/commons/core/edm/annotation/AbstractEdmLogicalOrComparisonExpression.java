@@ -23,10 +23,9 @@ import org.apache.olingo.commons.api.edm.EdmException;
 import org.apache.olingo.commons.api.edm.annotation.EdmExpression;
 import org.apache.olingo.commons.api.edm.annotation.EdmLogicalOrComparisonExpression;
 import org.apache.olingo.commons.api.edm.provider.annotation.CsdlLogicalOrComparisonExpression;
-//CHECKSTYLE:OFF
+// CHECKSTYLE:OFF
 import org.apache.olingo.commons.api.edm.provider.annotation.CsdlLogicalOrComparisonExpression.LogicalOrComparisonExpressionType;
-
-//CHECKSTYLE:ON
+// CHECKSTYLE:ON
 
 public abstract class AbstractEdmLogicalOrComparisonExpression
     extends AbstractEdmAnnotatableDynamicExpression implements EdmLogicalOrComparisonExpression {

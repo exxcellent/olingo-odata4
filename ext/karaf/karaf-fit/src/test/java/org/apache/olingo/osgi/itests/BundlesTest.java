@@ -16,40 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  ******************************************************************************/
-
 package org.apache.olingo.osgi.itests;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.Configuration;
-import org.ops4j.pax.exam.Option;
-import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
-import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
-import org.ops4j.pax.exam.spi.reactors.PerClass;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.logLevel;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-
-@RunWith(PaxExam.class)
-@ExamReactorStrategy(PerClass.class)
+/**
+ * Verifies that the core Olingo bundles reach {@code Active} state inside a
+ * Karaf Docker container after the {@code olingo-server} and
+ * {@code olingo-client} features are installed.
+ */
+@Disabled("karaf image 4.4.14 is not working with Java 21, setup currently broken")
 public class BundlesTest extends OlingoOSGiTestSupport {
+
     @Test
-    public void test() throws Exception {
-        // check the server-api and server-core
+    void bundlesActive() throws Exception {
         assertBundleStarted("org.apache.olingo.odata-server-api");
         assertBundleStarted("org.apache.olingo.odata-server-core");
-
-        // check the client-api and client-core
         assertBundleStarted("org.apache.olingo.odata-client-api");
         assertBundleStarted("org.apache.olingo.odata-client-core");
-    }
-
-    @Configuration
-    public Option[] config() {
-        return new Option[]{
-            olingoBaseConfig(),
-            features(olingoUrl, "olingo-server", "olingo-client"),
-            logLevel(LogLevel.INFO)};
     }
 }

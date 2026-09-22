@@ -20,9 +20,9 @@ package org.apache.olingo.client.core.uri;
 
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.core.ODataClientFactory;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ExampleUriGeneratorTest {
     /**
@@ -78,7 +78,7 @@ public class ExampleUriGeneratorTest {
                 .build().toString();
         }
 
-        //CHECKSTYLE:OFF
+        // CHECKSTYLE:OFF
         /**
          * Escapes a string literal by representing a single quote in a string literal as two consecutive single quotes,
          * as per the <a href="https://docs.oasis-open.org/odata/odata/v4.01/os/part2-url-conventions/odata-v4.01-os-part2-url-conventions.html#sec_URLSyntax">OData 4.01 URL Conventions</a>
@@ -86,7 +86,7 @@ public class ExampleUriGeneratorTest {
          * @param value the value to escape
          * @return the escaped value
          */
-        //CHECKSTYLE:ON
+        // CHECKSTYLE:ON
         private static String escape(String value) {
             return value.replaceAll("'", "''");
         }

@@ -614,13 +614,13 @@ From: 'FasterXML' (http://fasterxml.com/) - aalto-xml
 License: The Apache Software License, Version 2.0
 (http://www.apache.org/licenses/LICENSE-2.0.txt) - Jackson-annotations
 (http://wiki.fasterxml.com/JacksonHome)
-com.fasterxml.jackson.core:jackson-annotations:bundle:2.4.1 License: The Apache
+tools.jackson.core:jackson-annotations:bundle:2.4.1 License: The Apache
 Software License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0.txt)
 - Jackson-core (http://wiki.fasterxml.com/JacksonHome)
-com.fasterxml.jackson.core:jackson-core:bundle:2.4.1 License: The Apache
+tools.jackson.core:jackson-core:bundle:2.4.1 License: The Apache
 Software License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0.txt)
 - jackson-databind (http://wiki.fasterxml.com/JacksonHome)
-com.fasterxml.jackson.core:jackson-databind:bundle:2.4.1.1 License: The Apache
+tools.jackson.core:jackson-databind:bundle:2.4.1.1 License: The Apache
 Software License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0.txt)
 - Jackson-dataformat-XML
 (http://wiki.fasterxml.com/JacksonExtensionXmlDataBinding)

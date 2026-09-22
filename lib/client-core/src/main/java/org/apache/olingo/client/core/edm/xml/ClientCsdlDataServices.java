@@ -23,15 +23,15 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
 
 import org.apache.olingo.client.api.edm.xml.DataServices;
 import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmItem;
 import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(using = ClientCsdlDataServices.DataServicesDeserializer.class)
 class ClientCsdlDataServices extends CsdlAbstractEdmItem implements Serializable, DataServices {
@@ -75,14 +75,14 @@ class ClientCsdlDataServices extends CsdlAbstractEdmItem implements Serializable
 
       final ClientCsdlDataServices dataServices = new ClientCsdlDataServices();
 
-      for (; jp.getCurrentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
-        final JsonToken token = jp.getCurrentToken();
-        if (token == JsonToken.FIELD_NAME) {
-          if ("DataServiceVersion".equals(jp.getCurrentName())) {
-            dataServices.setDataServiceVersion(jp.nextTextValue());
-          } else if ("MaxDataServiceVersion".equals(jp.getCurrentName())) {
-            dataServices.setMaxDataServiceVersion(jp.nextTextValue());
-          } else if ("Schema".equals(jp.getCurrentName())) {
+      for (; jp.currentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
+        final JsonToken token = jp.currentToken();
+        if (token == JsonToken.PROPERTY_NAME) {
+          if ("DataServiceVersion".equals(jp.currentName())) {
+            dataServices.setDataServiceVersion(nextTextValue(jp));
+          } else if ("MaxDataServiceVersion".equals(jp.currentName())) {
+            dataServices.setMaxDataServiceVersion(nextTextValue(jp));
+          } else if ("Schema".equals(jp.currentName())) {
             jp.nextToken();
             dataServices.getSchemas().add(jp.readValueAs(ClientCsdlSchema.class));
           }
