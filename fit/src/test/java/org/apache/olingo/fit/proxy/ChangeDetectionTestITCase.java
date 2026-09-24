@@ -128,7 +128,7 @@ public class ChangeDetectionTestITCase extends AbstractTestITCase {
     assertFalse(isChanged(account));
 
     final PaymentInstrument instrument = getContainer().newEntityInstance(PaymentInstrument.class);
-    final int id = RandomUtils.nextInt(101999, 105000);
+    final int id = RandomUtils.secure().randomInt(101999, 105000);
     instrument.setPaymentInstrumentID(id);
     instrument.setFriendlyName("New one");
     instrument.setCreatedDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));

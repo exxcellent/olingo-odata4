@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
 
@@ -41,7 +42,7 @@ public class ODataVersionConformanceITCase extends AbstractBaseTestITCase {
 
   @Test
   public void invalidODataVersionHeader1() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim");
+    URL url = new URI(SERVICE_URI + "ESAllPrim").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name()); 
@@ -57,7 +58,7 @@ public class ODataVersionConformanceITCase extends AbstractBaseTestITCase {
   
   @Test
   public void invalidODataVersionHeader2() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim");
+    URL url = new URI(SERVICE_URI + "ESAllPrim").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -73,7 +74,7 @@ public class ODataVersionConformanceITCase extends AbstractBaseTestITCase {
   
   @Test
   public void invalidODataMaxVersionHeader1() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim");
+    URL url = new URI(SERVICE_URI + "ESAllPrim").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -89,7 +90,7 @@ public class ODataVersionConformanceITCase extends AbstractBaseTestITCase {
   
   @Test
   public void validODataMaxVersionHeader() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim");
+    URL url = new URI(SERVICE_URI + "ESAllPrim").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -98,13 +99,13 @@ public class ODataVersionConformanceITCase extends AbstractBaseTestITCase {
 
     assertEquals("4.0", connection.getHeaderField(HttpHeader.ODATA_VERSION));
 
-    final String content = IOUtils.toString(connection.getErrorStream(), Charset.defaultCharset());
+    final String content = IOUtils.toString(connection.getInputStream(), Charset.defaultCharset());
     assertNotNull(content);
   }
 
   @Test
   public void validODataVersionAndMaxVersionHeader() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim");
+    URL url = new URI(SERVICE_URI + "ESAllPrim").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -114,13 +115,13 @@ public class ODataVersionConformanceITCase extends AbstractBaseTestITCase {
 
     assertEquals("4.0", connection.getHeaderField(HttpHeader.ODATA_VERSION));
 
-    final String content = IOUtils.toString(connection.getErrorStream(), Charset.defaultCharset());
-    assertNotNull(content);;
+    final String content = IOUtils.toString(connection.getInputStream(), Charset.defaultCharset());
+    assertNotNull(content);
   }
   
   @Test
   public void validODataVersionAndMaxVersionHeader1() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim?$format=json");
+    URL url = new URI(SERVICE_URI + "ESAllPrim?$format=json").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -139,7 +140,7 @@ public class ODataVersionConformanceITCase extends AbstractBaseTestITCase {
   
   @Test
   public void validODataVersionAndMaxVersionHeader2() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim?$format=json");
+    URL url = new URI(SERVICE_URI + "ESAllPrim?$format=json").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -158,7 +159,7 @@ public class ODataVersionConformanceITCase extends AbstractBaseTestITCase {
   
   @Test
   public void invalidODataVersionAndMaxVersionHeader() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim");
+    URL url = new URI(SERVICE_URI + "ESAllPrim").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());

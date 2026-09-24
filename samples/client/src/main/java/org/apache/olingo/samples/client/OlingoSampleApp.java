@@ -234,7 +234,6 @@ public class OlingoSampleApp {
   }
 
   private ClientEntitySetIterator<ClientEntitySet, ClientEntity> readEntities(Edm edm, URI absoluteUri) {
-    System.out.println("URI = " + absoluteUri);
     ODataEntitySetIteratorRequest<ClientEntitySet, ClientEntity> request = 
       client.getRetrieveRequestFactory().getEntitySetIteratorRequest(absoluteUri);
     // odata4 sample/server limitation not handling metadata=full
