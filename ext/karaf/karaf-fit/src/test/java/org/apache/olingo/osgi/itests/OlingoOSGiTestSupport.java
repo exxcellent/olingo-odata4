@@ -18,29 +18,32 @@
  ******************************************************************************/
 package org.apache.olingo.osgi.itests;
 
+import static org.ops4j.pax.exam.CoreOptions.maven;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
+import static org.ops4j.pax.exam.CoreOptions.when;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.logLevel;
+
 import java.io.File;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.inject.Inject;
-
 import org.apache.karaf.features.FeaturesService;
 import org.junit.Assert;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.ProbeBuilder;
 import org.ops4j.pax.exam.TestProbeBuilder;
+import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
 import org.ops4j.pax.exam.options.MavenUrlReference;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-import static org.ops4j.pax.exam.CoreOptions.composite;
-import static org.ops4j.pax.exam.CoreOptions.maven;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
-import static org.ops4j.pax.exam.CoreOptions.when;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
+
+import jakarta.inject.Inject;
 
 /**
  * 
@@ -76,7 +79,7 @@ public class OlingoOSGiTestSupport {
         }
         if (karafVersion == null) {
             // setup the default version of it
-            karafVersion = "3.0.3";
+            karafVersion = "4.4.11";
         }
         return karafVersion;
     }
@@ -96,13 +99,13 @@ public class OlingoOSGiTestSupport {
      * 
      * @return
      */
-    protected Option olingoBaseConfig() {
+    protected Option[] olingoBaseConfig() {
         karafUrl = maven().groupId("org.apache.karaf").artifactId("apache-karaf").version(getKarafVersion())
             .type("tar.gz");
         olingoUrl = maven().groupId("org.apache.olingo").artifactId("odata-karaf-features").versionAsInProject()
             .type("xml").classifier("features");
         String localRepo = System.getProperty("localRepository");
-        return composite(karafDistributionConfiguration()
+        return new Option[] {karafDistributionConfiguration()
                              .frameworkUrl(karafUrl)
                              .karafVersion(getKarafVersion())
                              .name("Apache Karaf")
@@ -114,7 +117,10 @@ public class OlingoOSGiTestSupport {
                          when(localRepo != null)
                              .useOptions(editConfigurationFilePut("etc/org.ops4j.pax.url.mvn.cfg",
                                                                   "org.ops4j.pax.url.mvn.localRepository",
-                                                                  localRepo)));
+                                                                  localRepo)),
+                         features(olingoUrl, "olingo-server", "olingo-client"),
+                         logLevel(LogLevel.INFO)
+        };
     }
 
     protected void assertBundleStarted(String name) {

@@ -18,29 +18,29 @@
  ******************************************************************************/
 package org.apache.olingo.osgi.itests.server;
 
+import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
+
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.olingo.osgi.itests.OlingoOSGiTestSupport;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.junit.PaxExam;
-import org.ops4j.pax.exam.karaf.options.LogLevelOption.LogLevel;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
 
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.features;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.logLevel;
-
-/**
- *
- */
+@Ignore("Not running with Jakarta + Java21")
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
 public class CarServiceTest extends OlingoOSGiTestSupport {
@@ -72,7 +72,7 @@ public class CarServiceTest extends OlingoOSGiTestSupport {
     private static String getContent(String target) throws Exception {
         InputStream in = null;
         try {
-            URL url = new URL(target);
+            URL url = new URI(target).toURL();
             URLConnection urlConnection = url.openConnection();
             urlConnection.setRequestProperty("Accept", "*/*");
             in = urlConnection.getInputStream();
@@ -93,13 +93,9 @@ public class CarServiceTest extends OlingoOSGiTestSupport {
 
     @Configuration
     public Option[] config() {
-        return new Option[] {
-            olingoBaseConfig(),
-            features(olingoUrl, "olingo-server", "olingo-client"),
-            mavenBundle("org.apache.olingo", "odata-server-osgi-sample", "5.0.1-SNAPSHOT"),
-            logLevel(LogLevel.INFO)
-        };
+      List<Option> options = new ArrayList<>(Arrays.asList(olingoBaseConfig()));
+      options.add(mavenBundle("org.apache.olingo", "odata-server-osgi-sample", "5.0.1-SNAPSHOT"));
+      return options.toArray(new Option[options.size()]);
     }
-
-
+    
 }

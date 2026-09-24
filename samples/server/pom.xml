@@ -34,10 +34,6 @@
 		<relativePath>..</relativePath>
 	</parent>
 
-	<properties>
-		<version.slf4j>1.7.7</version.slf4j>
-	</properties>
-
 	<build>
 		<plugins>
 			<plugin>
@@ -54,7 +50,6 @@
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
-			<version>${jakarta.servlet.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -84,13 +79,11 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>${version.slf4j}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
-			<version>${version.slf4j}</version>
 			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
