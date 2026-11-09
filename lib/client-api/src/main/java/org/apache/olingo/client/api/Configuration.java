@@ -22,6 +22,7 @@ import java.util.concurrent.ExecutorService;
 
 import org.apache.olingo.client.api.http.HttpClientFactory;
 import org.apache.olingo.client.api.http.HttpUriRequestFactory;
+import org.apache.olingo.client.api.http.ODataHttpClient;
 import org.apache.olingo.commons.api.format.ContentType;
 
 /**
@@ -101,7 +102,7 @@ public interface Configuration {
    *
    * @return provided implementation (if configured via <tt>setHttpClientFactory</tt> or default.
    */
-  HttpClientFactory getHttpClientFactory();
+  <T extends ODataHttpClient> HttpClientFactory<T> getHttpClientFactory();
 
   /**
    * Sets the HttpClient factory to be used for executing requests.
@@ -109,7 +110,7 @@ public interface Configuration {
    * @param factory implementation of <tt>HttpClientFactory</tt>.
    * @see HttpClientFactory
    */
-  void setHttpClientFactory(HttpClientFactory factory);
+  <T extends ODataHttpClient> void setHttpClientFactory(HttpClientFactory<T> factory);
 
   /**
    * Gets the HttpUriRequest factory for generating requests to be executed.

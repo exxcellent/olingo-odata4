@@ -160,7 +160,10 @@ public class ODataJsonDeserializer implements ODataDeserializer {
     }
   }
 
-  private EntityCollection consumeEntityCollectionNode(final EdmEntityType edmEntityType, final ObjectNode tree,
+  /**
+   * Internal API, use at own risk
+   */
+  protected EntityCollection consumeEntityCollectionNode(final EdmEntityType edmEntityType, final ObjectNode tree,
       final ExpandTreeBuilder expandBuilder) throws DeserializerException {
     EntityCollection entitySet = new EntityCollection();
 
@@ -218,7 +221,10 @@ public class ODataJsonDeserializer implements ODataDeserializer {
     }
   }
 
-  private Entity consumeEntityNode(final EdmEntityType edmEntityType, final ObjectNode tree,
+  /**
+   * Internal API, use at own risk
+   */
+  protected Entity consumeEntityNode(final EdmEntityType edmEntityType, final ObjectNode tree,
       final ExpandTreeBuilder expandBuilder) throws DeserializerException {
     Entity entity = new Entity();
     entity.setType(edmEntityType.getFullQualifiedName().getFullQualifiedNameAsString());
@@ -364,7 +370,10 @@ public class ODataJsonDeserializer implements ODataDeserializer {
     return (ObjectNode) tree;
   }
 
-  private Map<String, Parameter> consumeParameters(final EdmAction edmAction, final ObjectNode node)
+  /**
+   * Internal API, use at own risk
+   */
+  protected Map<String, Parameter> consumeParameters(final EdmAction edmAction, final ObjectNode node)
       throws DeserializerException {
     List<String> parameterNames = edmAction.getParameterNames();
     if (edmAction.isBound()) {
@@ -558,7 +567,10 @@ public class ODataJsonDeserializer implements ODataDeserializer {
     property.getAnnotations().add(annotation);
   }
 
-  private void consumeEntityProperties(final EdmEntityType edmEntityType, final ObjectNode node,
+  /**
+   * Internal API, use at own risk
+   */
+  protected void consumeEntityProperties(final EdmEntityType edmEntityType, final ObjectNode node,
       final Entity entity) throws DeserializerException {
     List<String> propertyNames = edmEntityType.getPropertyNames();
     for (String propertyName : propertyNames) {
@@ -642,7 +654,10 @@ public class ODataJsonDeserializer implements ODataDeserializer {
     return link;
   }
   
-  private Link consumeBindingLink(final String key, final JsonNode jsonNode, final EdmEntityType edmEntityType)
+  /**
+   * Internal API, use at own risk
+   */
+  protected Link consumeBindingLink(final String key, final JsonNode jsonNode, final EdmEntityType edmEntityType)
       throws DeserializerException {
     String[] splitKey = key.split(ODATA_ANNOTATION_MARKER);
     String navigationPropertyName = splitKey[0];
@@ -694,7 +709,10 @@ public class ODataJsonDeserializer implements ODataDeserializer {
     }
   }
 
-  private Property consumePropertyNode(final String name, final EdmType type, final boolean isCollection,
+  /**
+   * Internal API, use at own risk
+   */
+  protected Property consumePropertyNode(final String name, final EdmType type, final boolean isCollection,
       final boolean isNullable, final Integer maxLength, final Integer precision, final Integer scale,
       final boolean isUnicode, final EdmMapping mapping, final JsonNode jsonNode) throws DeserializerException {
     Property property = new Property();
@@ -710,7 +728,10 @@ public class ODataJsonDeserializer implements ODataDeserializer {
     return property;
   }
 
-  private void consumePropertySingleNode(final String name, final EdmType type,
+  /**
+   * Internal API, use at own risk
+   */
+  protected void consumePropertySingleNode(final String name, final EdmType type,
       final boolean isNullable, final Integer maxLength, final Integer precision, final Integer scale,
       final boolean isUnicode, final EdmMapping mapping, final JsonNode jsonNode, final Property property)
       throws DeserializerException {
@@ -738,7 +759,7 @@ public class ODataJsonDeserializer implements ODataDeserializer {
     }
   }
 
-  private Object readComplexNode(final String name, final EdmType type, final boolean isNullable,
+  private ComplexValue readComplexNode(final String name, final EdmType type, final boolean isNullable,
       final JsonNode jsonNode)
       throws DeserializerException {
     // read and add all complex properties
@@ -747,13 +768,28 @@ public class ODataJsonDeserializer implements ODataDeserializer {
     if (jsonNode.isObject()) {
       removeAnnotations((ObjectNode) jsonNode);
     }
+    readComplexNodeExtension(type, value, jsonNode);
     // Afterwards the node must be empty
     assertJsonNodeIsEmpty(jsonNode);
 
     return value;
   }
 
-  private void consumePropertyCollectionNode(final String name, final EdmType type,
+  /**
+   * API hook to extend the functionality 
+   * to read {@link #readComplexNode(String, EdmType, boolean, JsonNode) complex values}.
+   * 
+   * @param result The already read complex value, also used as result value
+   */
+  protected void readComplexNodeExtension(final EdmType type, final ComplexValue result, final JsonNode jsonNode) 
+      throws DeserializerException {
+    //do nothing as default
+  }
+  
+  /**
+   * Internal API, use at own risk
+   */
+  protected void consumePropertyCollectionNode(final String name, final EdmType type,
       final boolean isNullable, final Integer maxLength, final Integer precision, final Integer scale,
       final boolean isUnicode, final EdmMapping mapping, final JsonNode jsonNode, final Property property)
       throws DeserializerException {
@@ -855,7 +891,6 @@ public class ODataJsonDeserializer implements ODataDeserializer {
           "Invalid value: " + jsonNode.toString() + " for property: " + name, e,
           DeserializerException.MessageKeys.INVALID_VALUE_FOR_PROPERTY, name);
     } catch (final RuntimeException e) {
-      // Jackson 3.x: asText()/asString() throws JsonNodeException when called on non-coercible nodes (e.g., ObjectNode)
       throw new DeserializerException(
           "Invalid value for property: " + name, e,
           DeserializerException.MessageKeys.INVALID_VALUE_FOR_PROPERTY, name);
