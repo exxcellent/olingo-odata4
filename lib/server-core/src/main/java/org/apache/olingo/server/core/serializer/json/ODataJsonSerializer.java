@@ -699,7 +699,7 @@ public class ODataJsonSerializer extends AbstractODataSerializer {
       json.writeName(edmProperty.getName());
     }
     if (property == null || property.isNull()) {
-      if (edmProperty.isNullable() == Boolean.FALSE && !isStreamProperty) {
+      if (!edmProperty.isNullable() && !isStreamProperty) {
         throw new SerializerException("Non-nullable property not present!",
             SerializerException.MessageKeys.MISSING_PROPERTY, edmProperty.getName());
       } else {

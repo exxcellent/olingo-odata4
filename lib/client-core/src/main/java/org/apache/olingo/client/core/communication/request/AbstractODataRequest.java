@@ -323,7 +323,11 @@ public abstract class AbstractODataRequest extends AbstractRequest implements OD
       checkResponse(odataClient, response, getAccept());
     } catch (ODataRuntimeException e) {
       closeHttpResponse(response);
-      httpClient.close();
+      try {
+        httpClient.close();
+      } catch (Exception e1) {
+        LOG.warn("Problem while closing client after another execption", e1);
+      }
       throw e;
     }
 

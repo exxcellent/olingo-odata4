@@ -796,7 +796,9 @@ public class ODataJsonDeserializer implements ODataDeserializer {
 
     Iterator<JsonNode> iterator;
     List<Object> valueArray = new ArrayList<>();
-    if (!jsonNode.isArray()) {
+    if (isValidNull(name, isNullable, jsonNode)) {
+      iterator = null;
+    } else  if (!jsonNode.isArray()) {
       iterator = Arrays.asList(jsonNode).iterator();
     } else {
       iterator = jsonNode.iterator();
@@ -805,22 +807,31 @@ public class ODataJsonDeserializer implements ODataDeserializer {
     case PRIMITIVE:
     case DEFINITION:
     case ENUM:
-      while (iterator.hasNext()) {
-        JsonNode arrayElement = iterator.next();
-        Object value = readPrimitiveValue(name, (EdmPrimitiveType) type,
-            isNullable, maxLength, precision, scale, isUnicode, mapping, arrayElement);
-        valueArray.add(value);
-      }
-      property.setValue(type.getKind() == EdmTypeKind.ENUM ? ValueType.COLLECTION_ENUM : ValueType.COLLECTION_PRIMITIVE,
-          valueArray);
+      ValueType valueType = type.getKind() == EdmTypeKind.ENUM ? 
+          ValueType.COLLECTION_ENUM : ValueType.COLLECTION_PRIMITIVE;
+      if (iterator == null) {
+        property.setValue(valueType, null);
+      } else {
+        while (iterator.hasNext()) {
+          JsonNode arrayElement = iterator.next();
+          Object value = readPrimitiveValue(name, (EdmPrimitiveType) type,
+              isNullable, maxLength, precision, scale, isUnicode, mapping, arrayElement);
+          valueArray.add(value);
+        }
+        property.setValue(valueType, valueArray);
+      }      
       break;
     case COMPLEX:
-      while (iterator.hasNext()) {
-        // read and add all complex properties
-        Object value = readComplexNode(name, type, isNullable, iterator.next());
-        valueArray.add(value);
-      }
-      property.setValue(ValueType.COLLECTION_COMPLEX, valueArray);
+      if (iterator == null) {
+        property.setValue(ValueType.COLLECTION_COMPLEX, null);
+      } else {
+        while (iterator.hasNext()) {
+          // read and add all complex properties
+          Object value = readComplexNode(name, type, isNullable, iterator.next());
+          valueArray.add(value);
+        }
+        property.setValue(ValueType.COLLECTION_COMPLEX, valueArray);
+      }      
       break;
     default:
       throw new DeserializerException("Invalid Type Kind for a property found: " + type.getKind(),

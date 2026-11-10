@@ -23,9 +23,7 @@ import java.io.IOException;
 import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.HttpResponse;
 
-public interface ODataHttpClient {
+public interface ODataHttpClient extends AutoCloseable {
 
   public HttpResponse execute(ClassicHttpRequest request) throws IOException;
-  
-  public void close() throws RuntimeException;
 }

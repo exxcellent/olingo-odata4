@@ -364,17 +364,7 @@ public class ApplyParser {
     }
   }
 
-  private EdmType getTypeForAggregateMethod(final StandardMethod method, final EdmType type) {
-    if (method == StandardMethod.SUM || method == StandardMethod.AVERAGE || method == StandardMethod.COUNT_DISTINCT) {
-      return odata.createPrimitiveTypeInstance(EdmPrimitiveTypeKind.Decimal);
-    } else if (method == StandardMethod.MIN || method == StandardMethod.MAX) {
-      return type;
-    } else {
-      return null;
-    }
-  }
-  
-  enum Requirement {
+  private enum Requirement {
 	    REQUIRED, OPTIONAL, FORBIDDEN
 	  }
 

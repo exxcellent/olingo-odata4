@@ -52,12 +52,8 @@ public class DefaultHttpClientFactory extends AbstractHttpClientFactory<ODataHtt
     }
     
     @Override
-    public void close() throws RuntimeException {
-      try {
-        ((AutoCloseable) client).close();
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
+    public void close() throws Exception {
+      ((AutoCloseable) client).close();
     }
   }
 

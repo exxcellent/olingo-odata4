@@ -251,7 +251,11 @@ public abstract class AbstractODataResponse implements ODataResponse {
   @Override
   public void close() {
     closeHttpResponse();
-    httpClient.close();
+    try {
+      httpClient.close();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
 
     if (batchInfo != null) {
       batchInfo.setValidBatch(false);
