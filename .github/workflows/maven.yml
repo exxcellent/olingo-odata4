@@ -10,6 +10,27 @@ on:
     branches: [ "master" ]
 
 jobs:
+  clear-cache:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clear cache
+        uses: actions/github-script@v6
+        with:
+          script: |
+            console.log("About to clear")
+            const caches = await github.rest.actions.getActionsCacheList({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            })
+            for (const cache of caches.data.actions_caches) {
+              console.log(cache)
+              github.rest.actions.deleteActionsCacheById({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                cache_id: cache.id,
+              })
+            }
+            console.log("Clear completed")
   build:
     runs-on: ubuntu-latest
     strategy:
@@ -27,4 +48,4 @@ jobs:
         architecture: x64
         cache: maven
     - name: Build with Maven
-      run: mvn -B -P karaf,build.quality,samples,tutorials clean package
+      run: mvn -B -P karaf,build.quality,samples,tutorials clean install
