@@ -2,23 +2,44 @@ name: "CodeQL"
 
 on:
   schedule:
-    - cron: '00 20 * * 3'
+    - cron: "00 20 * * 3"
   push:
     branches: [master]
     paths-ignore:
-      - 'LICENSE'
-      - 'NOTICE'
-      - 'README'
-      - 'SECURITY.md'
+      - "LICENSE"
+      - "NOTICE"
+      - "README"
+      - "SECURITY.md"
   pull_request:
     branches: [master]
     paths-ignore:
-      - 'LICENSE'
-      - 'NOTICE'
-      - 'README'
-      - 'SECURITY.md'
+      - "LICENSE"
+      - "NOTICE"
+      - "README"
+      - "SECURITY.md"
 
 jobs:
+  clear-cache:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clear cache
+        uses: actions/github-script@v6
+        with:
+          script: |
+            console.log("About to clear")
+            const caches = await github.rest.actions.getActionsCacheList({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            })
+            for (const cache of caches.data.actions_caches) {
+              console.log(cache)
+              github.rest.actions.deleteActionsCacheById({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                cache_id: cache.id,
+              })
+            }
+            console.log("Clear completed")
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
@@ -28,24 +49,24 @@ jobs:
       security-events: write
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v7
+      - name: Checkout repository
+        uses: actions/checkout@v7
 
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3
-      with:
-        languages: 'java'
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: "java"
 
-    - name: Set up JDK
-      uses: actions/setup-java@v6
-      with:
-        java-version: 21
-        distribution: 'temurin'
-        architecture: x64
-        cache: maven
+      - name: Set up JDK
+        uses: actions/setup-java@v6
+        with:
+          java-version: 21
+          distribution: "temurin"
+          architecture: x64
+          cache: maven
 
-    - name: Build with Maven
-      run: mvn -B clean package
+      - name: Build with Maven
+        run: mvn -B clean install
 
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
