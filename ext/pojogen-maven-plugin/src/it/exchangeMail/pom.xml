@@ -23,15 +23,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
+  <parent>
+    <groupId>org.apache.olingo</groupId>
+    <artifactId>odata-parent</artifactId>
+    <version>5.0.1-SNAPSHOT</version>
+    <relativePath>..</relativePath>
+  </parent>
+
   <artifactId>pojogen-maven-plugin-v4test</artifactId>
-  <groupId>org.apache.olingo</groupId>
   <version>@project.version@</version>
-  <name>${project.artifactId}</name>
   <description>A simple IT verifying the basic use case of pojogen-man-plugin.</description>
 
   <properties>
-    <project.source>17</project.source>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
   <dependencies>
@@ -54,21 +57,10 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>${project.source}</source>
-          <target>${project.source}</target>
-          <showWarnings>true</showWarnings>
-          <showDeprecation>true</showDeprecation>
-          <compilerArgument>-Xlint:unchecked</compilerArgument>
-          <includes>
-            <include>${project.basedir}/target/generated-sources/**</include>
-          </includes>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
-        <version>1.8</version>
         <executions>
           <execution>
             <phase>process-sources</phase>
