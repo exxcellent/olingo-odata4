@@ -59,6 +59,7 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
           <release>${project.build.release.version}</release>
+          <source>${project.build.release.version}</source>          
           <showWarnings>false</showWarnings>
           <showDeprecation>false</showDeprecation>
           <compilerArgument>-Xlint:unchecked</compilerArgument>
