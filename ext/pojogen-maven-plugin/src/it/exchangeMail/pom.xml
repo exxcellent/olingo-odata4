@@ -30,7 +30,7 @@
     <relativePath>..</relativePath>
   </parent>
 
-  <artifactId>pojogen-maven-plugin-v4test</artifactId>
+  <artifactId>pojogen-maven-plugin-v4test-exchangeMail</artifactId>
   <version>@project.version@</version>
   <description>A simple IT verifying the basic use case of pojogen-man-plugin.</description>
 
@@ -69,7 +69,7 @@
             </goals>
             <configuration>
               <sources>
-                <source>${project.build.directory}/generated-sources</source>
+                <source>${project.build.directory}/generated-sources/ojc-plugin</source>
               </sources>
             </configuration>
           </execution>

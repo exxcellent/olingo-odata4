@@ -30,7 +30,7 @@
     <relativePath>..</relativePath>
   </parent>
 
-  <artifactId>pojogen-maven-plugin-v4test</artifactId>
+  <artifactId>pojogen-maven-plugin-v4test-exchangeMailNoBasepkg</artifactId>
   <version>@project.version@</version>
   <description>A simple IT verifying the basic use case of pojogen-man-plugin.</description>
 
@@ -69,7 +69,7 @@
             </goals>
             <configuration>
               <sources>
-                <source>${project.build.directory}/generated-sources</source>
+                <source>${project.build.directory}/generated-sources/ojc-plugin</source>
               </sources>
             </configuration>
           </execution>
@@ -85,7 +85,7 @@
             <configuration>
               <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
               <localEdm>${project.basedir}/src/test/resources/metadata.xml</localEdm>
-              <basePackage>org.apache.olingo.fit.proxy.v4.staticservice</basePackage>
+              <!-- do not set a base package -->
             </configuration>
             <id>v4pojoGen</id>
             <phase>generate-sources</phase>
