@@ -35,6 +35,7 @@
   </parent>
 
   <properties>
+  	<skip.pojogen.examplebuild>false</skip.pojogen.examplebuild>
   </properties>
 
   <dependencies>
@@ -117,6 +118,7 @@
         <artifactId>maven-invoker-plugin</artifactId>
         <inherited>true</inherited>
         <configuration>
+          <skipInvocation>${skip.pojogen.examplebuild}</skipInvocation>
           <debug>true</debug>
           <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
           <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>

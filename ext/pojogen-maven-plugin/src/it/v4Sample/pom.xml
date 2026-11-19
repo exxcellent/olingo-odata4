@@ -57,13 +57,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <release>${project.build.release.version}</release>
-          <showWarnings>false</showWarnings>
-          <showDeprecation>false</showDeprecation>
-          <compilerArgument>-Xlint:unchecked</compilerArgument>
-          <encoding>${project.build.sourceEncoding}</encoding>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
