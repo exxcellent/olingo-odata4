@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Clear cache
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             console.log("About to clear")
@@ -49,3 +49,11 @@ jobs:
         cache: maven
     - name: Build with Maven
       run: mvn -B -P karaf,build.quality,samples,tutorials clean install
+    - name: Archive Build (log) artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: Nested Build files
+        path: |
+          **/target/**/*.log
+        retention-days: 1
+        compression-level: 9 # maximum compression
