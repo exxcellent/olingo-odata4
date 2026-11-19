@@ -36,7 +36,7 @@
 
   <properties>
   </properties>
-  
+
   <dependencies>
     <dependency>
       <artifactId>pojogen-maven-plugin</artifactId>
@@ -44,7 +44,7 @@
       <version>@project.version@</version>
       <scope>runtime</scope>
     </dependency>
-    
+
     <dependency>
       <artifactId>odata-client-proxy</artifactId>
       <groupId>org.apache.olingo</groupId>
@@ -75,7 +75,7 @@
           </execution>
         </executions>
       </plugin>
-      
+
       <plugin>
         <groupId>@project.groupId@</groupId>
         <artifactId>pojogen-maven-plugin</artifactId>

@@ -55,6 +55,7 @@ jobs:
       with:
         name: nested-build-files-${{ matrix.java-version }}
         path: |
+          **/pojogen-maven-plugin/target/**
           **/target/**/*.log
         retention-days: 1
         compression-level: 9 # maximum compression
