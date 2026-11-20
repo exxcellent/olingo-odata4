@@ -19,9 +19,9 @@
 package org.apache.olingo.fit.proxy;
 
 // CHECKSTYLE:OFF (Maven checkstyle)
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 import java.lang.reflect.Proxy;
@@ -45,7 +45,7 @@ import org.apache.olingo.fit.proxy.staticservice.odatawcfservice.types.OrderDeta
 import org.apache.olingo.fit.proxy.staticservice.odatawcfservice.types.OrderDetailKey;
 import org.apache.olingo.fit.proxy.staticservice.odatawcfservice.types.PaymentInstrument;
 import org.apache.olingo.fit.proxy.staticservice.odatawcfservice.types.Person;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 // CHECKSTYLE:ON (Maven checkstyle)
 /**
@@ -119,7 +119,7 @@ public class EntityUpdateTestITCase extends AbstractTestITCase {
     customer.setTimeBetweenLastTwoOrders(BigDecimal.valueOf(0.0000002));
 
     // 2. create order and set it to customer
-    final int orderId = RandomUtils.nextInt(400, 410);
+    final int orderId = RandomUtils.secure().randomInt(400, 410);
 
     Order order = getContainer().newEntityInstance(Order.class);
     order.setOrderID(orderId);

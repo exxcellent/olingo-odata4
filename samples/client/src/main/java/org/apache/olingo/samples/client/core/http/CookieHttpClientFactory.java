@@ -20,10 +20,11 @@ package org.apache.olingo.samples.client.core.http;
 
 import java.net.URI;
 
-import org.apache.http.client.CookieStore;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.cookie.BasicClientCookie;
+import org.apache.hc.client5.http.cookie.BasicCookieStore;
+import org.apache.hc.client5.http.cookie.CookieStore;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.cookie.BasicClientCookie;
+import org.apache.olingo.client.api.http.ODataHttpClient;
 import org.apache.olingo.client.core.http.DefaultHttpClientFactory;
 import org.apache.olingo.commons.api.http.HttpMethod;
 
@@ -36,20 +37,19 @@ import org.apache.olingo.commons.api.http.HttpMethod;
 public class CookieHttpClientFactory extends DefaultHttpClientFactory {
 
   @Override
-  public DefaultHttpClient create(final HttpMethod method, final URI uri) {
+  public ODataHttpClient create(final HttpMethod method, final URI uri) {
     final CookieStore cookieStore = new BasicCookieStore();
 
     // Populate cookies if needed
     final BasicClientCookie cookie = new BasicClientCookie("name", "value");
-    cookie.setVersion(0);
     cookie.setDomain(".mycompany.com");
     cookie.setPath("/");
     cookieStore.addCookie(cookie);
 
-    final DefaultHttpClient httpClient = super.create(method, uri);
-    httpClient.setCookieStore(cookieStore);
-
-    return httpClient;
+    return DefaultHttpClientFactory.wrapHC5Client(HttpClients.custom()
+        .setUserAgent(USER_AGENT)
+        .setDefaultCookieStore(cookieStore)
+        .build());
   }
 
 }

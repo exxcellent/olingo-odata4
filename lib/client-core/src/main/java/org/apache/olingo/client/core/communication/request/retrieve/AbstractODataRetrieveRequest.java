@@ -21,11 +21,11 @@ package org.apache.olingo.client.core.communication.request.retrieve;
 import java.io.InputStream;
 import java.net.URI;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataRetrieveRequest;
 import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse;
+import org.apache.olingo.client.api.http.ODataHttpClient;
 import org.apache.olingo.client.core.communication.request.AbstractODataBasicRequest;
 import org.apache.olingo.client.core.communication.response.AbstractODataResponse;
 import org.apache.olingo.commons.api.http.HttpMethod;
@@ -64,8 +64,8 @@ public abstract class AbstractODataRetrieveRequest<T>
   protected abstract class AbstractODataRetrieveResponse
           extends AbstractODataResponse implements ODataRetrieveResponse<T> {
 
-    protected AbstractODataRetrieveResponse(final ODataClient odataClient, final HttpClient httpClient,
-            final HttpResponse res) {
+    protected AbstractODataRetrieveResponse(final ODataClient odataClient, final ODataHttpClient httpClient,
+            final ClassicHttpResponse res) {
 
       super(odataClient, httpClient, res);
     }

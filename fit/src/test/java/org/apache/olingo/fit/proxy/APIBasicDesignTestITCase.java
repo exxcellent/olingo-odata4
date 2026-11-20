@@ -18,14 +18,15 @@
  */
 package org.apache.olingo.fit.proxy;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.lang.reflect.Proxy;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -68,7 +69,8 @@ import org.apache.olingo.fit.proxy.staticservice.odatawcfservice.types.ProductDe
 import org.apache.olingo.fit.proxy.staticservice.odatawcfservice.types.ProductDetailCollectionComposableInvoker;
 import org.apache.olingo.fit.proxy.staticservice.odatawcfservice.types.Account.MyPaymentInstruments;
 // CHECKSTYLE:ON (Maven checkstyle)
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class APIBasicDesignTestITCase extends AbstractTestITCase {
 
@@ -85,11 +87,8 @@ public class APIBasicDesignTestITCase extends AbstractTestITCase {
     final OrderCollection orders = container.getOrders().execute();
     assertFalse(orders.isEmpty());
 
-    final CustomerCollection customers = container.getCustomers().
-        orderBy("PersonID").
-        select("FirstName", "LastName", "Orders").
-        expand("Orders").
-        execute();
+    final CustomerCollection customers = container.getCustomers().orderBy("PersonID")
+        .select("FirstName", "LastName", "Orders").expand("Orders").execute();
 
     assertEquals(2, customers.size());
     for (Customer customer : customers) {
@@ -97,7 +96,7 @@ public class APIBasicDesignTestITCase extends AbstractTestITCase {
       assertNotNull(customer.getLastName());
     }
   }
-  
+
   @Test
   public void expandToContainedEntitySet() {
     Account account = container.getAccounts().getByKey(103).expand("MyPaymentInstruments").load();
@@ -117,10 +116,12 @@ public class APIBasicDesignTestITCase extends AbstractTestITCase {
     assertNotNull(paymentInstrument.getFriendlyName());
   }
 
-  @Test(expected = UnsupportedOperationException.class)
+  @Test
   public void expandToContainedEntitySetWithUnsupportedOperation() {
-    Account account = container.getAccounts().getByKey(103).expand("MyPaymentInstruments").load();
-    account.getMyPaymentInstruments().delete(101901);
+    assertThrows(UnsupportedOperationException.class, () -> {
+      Account account = container.getAccounts().getByKey(103).expand("MyPaymentInstruments").load();
+      account.getMyPaymentInstruments().delete(101901);
+    });
   }
 
   @Test
@@ -229,8 +230,7 @@ public class APIBasicDesignTestITCase extends AbstractTestITCase {
 
   @Test
   public void loadWithSelect() {
-    Order order =
-        getContainer().getOrders().getByKey(8);
+    Order order = getContainer().getOrders().getByKey(8);
     assertNull(order.getOrderID());
     assertNull(order.getOrderDate());
 
@@ -354,8 +354,7 @@ public class APIBasicDesignTestITCase extends AbstractTestITCase {
     // ---------------------------------------
     // Instantiate Demo Service
     // ---------------------------------------
-    final Service<EdmEnabledODataClient> dservice =
-        Service.getV4(testDemoServiceRootURL);
+    final Service<EdmEnabledODataClient> dservice = Service.getV4(testDemoServiceRootURL);
     dservice.getClient().getConfiguration().setDefaultBatchAcceptFormat(ContentType.APPLICATION_OCTET_STREAM);
     final DemoService dcontainer = dservice.getEntityContainer(DemoService.class);
     assertNotNull(dcontainer);
@@ -384,24 +383,24 @@ public class APIBasicDesignTestITCase extends AbstractTestITCase {
     // ---------------------------------------
     // Instantiate Demo Service
     // ---------------------------------------
-    final Service<EdmEnabledODataClient> dservice =
-        Service.getV4(testDemoServiceRootURL);
+    final Service<EdmEnabledODataClient> dservice = Service.getV4(testDemoServiceRootURL);
     dservice.getClient().getConfiguration().setDefaultBatchAcceptFormat(ContentType.APPLICATION_OCTET_STREAM);
     final DemoService dcontainer = dservice.getEntityContainer(DemoService.class);
     assertNotNull(dcontainer);
     dservice.getContext().detachAll();
     // ---------------------------------------
-    final String random = RandomStringUtils.random(124, "abcdefghijklmnopqrstuvwxyz");
+    final String random = RandomStringUtils.secure().next(124, "abcdefghijklmnopqrstuvwxyz");
 
     final PersonDetail personDetail = dcontainer.getPersonDetails().getByKey(1); // NO HTTP Request
 
     // 1 HTTP Request to add an Edm.Stream property value about MediaEditLink Photo
-    personDetail.setPhoto(dcontainer.newEdmStreamValue("application/octet-stream", IOUtils.toInputStream(random)));
+    personDetail.setPhoto(dcontainer.newEdmStreamValue("application/octet-stream",
+        IOUtils.toInputStream(random, StandardCharsets.UTF_8)));
 
     dcontainer.flush();
 
     final EdmStreamValue actual = dcontainer.getPersonDetails().getByKey(1).getPhoto().load(); // 1 HTTP Request
-    assertEquals(random, IOUtils.toString(actual.getStream()));
+    assertEquals(random, IOUtils.toString(actual.getStream(), StandardCharsets.UTF_8));
 
     dservice.getContext().detachAll(); // avoid influences
   }
@@ -444,8 +443,8 @@ public class APIBasicDesignTestITCase extends AbstractTestITCase {
     assertNotNull(product.operations().addAccessRight(AccessLevel.None).execute());
 
     // The third HTTP Request to access a bound operation via entity URL
-    final ProductDetailCollectionComposableInvoker result =
-        container.getProducts().getByKey(1012).operations().getProductDetails(1);
+    final ProductDetailCollectionComposableInvoker result = container.getProducts().getByKey(1012).operations()
+        .getProductDetails(1);
     assertEquals(1, result.execute().size());
   }
 
@@ -500,31 +499,24 @@ public class APIBasicDesignTestITCase extends AbstractTestITCase {
   @Test
   public void workingWithOperations() {
     // Primitive collections (available only skip and top)
-    final PrimitiveCollection<String> prods1 = container.operations().
-        getProductsByAccessLevel(AccessLevel.None).
-        skip(2).
-        top(3).execute();
+    final PrimitiveCollection<String> prods1 = container.operations().getProductsByAccessLevel(AccessLevel.None).skip(2)
+        .top(3).execute();
     assertNotNull(prods1);
     assertFalse(prods1.isEmpty());
 
     // Complex/Entity collection
-    final ProductCollection prods2 = container.operations().getAllProducts().
-        filter("name eq XXXX").
-        select("Name", "ProductDetail").
-        expand("ProductDetail").
-        orderBy("Name").skip(3).top(5).execute();
+    final ProductCollection prods2 = container.operations().getAllProducts().filter("name eq XXXX")
+        .select("Name", "ProductDetail").expand("ProductDetail").orderBy("Name").skip(3).top(5).execute();
     assertNotNull(prods2);
     assertFalse(prods2.isEmpty());
 
     // Complex/Entity
-    final Person person = container.operations().getPerson2("London").
-        select("Name").
-        expand("Order").execute();
+    final Person person = container.operations().getPerson2("London").select("Name").expand("Order").execute();
     assertNotNull(person);
 
     // Primitive (no query option available)
-    final Double amount = container.getAccounts().getByKey(101).getMyGiftCard().operations().
-        getActualAmount(1.1).execute();
+    final Double amount = container.getAccounts().getByKey(101).getMyGiftCard().operations().getActualAmount(1.1)
+        .execute();
     assertNotNull(amount);
 
     // POST ...
@@ -534,8 +526,8 @@ public class APIBasicDesignTestITCase extends AbstractTestITCase {
     address.setCity("66010");
 
     final AddressCollection ac = container.newComplexCollection(AddressCollection.class);
-    final Person updated = container.getCustomers().getByKey(2).operations().
-        resetAddress(ac, 0).select("Name").expand("Orders").execute();
+    final Person updated = container.getCustomers().getByKey(2).operations().resetAddress(ac, 0).select("Name")
+        .expand("Orders").execute();
     assertNotNull(updated);
   }
 
@@ -545,10 +537,8 @@ public class APIBasicDesignTestITCase extends AbstractTestITCase {
 
     // Complex/Entity collection (available filter, select, expand, orderBy, skip and top)
     invoker1.operations().discount(10). // discount is an operation of ProductCollecton
-    filter("Name eq XXXX").
-    select("Name", "ProductDetail").
-    expand("ProductDetail").
-    orderBy("Name").skip(3).top(5).execute();
+        filter("Name eq XXXX").select("Name", "ProductDetail").expand("ProductDetail").orderBy("Name").skip(3).top(5)
+        .execute();
 
     // Complex/Entity
     final PersonComposableInvoker invoker2 = container.operations().getPerson2("London");
@@ -628,22 +618,16 @@ public class APIBasicDesignTestITCase extends AbstractTestITCase {
   @Test
   public void issueOLINGO398() {
     AbstractCollectionInvocationHandler<?, ?> handler = AbstractCollectionInvocationHandler.class.cast(
-        Proxy.getInvocationHandler(container.getCustomers().getByKey(1).getOrders().
-            select("OrderID", "CustomerForOrder").
-            expand("CustomerForOrder").
-            top(1).
-            skip(2)));
+        Proxy.getInvocationHandler(container.getCustomers().getByKey(1).getOrders()
+            .select("OrderID", "CustomerForOrder").expand("CustomerForOrder").top(1).skip(2)));
 
     assertEquals("http://localhost:9080/stub/StaticService/V40/Static.svc/Customers(1)/Orders?"
         + "%24select=OrderID%2CCustomerForOrder&%24expand=CustomerForOrder&%24top=1&%24skip=2",
         handler.getRequestURI().toASCIIString());
 
     handler = AbstractCollectionInvocationHandler.class.cast(
-        Proxy.getInvocationHandler(container.getCustomers().getByKey(1).getOrders().
-            select("OrderID", "CustomerForOrder").
-            expand("CustomerForOrder").
-            top(1).
-            skip(2)));
+        Proxy.getInvocationHandler(container.getCustomers().getByKey(1).getOrders()
+            .select("OrderID", "CustomerForOrder").expand("CustomerForOrder").top(1).skip(2)));
 
     assertEquals("http://localhost:9080/stub/StaticService/V40/Static.svc/Customers(1)/Orders?%24"
         + "select=OrderID%2CCustomerForOrder&%24expand=CustomerForOrder&%24top=1&%24skip=2",

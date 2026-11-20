@@ -19,11 +19,12 @@
 package org.apache.olingo.server.core.serializer.xml;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.net.URI;
 import java.util.Collections;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.olingo.commons.api.edmx.EdmxReference;
@@ -32,7 +33,7 @@ import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.tecsvc.provider.EdmTechProvider;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class MetadataDocumentTest {
 
@@ -49,7 +50,8 @@ public class MetadataDocumentTest {
                 .addInclude(new EdmxReferenceInclude("Org.OData.Core.V1", "Core"))));
 
     final String metadata = IOUtils.toString(
-        odata.createSerializer(ContentType.APPLICATION_XML).metadataDocument(serviceMetadata).getContent());
+        odata.createSerializer(ContentType.APPLICATION_XML)
+        .metadataDocument(serviceMetadata).getContent(), StandardCharsets.UTF_8);
     assertNotNull(metadata);
     assertThat(metadata, containsString("<edmx:Reference Uri=\"" + CORE_VOCABULARY + "\">"
             + "<edmx:Include Namespace=\"Org.OData.Core.V1\" Alias=\"Core\"></edmx:Include>" + "</edmx:Reference>"));

@@ -18,7 +18,7 @@
  *#
 package ${package};
 
-//CHECKSTYLE:OFF (Maven checkstyle)
+// CHECKSTYLE:OFF (Maven checkstyle)
 import org.apache.olingo.ext.proxy.api.annotations.AnnotationsForProperty;
 import org.apache.olingo.ext.proxy.api.annotations.AnnotationsForNavigationProperty;
 import org.apache.olingo.ext.proxy.api.annotations.Namespace;
@@ -41,7 +41,7 @@ import org.apache.olingo.commons.api.edm.geo.MultiPoint;
 import org.apache.olingo.commons.api.edm.geo.MultiPolygon;
 import org.apache.olingo.commons.api.edm.geo.Point;
 import org.apache.olingo.commons.api.edm.geo.Polygon;
-//CHECKSTYLE:ON (Maven checkstyle)
+// CHECKSTYLE:ON (Maven checkstyle)
 
 @org.apache.olingo.ext.proxy.api.annotations.Namespace("$namespace")
 @org.apache.olingo.ext.proxy.api.annotations.ComplexType(name = "$complexType.Name",

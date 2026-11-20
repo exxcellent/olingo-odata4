@@ -20,7 +20,7 @@ package org.apache.olingo.server.sample.processor;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
 
@@ -214,7 +214,7 @@ public class CarsProcessor implements EntityCollectionProcessor, EntityProcessor
         } else {
           String value = String.valueOf(property.getValue());
           ByteArrayInputStream serializerContent = new ByteArrayInputStream(
-                  value.getBytes(Charset.forName("UTF-8")));
+                  value.getBytes(StandardCharsets.UTF_8));
           response.setContent(serializerContent);
           response.setStatusCode(HttpStatusCode.OK.getStatusCode());
           response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.TEXT_PLAIN.toContentTypeString());

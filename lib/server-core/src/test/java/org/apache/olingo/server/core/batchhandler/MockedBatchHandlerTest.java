@@ -18,9 +18,9 @@
  */
 package org.apache.olingo.server.core.batchhandler;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.olingo.commons.api.ex.ODataException;
 import org.apache.olingo.commons.api.format.ContentType;
@@ -41,6 +42,7 @@ import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataApplicationException;
+import org.apache.olingo.server.api.ODataHandler;
 import org.apache.olingo.server.api.ODataLibraryException;
 import org.apache.olingo.server.api.ODataRequest;
 import org.apache.olingo.server.api.ODataResponse;
@@ -52,11 +54,11 @@ import org.apache.olingo.server.api.deserializer.batch.BatchRequestPart;
 import org.apache.olingo.server.api.deserializer.batch.ODataResponsePart;
 import org.apache.olingo.server.api.processor.BatchProcessor;
 import org.apache.olingo.server.api.serializer.BatchSerializerException;
-import org.apache.olingo.server.core.ODataHandlerImpl;
 import org.apache.olingo.server.core.deserializer.batch.BatchLineReader;
 import org.apache.olingo.server.core.deserializer.batch.BatchParserCommon;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -67,17 +69,17 @@ public class MockedBatchHandlerTest {
   private static final String BATCH_REQUEST_URI = "http://localhost:8080/odata/$batch";
   private static final String BASE_URI = "http://localhost:8080/odata";
   private static final String CRLF = "\r\n";
-  private ODataHandlerImpl oDataHandler;
+  private ODataHandler oDataHandler;
   private BatchHandler batchHandler;
   private int entityCounter = 1;
 
-  @Before
+  @BeforeEach
   public void setup() {
     final BatchProcessor batchProcessor = new BatchTestProcessorImpl();
     batchProcessor.init(OData.newInstance(), null);
 
     entityCounter = 1;
-    oDataHandler = mock(ODataHandlerImpl.class);
+    oDataHandler = mock(ODataHandler.class);
     batchHandler = new BatchHandler(oDataHandler, batchProcessor);
   }
 
@@ -465,58 +467,62 @@ public class MockedBatchHandlerTest {
     assertEquals(44, line);
   }
 
-  @Test(expected = BatchDeserializerException.class)
+  @Test
   public void testInvalidMethod() throws Exception {
-    final String content = ""
-            + "--batch_12345" + CRLF
-            + "Content-Type: multipart/mixed; boundary=changeset_12345" + CRLF
-            + CRLF
-            + "--changeset_12345" + CRLF
-            + "Content-Type: application/http" + CRLF
-            + "Content-Transfer-Encoding: binary" + CRLF
-            + "Content-Id: 1" + CRLF
-            + CRLF
-            + "PUT ESAllPrim(1) HTTP/1.1" + CRLF
-            + "Content-Type: application/json;odata=verbose" + CRLF
-            + CRLF
-            + CRLF
-            + "--changeset_12345--" + CRLF
-            + CRLF
-            + "--batch_12345--";
-
-    final Map<String, List<String>> header = getMimeHeader();
-    final ODataResponse response = new ODataResponse();
-    final ODataRequest request = buildODataRequest(content, header);
-    request.setMethod(HttpMethod.GET);
-
-    batchHandler.process(request, response, true);
+      assertThrows(BatchDeserializerException.class, () -> {
+      final String content = ""
+              + "--batch_12345" + CRLF
+              + "Content-Type: multipart/mixed; boundary=changeset_12345" + CRLF
+              + CRLF
+              + "--changeset_12345" + CRLF
+              + "Content-Type: application/http" + CRLF
+              + "Content-Transfer-Encoding: binary" + CRLF
+              + "Content-Id: 1" + CRLF
+              + CRLF
+              + "PUT ESAllPrim(1) HTTP/1.1" + CRLF
+              + "Content-Type: application/json;odata=verbose" + CRLF
+              + CRLF
+              + CRLF
+              + "--changeset_12345--" + CRLF
+              + CRLF
+              + "--batch_12345--";
+  
+      final Map<String, List<String>> header = getMimeHeader();
+      final ODataResponse response = new ODataResponse();
+      final ODataRequest request = buildODataRequest(content, header);
+      request.setMethod(HttpMethod.GET);
+  
+      batchHandler.process(request, response, true);
+      });
   }
 
-  @Test(expected = BatchDeserializerException.class)
+  @Test
   public void testInvalidContentType() throws Exception {
-    final String content = ""
-            + "--batch_12345" + CRLF
-            + "Content-Type: multipart/mixed; boundary=changeset_12345" + CRLF
-            + CRLF
-            + "--changeset_12345" + CRLF
-            + "Content-Type: application/http" + CRLF
-            + "Content-Transfer-Encoding: binary" + CRLF
-            + "Content-Id: 1" + CRLF
-            + CRLF
-            + "PUT ESAllPrim(1) HTTP/1.1" + CRLF
-            + "Content-Type: application/json;odata=verbose" + CRLF
-            + CRLF
-            + CRLF
-            + "--changeset_12345--" + CRLF
-            + CRLF
-            + "--batch_12345--";
-
-    final Map<String, List<String>> header = new HashMap<String, List<String>>();
-    header.put(HttpHeader.CONTENT_TYPE, Arrays.asList(new String[] { "application/http" }));
-    final ODataResponse response = new ODataResponse();
-    final ODataRequest request = buildODataRequest(content, header);
-
-    batchHandler.process(request, response, true);
+      assertThrows(BatchDeserializerException.class, () -> {
+      final String content = ""
+              + "--batch_12345" + CRLF
+              + "Content-Type: multipart/mixed; boundary=changeset_12345" + CRLF
+              + CRLF
+              + "--changeset_12345" + CRLF
+              + "Content-Type: application/http" + CRLF
+              + "Content-Transfer-Encoding: binary" + CRLF
+              + "Content-Id: 1" + CRLF
+              + CRLF
+              + "PUT ESAllPrim(1) HTTP/1.1" + CRLF
+              + "Content-Type: application/json;odata=verbose" + CRLF
+              + CRLF
+              + CRLF
+              + "--changeset_12345--" + CRLF
+              + CRLF
+              + "--batch_12345--";
+  
+      final Map<String, List<String>> header = new HashMap<String, List<String>>();
+      header.put(HttpHeader.CONTENT_TYPE, Arrays.asList(new String[] { "application/http" }));
+      final ODataResponse response = new ODataResponse();
+      final ODataRequest request = buildODataRequest(content, header);
+  
+      batchHandler.process(request, response, true);
+      });
   }
 
   /*
@@ -557,7 +563,7 @@ public class MockedBatchHandlerTest {
     request.setRawRequestUri(BATCH_REQUEST_URI);
     request.setRawServiceResolutionUri("");
 
-    request.setBody(new ByteArrayInputStream(content.getBytes("UTF-8")));
+    request.setBody(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)));
 
     return request;
   }

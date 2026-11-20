@@ -19,6 +19,7 @@
 package org.apache.olingo.fit.metadata;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -61,7 +62,7 @@ public class Metadata extends AbstractMetadataElement {
       final XMLInputFactory ifactory = XMLInputFactory.newInstance();
       ifactory.setProperty(SUPPORT_DTD, false);
       ifactory.setProperty(IS_SUPPORTING_EXTERNAL_ENTITIES, false);
-      final XMLEventReader reader = ifactory.createXMLEventReader(is, org.apache.olingo.commons.api.Constants.UTF8);
+      final XMLEventReader reader = ifactory.createXMLEventReader(is, StandardCharsets.UTF_8.name());
 
       try {
         while (reader.hasNext()) {

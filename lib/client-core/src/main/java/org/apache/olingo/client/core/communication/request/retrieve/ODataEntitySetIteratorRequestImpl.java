@@ -20,14 +20,14 @@ package org.apache.olingo.client.core.communication.request.retrieve;
 
 import java.net.URI;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataEntitySetIteratorRequest;
 import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse;
 import org.apache.olingo.client.api.domain.ClientEntity;
 import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.client.api.domain.ClientEntitySetIterator;
+import org.apache.olingo.client.api.http.ODataHttpClient;
 import org.apache.olingo.commons.api.format.ContentType;
 
 /**
@@ -56,7 +56,7 @@ public class ODataEntitySetIteratorRequestImpl<ES extends ClientEntitySet, E ext
 
   @Override
   public ODataRetrieveResponse<ClientEntitySetIterator<ES, E>> execute() {
-    final HttpResponse res = doExecute();
+    final ClassicHttpResponse res = doExecute();
     return new ODataEntitySetIteratorResponseImpl(odataClient, httpClient, res);
   }
 
@@ -65,8 +65,8 @@ public class ODataEntitySetIteratorRequestImpl<ES extends ClientEntitySet, E ext
    */
   protected class ODataEntitySetIteratorResponseImpl extends AbstractODataRetrieveResponse {
 
-    private ODataEntitySetIteratorResponseImpl(final ODataClient odataClient, final HttpClient httpClient,
-            final HttpResponse res) {
+    private ODataEntitySetIteratorResponseImpl(final ODataClient odataClient, final ODataHttpClient httpClient,
+            final ClassicHttpResponse res) {
 
       super(odataClient, httpClient, res);
     }

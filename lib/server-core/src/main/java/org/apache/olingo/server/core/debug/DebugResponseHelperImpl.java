@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -41,8 +42,9 @@ import org.apache.olingo.server.api.debug.DebugSupport;
 import org.apache.olingo.server.api.debug.RuntimeMeasurement;
 import org.apache.olingo.server.core.serializer.utils.CircleStreamBuffer;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.json.JsonFactory;
+import tools.jackson.core.ObjectWriteContext;
 
 public class DebugResponseHelperImpl implements DebugResponseHelper {
 
@@ -135,21 +137,21 @@ public class DebugResponseHelperImpl implements DebugResponseHelper {
     CircleStreamBuffer csb = new CircleStreamBuffer();
     outputStream = csb.getOutputStream();
     // Create JSON generator (the object mapper is necessary to write expression trees).
-    try (JsonGenerator gen = new ObjectMapper().getFactory().createGenerator(outputStream)) {
+    try (JsonGenerator gen = new JsonFactory().createGenerator(ObjectWriteContext.empty(), outputStream)) {
       gen.writeStartObject();
       DebugTab requestInfo = parts.get(0);
-      gen.writeFieldName(requestInfo.getName().toLowerCase(Locale.ROOT));
+      gen.writeName(requestInfo.getName().toLowerCase(Locale.ROOT));
       requestInfo.appendJson(gen);
 
       DebugTab responseInfo = parts.get(1);
-      gen.writeFieldName(responseInfo.getName().toLowerCase(Locale.ROOT));
+      gen.writeName(responseInfo.getName().toLowerCase(Locale.ROOT));
       responseInfo.appendJson(gen);
 
-      gen.writeFieldName("server");
+      gen.writeName("server");
       gen.writeStartObject();
-      gen.writeStringField("version", getVersion());
+      gen.writeStringProperty("version", getVersion());
       for (DebugTab part : parts.subList(2, parts.size())) {
-        gen.writeFieldName(part.getName().toLowerCase(Locale.ROOT));
+        gen.writeName(part.getName().toLowerCase(Locale.ROOT));
         part.appendJson(gen);
       }
       gen.writeEndObject();
@@ -235,7 +237,7 @@ public class DebugResponseHelperImpl implements DebugResponseHelper {
     writer.append("</body>\n")
         .append("</html>\n")
         .close();
-    byte[] bytes = writer.toString().getBytes("UTF-8");
+    byte[] bytes = writer.toString().getBytes(StandardCharsets.UTF_8);
     return new ByteArrayInputStream(bytes);
   }
 
@@ -250,7 +252,7 @@ public class DebugResponseHelperImpl implements DebugResponseHelper {
     } else {
       gen.writeStartObject();
       for (final Map.Entry<String, String> entry : entries.entrySet()) {
-        gen.writeFieldName(entry.getKey());
+        gen.writeName(entry.getKey());
         if (entry.getValue() == null) {
           gen.writeNull();
         } else {

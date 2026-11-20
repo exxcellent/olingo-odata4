@@ -18,14 +18,14 @@
  */
 package org.apache.olingo.client.core.edm.xml;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityType;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -42,30 +42,30 @@ class ClientCsdlEntityType extends CsdlEntityType implements Serializable {
 
       final ClientCsdlEntityType entityType = new ClientCsdlEntityType();
 
-      for (; jp.getCurrentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
-        final JsonToken token = jp.getCurrentToken();
-        if (token == JsonToken.FIELD_NAME) {
-          if ("Name".equals(jp.getCurrentName())) {
-            entityType.setName(jp.nextTextValue());
-          } else if ("Abstract".equals(jp.getCurrentName())) {
-            entityType.setAbstract(BooleanUtils.toBoolean(jp.nextTextValue()));
-          } else if ("BaseType".equals(jp.getCurrentName())) {
-            entityType.setBaseType(jp.nextTextValue());
-          } else if ("OpenType".equals(jp.getCurrentName())) {
-            entityType.setOpenType(BooleanUtils.toBoolean(jp.nextTextValue()));
-          } else if ("HasStream".equals(jp.getCurrentName())) {
-            entityType.setHasStream(BooleanUtils.toBoolean(jp.nextTextValue()));
-          } else if ("Key".equals(jp.getCurrentName())) {
+      for (; jp.currentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
+        final JsonToken token = jp.currentToken();
+        if (token == JsonToken.PROPERTY_NAME) {
+          if ("Name".equals(jp.currentName())) {
+            entityType.setName(nextTextValue(jp));
+          } else if ("Abstract".equals(jp.currentName())) {
+            entityType.setAbstract(BooleanUtils.toBoolean(nextTextValue(jp)));
+          } else if ("BaseType".equals(jp.currentName())) {
+            entityType.setBaseType(nextTextValue(jp));
+          } else if ("OpenType".equals(jp.currentName())) {
+            entityType.setOpenType(BooleanUtils.toBoolean(nextTextValue(jp)));
+          } else if ("HasStream".equals(jp.currentName())) {
+            entityType.setHasStream(BooleanUtils.toBoolean(nextTextValue(jp)));
+          } else if ("Key".equals(jp.currentName())) {
             jp.nextToken();
             ClientCsdlEntityKey keyImpl = jp.readValueAs(ClientCsdlEntityKey.class);
             entityType.setKey(keyImpl.getPropertyRefs());
-          } else if ("Property".equals(jp.getCurrentName())) {
+          } else if ("Property".equals(jp.currentName())) {
             jp.nextToken();
             entityType.getProperties().add(jp.readValueAs(ClientCsdlProperty.class));
-          } else if ("NavigationProperty".equals(jp.getCurrentName())) {
+          } else if ("NavigationProperty".equals(jp.currentName())) {
             jp.nextToken();
             entityType.getNavigationProperties().add(jp.readValueAs(ClientCsdlNavigationProperty.class));
-          } else if ("Annotation".equals(jp.getCurrentName())) {
+          } else if ("Annotation".equals(jp.currentName())) {
             jp.nextToken();
             entityType.getAnnotations().add(jp.readValueAs(ClientCsdlAnnotation.class));
           }

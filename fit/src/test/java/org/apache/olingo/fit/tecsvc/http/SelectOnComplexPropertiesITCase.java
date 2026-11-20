@@ -18,11 +18,12 @@
  */
 package org.apache.olingo.fit.tecsvc.http;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URI;
 import java.nio.charset.Charset;
 
 import org.apache.commons.io.IOUtils;
@@ -33,7 +34,7 @@ import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.fit.AbstractBaseTestITCase;
 import org.apache.olingo.fit.tecsvc.TecSvcConst;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class SelectOnComplexPropertiesITCase extends AbstractBaseTestITCase {
 
@@ -41,8 +42,8 @@ public class SelectOnComplexPropertiesITCase extends AbstractBaseTestITCase {
 
   @Test
   public void queryESKeyColPropertyComp1() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESKeyNav(1)/CollPropertyComp"
-        + "?$select=PropertyComp/PropertyString");
+    URL url = URI.create(SERVICE_URI + "ESKeyNav(1)/CollPropertyComp"
+        + "?$select=PropertyComp/PropertyString").toURL();
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
     connection.setRequestProperty(HttpHeader.ACCEPT, "application/json;odata.metadata=minimal");
@@ -60,8 +61,8 @@ public class SelectOnComplexPropertiesITCase extends AbstractBaseTestITCase {
   
   @Test
   public void queryESKeyColPropertyComp2() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESKeyNav(1)/CollPropertyComp"
-        + "?$select=PropertyInt16");
+    URL url = URI.create(SERVICE_URI + "ESKeyNav(1)/CollPropertyComp"
+        + "?$select=PropertyInt16").toURL();
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
     connection.setRequestProperty(HttpHeader.ACCEPT, "application/json;odata.metadata=minimal");
@@ -76,8 +77,8 @@ public class SelectOnComplexPropertiesITCase extends AbstractBaseTestITCase {
   
   @Test
   public void queryESKeyColPropertyComp3() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESKeyNav(1)/CollPropertyComp"
-        + "?$select=PropertyComp");
+    URL url = URI.create(SERVICE_URI + "ESKeyNav(1)/CollPropertyComp"
+        + "?$select=PropertyComp").toURL();
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
     connection.setRequestProperty(HttpHeader.ACCEPT, "application/json;odata.metadata=minimal");
@@ -123,8 +124,8 @@ public class SelectOnComplexPropertiesITCase extends AbstractBaseTestITCase {
   
   @Test
   public void queryESKeyPropertyCompCompNav() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESKeyNav(1)/PropertyCompCompNav"
-        + "?$select=PropertyCompNav/PropertyInt16");
+    URL url = URI.create(SERVICE_URI + "ESKeyNav(1)/PropertyCompCompNav"
+        + "?$select=PropertyCompNav/PropertyInt16").toURL();
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
     connection.setRequestProperty(HttpHeader.ACCEPT, "application/json;odata.metadata=minimal");
@@ -140,8 +141,8 @@ public class SelectOnComplexPropertiesITCase extends AbstractBaseTestITCase {
   
   @Test
   public void queryESCompCollDerivedWithMixedComplexTypes() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESCompCollDerived(12345)/"
-        + "CollPropertyCompAno?$select=PropertyString");
+    URL url = URI.create(SERVICE_URI + "ESCompCollDerived(12345)/"
+        + "CollPropertyCompAno?$select=PropertyString").toURL();
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
     connection.setRequestProperty(HttpHeader.ACCEPT, "application/json;odata.metadata=full");

@@ -25,8 +25,8 @@ import org.apache.olingo.client.api.data.ResWrap;
 import org.apache.olingo.commons.api.Constants;
 import org.apache.olingo.commons.api.ex.ODataErrorDetail;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.JsonNode;
 
 public class JsonODataErrorDetailDeserializer extends JsonDeserializer {
 
@@ -37,20 +37,20 @@ public class JsonODataErrorDetailDeserializer extends JsonDeserializer {
   protected ResWrap<ODataErrorDetail> doDeserialize(final JsonParser parser) throws IOException {
 
     final ODataErrorDetail error = new ODataErrorDetail();
-    final JsonNode errorNode = parser.getCodec().readTree(parser);
+    final JsonNode errorNode = MAPPER.readTree(parser);
     if (errorNode.has(Constants.ERROR_CODE)) {
-      error.setCode(errorNode.get(Constants.ERROR_CODE).textValue());
+      error.setCode(errorNode.get(Constants.ERROR_CODE).stringValue());
     }
     if (errorNode.has(Constants.ERROR_MESSAGE)) {
       final JsonNode message = errorNode.get(Constants.ERROR_MESSAGE);
       if (message.isValueNode()) {
-        error.setMessage(message.textValue());
+        error.setMessage(message.stringValue());
       } else if (message.isObject()) {
-        error.setMessage(message.get(Constants.VALUE).asText());
+        error.setMessage(message.get(Constants.VALUE).asString());
       }
     }
     if (errorNode.has(Constants.ERROR_TARGET)) {
-      error.setTarget(errorNode.get(Constants.ERROR_TARGET).textValue());
+      error.setTarget(errorNode.get(Constants.ERROR_TARGET).stringValue());
     }
 
     return new ResWrap<>((URI) null, null, error);

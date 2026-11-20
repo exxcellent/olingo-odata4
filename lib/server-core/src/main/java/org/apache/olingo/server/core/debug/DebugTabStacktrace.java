@@ -24,7 +24,7 @@ import java.io.Writer;
 import org.apache.olingo.server.api.ODataLibraryException;
 import org.apache.olingo.server.api.ODataLibraryException.ODataErrorMessage;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonGenerator;
 
 /**
  * Exception debug information.
@@ -45,14 +45,14 @@ public class DebugTabStacktrace implements DebugTab {
   @Override
   public void appendJson(final JsonGenerator gen) throws IOException {
     gen.writeStartObject();
-    gen.writeFieldName("exceptions");
+    gen.writeName("exceptions");
     gen.writeStartArray();
     Throwable throwable = exception;
     while (throwable != null) {
       gen.writeStartObject();
-      gen.writeStringField("class", throwable.getClass().getCanonicalName());
-      gen.writeStringField("message", getMessageText(throwable));
-      gen.writeFieldName("invocation");
+      gen.writeStringProperty("class", throwable.getClass().getCanonicalName());
+      gen.writeStringProperty("message", getMessageText(throwable));
+      gen.writeName("invocation");
       appendJsonStackTraceElement(gen, throwable.getStackTrace()[0]);
       gen.writeEndObject();
 
@@ -61,7 +61,7 @@ public class DebugTabStacktrace implements DebugTab {
     }
     gen.writeEndArray();
 
-    gen.writeFieldName("stacktrace");
+    gen.writeName("stacktrace");
     gen.writeStartArray();
     if(exception != null){
       for (final StackTraceElement stackTraceElement : exception.getStackTrace()) {
@@ -90,9 +90,9 @@ public class DebugTabStacktrace implements DebugTab {
   private void appendJsonStackTraceElement(final JsonGenerator gen, final StackTraceElement element)
       throws IOException {
     gen.writeStartObject();
-    gen.writeStringField("class", element.getClassName());
-    gen.writeStringField("method", element.getMethodName());
-    gen.writeNumberField("line", element.getLineNumber());
+    gen.writeStringProperty("class", element.getClassName());
+    gen.writeStringProperty("method", element.getMethodName());
+    gen.writeNumberProperty("line", element.getLineNumber());
     gen.writeEndObject();
   }
 

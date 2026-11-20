@@ -18,14 +18,14 @@
  */
 package org.apache.olingo.client.core.edm.xml;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.olingo.commons.api.edm.provider.CsdlEnumType;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -42,19 +42,19 @@ class ClientCsdlEnumType extends CsdlEnumType implements Serializable {
 
       final ClientCsdlEnumType enumType = new ClientCsdlEnumType();
 
-      for (; jp.getCurrentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
-        final JsonToken token = jp.getCurrentToken();
-        if (token == JsonToken.FIELD_NAME) {
-          if ("Name".equals(jp.getCurrentName())) {
-            enumType.setName(jp.nextTextValue());
-          } else if ("UnderlyingType".equals(jp.getCurrentName())) {
-            enumType.setUnderlyingType(jp.nextTextValue());
-          } else if ("IsFlags".equals(jp.getCurrentName())) {
-            enumType.setFlags(BooleanUtils.toBoolean(jp.nextTextValue()));
-          } else if ("Member".equals(jp.getCurrentName())) {
+      for (; jp.currentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
+        final JsonToken token = jp.currentToken();
+        if (token == JsonToken.PROPERTY_NAME) {
+          if ("Name".equals(jp.currentName())) {
+            enumType.setName(nextTextValue(jp));
+          } else if ("UnderlyingType".equals(jp.currentName())) {
+            enumType.setUnderlyingType(nextTextValue(jp));
+          } else if ("IsFlags".equals(jp.currentName())) {
+            enumType.setFlags(BooleanUtils.toBoolean(nextTextValue(jp)));
+          } else if ("Member".equals(jp.currentName())) {
             jp.nextToken();
             enumType.getMembers().add(jp.readValueAs(ClientCsdlEnumMember.class));
-          } else if ("Annotation".equals(jp.getCurrentName())) {
+          } else if ("Annotation".equals(jp.currentName())) {
             jp.nextToken();
             enumType.getAnnotations().add(jp.readValueAs(ClientCsdlAnnotation.class));
           }

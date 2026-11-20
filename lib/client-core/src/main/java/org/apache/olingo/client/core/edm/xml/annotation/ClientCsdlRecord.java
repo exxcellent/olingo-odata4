@@ -25,10 +25,10 @@ import org.apache.olingo.client.core.edm.xml.AbstractClientCsdlEdmDeserializer;
 import org.apache.olingo.client.core.edm.xml.ClientCsdlAnnotation;
 import org.apache.olingo.commons.api.edm.provider.annotation.CsdlRecord;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(using = ClientCsdlRecord.RecordDeserializer.class)
 class ClientCsdlRecord extends CsdlRecord implements Serializable {
@@ -40,15 +40,15 @@ class ClientCsdlRecord extends CsdlRecord implements Serializable {
     protected ClientCsdlRecord doDeserialize(final JsonParser jp, final DeserializationContext ctxt)
         throws IOException {
       final ClientCsdlRecord record = new ClientCsdlRecord();
-      for (; jp.getCurrentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
-        final JsonToken token = jp.getCurrentToken();
-        if (token == JsonToken.FIELD_NAME) {
-          if ("Type".equals(jp.getCurrentName())) {
-            record.setType(jp.nextTextValue());
-          } else if ("Annotation".equals(jp.getCurrentName())) {
+      for (; jp.currentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
+        final JsonToken token = jp.currentToken();
+        if (token == JsonToken.PROPERTY_NAME) {
+          if ("Type".equals(jp.currentName())) {
+            record.setType(nextTextValue(jp));
+          } else if ("Annotation".equals(jp.currentName())) {
 			jp.nextToken();
             record.getAnnotations().add(jp.readValueAs(ClientCsdlAnnotation.class));
-          } else if ("PropertyValue".equals(jp.getCurrentName())) {
+          } else if ("PropertyValue".equals(jp.currentName())) {
 			jp.nextToken();
             record.getPropertyValues().add(jp.readValueAs(ClientCsdlPropertyValue.class));
           }

@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
@@ -35,7 +36,7 @@ import static javax.xml.stream.XMLInputFactory.*;
 
 public class XMLEventReaderWrapper implements XMLEventReader {
 
-  private static final Charset ENCODING = Charset.forName(org.apache.olingo.commons.api.Constants.UTF8);
+  private static final Charset ENCODING = StandardCharsets.UTF_8;
 
   public final static String CONTENT = "CONTENT_TAG";
 

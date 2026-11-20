@@ -193,7 +193,7 @@ public class TechnicalAsyncService {
     InputStream odResponseStream = odata.createFixedFormatSerializer().asyncResponse(odResponse);
 
     response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.APPLICATION_HTTP.toContentTypeString());
-    response.setHeader(HttpHeader.CONTENT_ENCODING, "binary");
+    response.setHeader("Content-Transfer-Encoding", "binary");
     response.setStatus(HttpStatusCode.OK.getStatusCode());
 
     writeToResponse(response, odResponseStream);

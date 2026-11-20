@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.olingo.commons.api.data.Annotation;
@@ -44,8 +45,8 @@ import org.apache.olingo.server.api.uri.UriHelper;
 import org.apache.olingo.server.tecsvc.MetadataETagSupport;
 import org.apache.olingo.server.tecsvc.data.DataProvider;
 import org.apache.olingo.server.tecsvc.provider.EdmTechProvider;
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 public class ODataJsonSerializerWithInstanceAnnotationsTest {
   private static final OData odata = OData.newInstance();
@@ -78,7 +79,7 @@ public class ODataJsonSerializerWithInstanceAnnotationsTest {
         EntitySerializerOptions.with()
             .contextURL(ContextURL.with().entitySet(edmEntitySet).suffix(Suffix.ENTITY).build())
             .build()).getContent();
-    final String resultString = IOUtils.toString(result);
+    final String resultString = IOUtils.toString(result, StandardCharsets.UTF_8);
     final String expectedResult = "{"
         + "\"@odata.context\":\"$metadata#ESAllPrim/$entity\","
         + "\"@odata.metadataEtag\":\"W/\\\"metadataETag\\\"\","
@@ -102,7 +103,7 @@ public class ODataJsonSerializerWithInstanceAnnotationsTest {
         + "\"PropertyGuid\":\"01234567-89ab-cdef-0123-456789abcdef\","
         + "\"PropertyTimeOfDay\":\"03:26:05\""
         + "}";
-    Assert.assertEquals(expectedResult, resultString);
+    assertEquals(expectedResult, resultString);
   }
   
   @Test
@@ -127,7 +128,7 @@ public class ODataJsonSerializerWithInstanceAnnotationsTest {
         EntitySerializerOptions.with()
             .contextURL(ContextURL.with().entitySet(edmEntitySet).suffix(Suffix.ENTITY).build())
             .build()).getContent();
-    final String resultString = IOUtils.toString(result);
+    final String resultString = IOUtils.toString(result, StandardCharsets.UTF_8);
     final String expectedResult = "{"
 	+	"\"@odata.context\":\"$metadata#ESAllPrim/$entity\","
 	+	"\"@odata.metadataEtag\":\"W/\\\"metadataETag\\\"\","
@@ -176,7 +177,7 @@ public class ODataJsonSerializerWithInstanceAnnotationsTest {
 	+		"\"target\":\"ESAllPrim(32767)/olingo.odata.test1.BAETAllPrimRT\""
 	+	"}"
 	+"}";
-    Assert.assertEquals(expectedResult, resultString);
+    assertEquals(expectedResult, resultString);
   }
   
   @Test
@@ -216,7 +217,7 @@ public class ODataJsonSerializerWithInstanceAnnotationsTest {
         EntitySerializerOptions.with()
             .contextURL(ContextURL.with().entitySet(edmEntitySet).suffix(Suffix.ENTITY).build())
             .build()).getContent();
-    final String resultString = IOUtils.toString(result);
+    final String resultString = IOUtils.toString(result, StandardCharsets.UTF_8);
     final String expectedResult = "{"
     		+	"\"@odata.context\":\"$metadata#ESMixPrimCollComp/$entity\","
     		+	"\"@odata.metadataEtag\":\"W/\\\"metadataETag\\\"\","
@@ -280,6 +281,6 @@ public class ODataJsonSerializerWithInstanceAnnotationsTest {
     		+ "\"ESMixPrimCollComp(32767)/olingo.odata.test1.BAETMixPrimCollCompRTCTTwoPrim\""
     		+	"}"
     		+"}";
-    Assert.assertEquals(expectedResult, resultString);
+    assertEquals(expectedResult, resultString);
   }
 }

@@ -18,7 +18,7 @@
  */
 package org.apache.olingo.client.core.http;
 
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 
 import java.net.URI;
 
@@ -26,16 +26,9 @@ import java.net.URI;
  * Class identifying PATCH HTTP method.
  * @NotThreadSafe
  */
-public class HttpPatch extends HttpEntityEnclosingRequestBase {
+public class HttpPatch extends HttpUriRequestBase {
 
   public final static String METHOD_NAME = "PATCH";
-
-  /**
-   * Constructor.
-   */
-  public HttpPatch() {
-    super();
-  }
 
   /**
    * Constructor.
@@ -43,8 +36,7 @@ public class HttpPatch extends HttpEntityEnclosingRequestBase {
    * @param uri request URI.
    */
   public HttpPatch(final URI uri) {
-    super();
-    setURI(uri);
+    super(METHOD_NAME, uri);
   }
 
   /**
@@ -54,8 +46,7 @@ public class HttpPatch extends HttpEntityEnclosingRequestBase {
    * @throws IllegalArgumentException if the uri is invalid.
    */
   public HttpPatch(final String uri) {
-    super();
-    setURI(URI.create(uri));
+    super(METHOD_NAME, URI.create(uri));
   }
 
   /**

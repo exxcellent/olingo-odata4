@@ -25,10 +25,10 @@ import org.apache.olingo.client.core.edm.xml.AbstractClientCsdlEdmDeserializer;
 import org.apache.olingo.client.core.edm.xml.ClientCsdlAnnotation;
 import org.apache.olingo.commons.api.edm.provider.annotation.CsdlPropertyValue;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(using = ClientCsdlPropertyValue.PropertyValueDeserializer.class)
 class ClientCsdlPropertyValue extends CsdlPropertyValue implements Serializable {
@@ -40,12 +40,12 @@ class ClientCsdlPropertyValue extends CsdlPropertyValue implements Serializable 
     protected ClientCsdlPropertyValue doDeserialize(final JsonParser jp, final DeserializationContext ctxt)
         throws IOException {
       final ClientCsdlPropertyValue propValue = new ClientCsdlPropertyValue();
-      for (; jp.getCurrentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
-        final JsonToken token = jp.getCurrentToken();
-        if (token == JsonToken.FIELD_NAME) {
-          if ("Property".equals(jp.getCurrentName())) {
-            propValue.setProperty(jp.nextTextValue());
-          } else if ("Annotation".equals(jp.getCurrentName())) {
+      for (; jp.currentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
+        final JsonToken token = jp.currentToken();
+        if (token == JsonToken.PROPERTY_NAME) {
+          if ("Property".equals(jp.currentName())) {
+            propValue.setProperty(nextTextValue(jp));
+          } else if ("Annotation".equals(jp.currentName())) {
             propValue.getAnnotations().add(jp.readValueAs(ClientCsdlAnnotation.class));
           } else if (isAnnotationConstExprConstruct(jp)) {
             propValue.setValue(parseAnnotationConstExprConstruct(jp));

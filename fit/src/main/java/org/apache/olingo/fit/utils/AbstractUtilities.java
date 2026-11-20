@@ -232,6 +232,7 @@ public abstract class AbstractUtilities {
 
     bos.reset();
     IOUtils.copy(createdEntity, bos);
+    IOUtils.closeQuietly(createdEntity);
 
     // -----------------------------------------
     // 4. Add navigation links to be kept

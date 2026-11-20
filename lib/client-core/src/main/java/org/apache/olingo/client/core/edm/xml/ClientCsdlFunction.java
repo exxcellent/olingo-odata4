@@ -18,14 +18,14 @@
  */
 package org.apache.olingo.client.core.edm.xml;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.olingo.commons.api.edm.provider.CsdlFunction;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -42,23 +42,23 @@ class ClientCsdlFunction extends CsdlFunction implements Serializable {
 
       final ClientCsdlFunction functionImpl = new ClientCsdlFunction();
 
-      for (; jp.getCurrentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
-        final JsonToken token = jp.getCurrentToken();
-        if (token == JsonToken.FIELD_NAME) {
-          if ("Name".equals(jp.getCurrentName())) {
-            functionImpl.setName(jp.nextTextValue());
-          } else if ("IsBound".equals(jp.getCurrentName())) {
-            functionImpl.setBound(BooleanUtils.toBoolean(jp.nextTextValue()));
-          } else if ("IsComposable".equals(jp.getCurrentName())) {
-            functionImpl.setComposable(BooleanUtils.toBoolean(jp.nextTextValue()));
-          } else if ("EntitySetPath".equals(jp.getCurrentName())) {
-            functionImpl.setEntitySetPath(jp.nextTextValue());
-          } else if ("Parameter".equals(jp.getCurrentName())) {
+      for (; jp.currentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
+        final JsonToken token = jp.currentToken();
+        if (token == JsonToken.PROPERTY_NAME) {
+          if ("Name".equals(jp.currentName())) {
+            functionImpl.setName(nextTextValue(jp));
+          } else if ("IsBound".equals(jp.currentName())) {
+            functionImpl.setBound(BooleanUtils.toBoolean(nextTextValue(jp)));
+          } else if ("IsComposable".equals(jp.currentName())) {
+            functionImpl.setComposable(BooleanUtils.toBoolean(nextTextValue(jp)));
+          } else if ("EntitySetPath".equals(jp.currentName())) {
+            functionImpl.setEntitySetPath(nextTextValue(jp));
+          } else if ("Parameter".equals(jp.currentName())) {
             jp.nextToken();
             functionImpl.getParameters().add(jp.readValueAs(ClientCsdlParameter.class));
-          } else if ("ReturnType".equals(jp.getCurrentName())) {
+          } else if ("ReturnType".equals(jp.currentName())) {
             functionImpl.setReturnType(parseReturnType(jp, "Function"));
-          } else if ("Annotation".equals(jp.getCurrentName())) {
+          } else if ("Annotation".equals(jp.currentName())) {
             jp.nextToken();
             functionImpl.getAnnotations().add(jp.readValueAs(ClientCsdlAnnotation.class));
           }

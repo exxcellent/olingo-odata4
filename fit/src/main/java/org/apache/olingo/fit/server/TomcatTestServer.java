@@ -22,6 +22,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,15 +37,6 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.SimpleFormatter;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-import jakarta.servlet.http.HttpSessionEvent;
-import jakarta.servlet.http.HttpSessionListener;
-
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.LifecycleState;
@@ -53,21 +46,24 @@ import org.apache.catalina.loader.WebappLoader;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.tomcat.util.http.LegacyCookieProcessor;
+import org.apache.tomcat.util.http.Rfc6265CookieProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSessionEvent;
+import jakarta.servlet.http.HttpSessionListener;
 
 /**
  * Server for integration tests.
  */
 public class TomcatTestServer {
   private static final Logger LOG = LoggerFactory.getLogger(TomcatTestServer.class);
-
-  private final Tomcat tomcat;
-
-  private TomcatTestServer(final Tomcat tomcat) {
-    this.tomcat = tomcat;
-  }
 
   public static void main(final String[] params) throws LifecycleException {
     TestServerBuilder server = null;
@@ -101,7 +97,9 @@ public class TomcatTestServer {
     } catch (LifecycleException e) {
       throw new RuntimeException("Failed to start Tomcat server from main method.", e);
     } finally {
-      server.stop();
+      if(server != null) {
+        server.stop();        
+      }
     }
   }
 
@@ -135,7 +133,7 @@ public class TomcatTestServer {
       File resourcePath = new File(resource);
       if (resourcePath.exists() && resourcePath.isFile()) {
         FileInputStream fin = new FileInputStream(resourcePath);
-        result = IOUtils.toString(fin, "UTF-8");
+        result = IOUtils.toString(fin, StandardCharsets.UTF_8);
         LOG.info("Mapped uri '{}' to resource '{}'.", uri, resource);
         LOG.trace("Resource content {\n\n{}\n\n}", result);
       } else {
@@ -273,35 +271,38 @@ public class TomcatTestServer {
     }
 
     public TestServerBuilder addServlet(final Class<? extends HttpServlet> factoryClass, final String path)
-        throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException {
+        throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException, 
+        IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
       if (server != null) {
         return this;
       }
       String servletClassname = factoryClass.getName();
-      HttpServlet httpServlet = (HttpServlet) Class.forName(servletClassname).newInstance();
+      HttpServlet httpServlet = (HttpServlet) Class.forName(servletClassname).getDeclaredConstructor().newInstance();
       Context cxt = getContext();
       String randomServletId = UUID.randomUUID().toString();
       Tomcat.addServlet(cxt, randomServletId, httpServlet);
-      cxt.addServletMappingDecoded(path, randomServletId);
+      cxt.addServletMapping(path, randomServletId);
       LOG.info("Added servlet {} at context {} (mapping id={}).", servletClassname, path, randomServletId);
       return this;
     }
 
     public TestServerBuilder addAuthServlet(final Class<? extends HttpServlet> factoryClass, 
             final String servletPath, final String contextPath)
-        throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException, ServletException {
+        throws InstantiationException, IllegalAccessException, ClassNotFoundException, IOException, 
+        ServletException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, 
+        SecurityException {
       if (server != null) {
         return this;
       }
       final String TOMCAT_WEB_XML = "web.xml";
       String webXMLPath = Thread.currentThread().getContextClassLoader().getResource(TOMCAT_WEB_XML).getPath();      
       String servletClassname = factoryClass.getName();
-      HttpServlet httpServlet = (HttpServlet) Class.forName(servletClassname).newInstance();
+      HttpServlet httpServlet = (HttpServlet) Class.forName(servletClassname).getDeclaredConstructor().newInstance();
       Context cxt = tomcat.addWebapp(servletPath, baseDir.getAbsolutePath());
       cxt.setAltDDName(webXMLPath);
       String randomServletId = UUID.randomUUID().toString();
       Tomcat.addServlet(cxt, randomServletId, httpServlet);
-      cxt.addServletMappingDecoded(contextPath, randomServletId);
+      cxt.addServletMapping(contextPath, randomServletId);
 
       return this;
     }
@@ -325,7 +326,7 @@ public class TomcatTestServer {
       }
       Context cxt = getContext();
       Tomcat.addServlet(cxt, name, httpServlet);
-      cxt.addServletMappingDecoded(path, name);
+      cxt.addServletMapping(path, name);
       //
       LOG.info("Added servlet {} at context {}.", name, path);
       return this;
@@ -336,7 +337,7 @@ public class TomcatTestServer {
     private Context getContext() {
       if (baseContext == null) {
         baseContext = tomcat.addContext("", baseDir.getAbsolutePath());
-        baseContext.setCookieProcessor(new LegacyCookieProcessor());
+        baseContext.setCookieProcessor(new Rfc6265CookieProcessor());
       }
       return baseContext;
     }
@@ -352,7 +353,7 @@ public class TomcatTestServer {
           + tomcat.getServer().getAddress() + ":" + tomcat.getConnector().getPort() +
           " (with base dir: " + baseDir.getAbsolutePath());
 
-      server = new TomcatTestServer(tomcat);
+      server = new TomcatTestServer();
       return server;
     }
 

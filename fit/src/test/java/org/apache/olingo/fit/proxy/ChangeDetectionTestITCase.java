@@ -18,8 +18,8 @@
  */
 package org.apache.olingo.fit.proxy;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.Proxy;
 import java.sql.Timestamp;
@@ -41,7 +41,7 @@ import org.apache.olingo.fit.proxy.staticservice.odatawcfservice.types.OrderColl
 import org.apache.olingo.fit.proxy.staticservice.odatawcfservice.types.PaymentInstrument;
 import org.apache.olingo.fit.proxy.staticservice.odatawcfservice.types.PaymentInstrumentCollection;
 // CHECKSTYLE:ON (Maven checkstyle)
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ChangeDetectionTestITCase extends AbstractTestITCase {
 
@@ -128,7 +128,7 @@ public class ChangeDetectionTestITCase extends AbstractTestITCase {
     assertFalse(isChanged(account));
 
     final PaymentInstrument instrument = getContainer().newEntityInstance(PaymentInstrument.class);
-    final int id = RandomUtils.nextInt(101999, 105000);
+    final int id = RandomUtils.secure().randomInt(101999, 105000);
     instrument.setPaymentInstrumentID(id);
     instrument.setFriendlyName("New one");
     instrument.setCreatedDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));

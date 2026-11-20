@@ -97,21 +97,6 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>com.keyboardsamurais.maven</groupId>
-        <artifactId>maven-timestamp-plugin</artifactId>
-        <configuration>
-          <propertyName>timestamp</propertyName>
-          <timestampPattern>dd.MM.yyyy HH:mm</timestampPattern>
-        </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>create</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
   </build>
 
@@ -119,13 +104,11 @@
     <dependency>
       <groupId>jakarta.servlet</groupId>
       <artifactId>jakarta.servlet-api</artifactId>
-      <version>${jakarta.servlet.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>jakarta.xml.bind</groupId>
       <artifactId>jakarta.xml.bind-api</artifactId>
-      <version>${jakarta.xml.version}</version>
     </dependency>
 
     <dependency>
@@ -163,12 +146,19 @@
     </dependency>
 
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>

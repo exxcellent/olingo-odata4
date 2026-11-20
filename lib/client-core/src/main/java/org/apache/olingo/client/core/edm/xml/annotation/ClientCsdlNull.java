@@ -25,10 +25,10 @@ import org.apache.olingo.client.core.edm.xml.AbstractClientCsdlEdmDeserializer;
 import org.apache.olingo.client.core.edm.xml.ClientCsdlAnnotation;
 import org.apache.olingo.commons.api.edm.provider.annotation.CsdlNull;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(using = ClientCsdlNull.NullDeserializer.class)
 class ClientCsdlNull extends CsdlNull implements Serializable {
@@ -40,9 +40,9 @@ class ClientCsdlNull extends CsdlNull implements Serializable {
     protected ClientCsdlNull doDeserialize(final JsonParser jp, final DeserializationContext ctxt)
             throws IOException {
       final ClientCsdlNull _null = new ClientCsdlNull();
-      for (; jp.getCurrentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
-        final JsonToken token = jp.getCurrentToken();
-        if (token == JsonToken.FIELD_NAME && "Annotation".equals(jp.getCurrentName())) {
+      for (; jp.currentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
+        final JsonToken token = jp.currentToken();
+        if (token == JsonToken.PROPERTY_NAME && "Annotation".equals(jp.currentName())) {
            _null.getAnnotations().add(jp.readValueAs(ClientCsdlAnnotation.class));
         }
       }

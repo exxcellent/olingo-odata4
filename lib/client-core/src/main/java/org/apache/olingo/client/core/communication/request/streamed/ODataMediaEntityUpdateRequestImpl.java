@@ -22,14 +22,14 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.api.communication.request.streamed.MediaEntityUpdateStreamManager;
 import org.apache.olingo.client.api.communication.request.streamed.ODataMediaEntityUpdateRequest;
 import org.apache.olingo.client.api.communication.response.ODataMediaEntityUpdateResponse;
 import org.apache.olingo.client.api.data.ResWrap;
 import org.apache.olingo.client.api.domain.ClientEntity;
+import org.apache.olingo.client.api.http.ODataHttpClient;
 import org.apache.olingo.client.api.serialization.ODataDeserializerException;
 import org.apache.olingo.client.core.communication.request.AbstractODataStreamManager;
 import org.apache.olingo.client.core.communication.response.AbstractODataResponse;
@@ -100,8 +100,8 @@ public class ODataMediaEntityUpdateRequestImpl<E extends ClientEntity>
 
     private E entity = null;
 
-    private ODataMediaEntityUpdateResponseImpl(final ODataClient odataClient, final HttpClient httpClient,
-            final HttpResponse res) {
+    private ODataMediaEntityUpdateResponseImpl(final ODataClient odataClient, final ODataHttpClient httpClient,
+            final ClassicHttpResponse res) {
 
       super(odataClient, httpClient, res);
     }

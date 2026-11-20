@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -31,7 +32,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.api.data.ResWrap;
 import org.apache.olingo.client.api.serialization.ODataDeserializerException;
-import org.apache.olingo.commons.api.Constants;
 import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.slf4j.Logger;
@@ -243,9 +243,9 @@ public class ClientEntitySetIterator<T extends ClientEntitySet, E extends Client
 
     try {
       if (consume(input, "<entry>", osEntitySet, false) >= 0) {
-        entity.write("<entry ".getBytes(Constants.UTF8));
-        entity.write(namespaces.getBytes(Constants.UTF8));
-        entity.write(">".getBytes(Constants.UTF8));
+        entity.write("<entry ".getBytes(StandardCharsets.UTF_8));
+        entity.write(namespaces.getBytes(StandardCharsets.UTF_8));
+        entity.write(">".getBytes(StandardCharsets.UTF_8));
 
         if (consume(input, "</entry>", entity, true) >= 0) {
           atomEntity = odataClient.getDeserializer(ContentType.APPLICATION_ATOM_XML).
@@ -274,7 +274,7 @@ public class ClientEntitySetIterator<T extends ClientEntitySet, E extends Client
         os.write('>');
       }
 
-      res = attrsDeclaration == null ? "" : new String(attrsDeclaration, Constants.UTF8).trim();
+      res = attrsDeclaration == null ? "" : new String(attrsDeclaration, StandardCharsets.UTF_8).trim();
     } catch (Exception e) {
       LOG.error("Error retrieving entities from EntitySet", e);
       res = "";

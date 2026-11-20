@@ -18,17 +18,18 @@
  */
 package org.apache.olingo.server.core.serializer;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.InputStream;
 import java.util.Random;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataResponse;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class AsyncResponseSerializerTest {
   private static final String CRLF = "\r\n";
@@ -40,11 +41,11 @@ public class AsyncResponseSerializerTest {
     response.setHeader(HttpHeader.CONTENT_TYPE, ContentType.APPLICATION_JSON.toContentTypeString());
     response.setHeader(HttpHeader.CONTENT_LENGTH, String.valueOf(200));
 
-    response.setContent(IOUtils.toInputStream("Walter Winter" + CRLF));
+    response.setContent(IOUtils.toInputStream("Walter Winter" + CRLF, StandardCharsets.UTF_8));
 
     AsyncResponseSerializer serializer = new AsyncResponseSerializer();
     InputStream in = serializer.serialize(response);
-    String result = IOUtils.toString(in);
+    String result = IOUtils.toString(in, StandardCharsets.UTF_8);
     assertEquals("HTTP/1.1 200 OK" + CRLF
         + "Content-Type: application/json" + CRLF
         + "Content-Length: 200" + CRLF + CRLF
@@ -59,11 +60,11 @@ public class AsyncResponseSerializerTest {
     response.setHeader(HttpHeader.CONTENT_LENGTH, String.valueOf(0));
 
     String testData = testData(20000);
-    response.setContent(IOUtils.toInputStream(testData));
+    response.setContent(IOUtils.toInputStream(testData, StandardCharsets.UTF_8));
 
     AsyncResponseSerializer serializer = new AsyncResponseSerializer();
     InputStream in = serializer.serialize(response);
-    String result = IOUtils.toString(in);
+    String result = IOUtils.toString(in, StandardCharsets.UTF_8);
     assertEquals("HTTP/1.1 202 Accepted" + CRLF
         + "Content-Type: application/json" + CRLF
         + "Content-Length: 0" + CRLF + CRLF

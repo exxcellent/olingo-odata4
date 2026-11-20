@@ -82,7 +82,7 @@ import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.api.serializer.Kind;
 import org.apache.olingo.server.api.serializer.SerializerException;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonGenerator;
 
 public class MetadataDocumentJsonSerializer {
   
@@ -144,7 +144,7 @@ public class MetadataDocumentJsonSerializer {
   
   public void writeMetadataDocument(final JsonGenerator json) throws SerializerException, IOException {
     json.writeStartObject();
-    json.writeStringField(VERSION, "4.01");
+    json.writeStringProperty(VERSION, "4.01");
     if (!serviceMetadata.getReferences().isEmpty()) {
       appendReference(json);
     }
@@ -160,10 +160,10 @@ public class MetadataDocumentJsonSerializer {
 
   private void appendSchema(JsonGenerator json, EdmSchema schema) 
       throws SerializerException, IOException {
-    json.writeFieldName(schema.getNamespace());
+    json.writeName(schema.getNamespace());
     json.writeStartObject();
     if (schema.getAlias() != null) {
-      json.writeStringField(ALIAS, schema.getAlias());
+      json.writeStringProperty(ALIAS, schema.getAlias());
       namespaceToAlias.put(schema.getNamespace(), schema.getAlias());
     }
     // EnumTypes
@@ -201,7 +201,7 @@ public class MetadataDocumentJsonSerializer {
   private void appendAnnotationGroups(final JsonGenerator json, 
       final List<EdmAnnotations> annotationGroups) throws SerializerException, IOException {
     if (!annotationGroups.isEmpty()) {
-      json.writeObjectFieldStart(ANNOTATION);
+      json.writeObjectPropertyStart(ANNOTATION);
     }
     for (EdmAnnotations annotationGroup : annotationGroups) {
       appendAnnotationGroup(json, annotationGroup);
@@ -215,9 +215,9 @@ public class MetadataDocumentJsonSerializer {
       final EdmAnnotations annotationGroup) throws SerializerException, IOException {
     String targetPath = annotationGroup.getTargetPath();
     if (annotationGroup.getQualifier() != null) {
-      json.writeObjectFieldStart(targetPath + "#" + annotationGroup.getQualifier());
+      json.writeObjectPropertyStart(targetPath + "#" + annotationGroup.getQualifier());
     } else {
-      json.writeObjectFieldStart(targetPath);
+      json.writeObjectPropertyStart(targetPath);
     }
     appendAnnotations(json, annotationGroup, null);
     json.writeEndObject();
@@ -226,8 +226,8 @@ public class MetadataDocumentJsonSerializer {
   private void appendEntityContainer(final JsonGenerator json, 
       final EdmEntityContainer container) throws SerializerException, IOException {
     if (container != null) {
-      json.writeObjectFieldStart(container.getName());
-      json.writeStringField(KIND, Kind.EntityContainer.name());
+      json.writeObjectPropertyStart(container.getName());
+      json.writeStringProperty(KIND, Kind.EntityContainer.name());
       FullQualifiedName parentContainerName = container.getParentContainerName();
       if (parentContainerName != null) {
         String parentContainerNameString;
@@ -237,9 +237,9 @@ public class MetadataDocumentJsonSerializer {
         } else {
           parentContainerNameString = parentContainerName.getFullQualifiedNameAsString();
         }
-        json.writeObjectFieldStart(Kind.Extending.name());
-        json.writeStringField(KIND, Kind.EntityContainer.name());
-        json.writeStringField(EXTENDS, parentContainerNameString);
+        json.writeObjectPropertyStart(Kind.Extending.name());
+        json.writeStringProperty(KIND, Kind.EntityContainer.name());
+        json.writeStringProperty(EXTENDS, parentContainerNameString);
         json.writeEndObject();
       }
 
@@ -273,9 +273,9 @@ public class MetadataDocumentJsonSerializer {
   private void appendSingletons(final JsonGenerator json, 
       final List<EdmSingleton> singletons) throws SerializerException, IOException {
     for (EdmSingleton singleton : singletons) {
-      json.writeObjectFieldStart(singleton.getName());
-      json.writeStringField(KIND, Kind.Singleton.name());
-      json.writeStringField(TYPE, getAliasedFullQualifiedName(singleton.getEntityType()));
+      json.writeObjectPropertyStart(singleton.getName());
+      json.writeStringProperty(KIND, Kind.Singleton.name());
+      json.writeStringProperty(TYPE, getAliasedFullQualifiedName(singleton.getEntityType()));
       
       appendNavigationPropertyBindings(json, singleton);
       appendAnnotations(json, singleton, null);
@@ -286,9 +286,9 @@ public class MetadataDocumentJsonSerializer {
   private void appendFunctionImports(final JsonGenerator json, final List<EdmFunctionImport> functionImports,
       final String containerNamespace) throws SerializerException, IOException {
     for (EdmFunctionImport functionImport : functionImports) {
-      json.writeObjectFieldStart(functionImport.getName());
+      json.writeObjectPropertyStart(functionImport.getName());
 
-      json.writeStringField(KIND, Kind.FunctionImport.name());
+      json.writeStringProperty(KIND, Kind.FunctionImport.name());
       String functionFQNString;
       FullQualifiedName functionFqn = functionImport.getFunctionFqn();
       if (namespaceToAlias.get(functionFqn.getNamespace()) != null) {
@@ -296,16 +296,16 @@ public class MetadataDocumentJsonSerializer {
       } else {
         functionFQNString = functionFqn.getFullQualifiedNameAsString();
       }
-      json.writeStringField(DOLLAR + Kind.Function.name(), functionFQNString);
+      json.writeStringProperty(DOLLAR + Kind.Function.name(), functionFQNString);
 
       EdmEntitySet returnedEntitySet = functionImport.getReturnedEntitySet();
       if (returnedEntitySet != null) {
-        json.writeStringField(DOLLAR + Kind.EntitySet.name(), 
+        json.writeStringProperty(DOLLAR + Kind.EntitySet.name(), 
             containerNamespace + "." + returnedEntitySet.getName());
       }
       // Default is false and we do not write the default
       if (functionImport.isIncludeInServiceDocument()) {
-        json.writeBooleanField(INCLUDE_IN_SERV_DOC, functionImport.isIncludeInServiceDocument());
+        json.writeBooleanProperty(INCLUDE_IN_SERV_DOC, functionImport.isIncludeInServiceDocument());
       }
       appendAnnotations(json, functionImport, null);
       json.writeEndObject();
@@ -316,11 +316,12 @@ public class MetadataDocumentJsonSerializer {
       final List<EdmActionImport> actionImports, String containerNamespace) 
           throws SerializerException, IOException {
     for (EdmActionImport actionImport : actionImports) {
-      json.writeObjectFieldStart(actionImport.getName());
-      json.writeStringField(KIND, Kind.ActionImport.name());
-      json.writeStringField(DOLLAR + Kind.Action.name(), getAliasedFullQualifiedName(actionImport.getUnboundAction()));
+      json.writeObjectPropertyStart(actionImport.getName());
+      json.writeStringProperty(KIND, Kind.ActionImport.name());
+      json.writeStringProperty(DOLLAR + 
+          Kind.Action.name(), getAliasedFullQualifiedName(actionImport.getUnboundAction()));
       if (actionImport.getReturnedEntitySet() != null) {
-        json.writeStringField(DOLLAR + Kind.EntitySet.name(), 
+        json.writeStringProperty(DOLLAR + Kind.EntitySet.name(), 
             containerNamespace + "." + actionImport.getReturnedEntitySet().getName());
       }
       appendAnnotations(json, actionImport, null);
@@ -332,11 +333,11 @@ public class MetadataDocumentJsonSerializer {
   private void appendEntitySets(final JsonGenerator json, 
       final List<EdmEntitySet> entitySets) throws SerializerException, IOException {
     for (EdmEntitySet entitySet : entitySets) {
-      json.writeObjectFieldStart(entitySet.getName());
-      json.writeStringField(KIND, Kind.EntitySet.name());
-      json.writeStringField(TYPE, getAliasedFullQualifiedName(entitySet.getEntityType()));
+      json.writeObjectPropertyStart(entitySet.getName());
+      json.writeStringProperty(KIND, Kind.EntitySet.name());
+      json.writeStringProperty(TYPE, getAliasedFullQualifiedName(entitySet.getEntityType()));
       if (!entitySet.isIncludeInServiceDocument()) {
-        json.writeBooleanField(INCLUDE_IN_SERV_DOC, entitySet.isIncludeInServiceDocument());
+        json.writeBooleanProperty(INCLUDE_IN_SERV_DOC, entitySet.isIncludeInServiceDocument());
       }
 
       appendNavigationPropertyBindings(json, entitySet);
@@ -349,9 +350,9 @@ public class MetadataDocumentJsonSerializer {
       final EdmBindingTarget bindingTarget) throws SerializerException, IOException {
     if (bindingTarget.getNavigationPropertyBindings() != null && 
         !bindingTarget.getNavigationPropertyBindings().isEmpty()) {
-      json.writeObjectFieldStart(NAVIGATION_PROPERTY_BINDING);
+      json.writeObjectPropertyStart(NAVIGATION_PROPERTY_BINDING);
       for (EdmNavigationPropertyBinding binding : bindingTarget.getNavigationPropertyBindings()) {
-        json.writeStringField(binding.getPath(), binding.getTarget());
+        json.writeStringProperty(binding.getPath(), binding.getTarget());
       }
       json.writeEndObject();
     }
@@ -360,13 +361,13 @@ public class MetadataDocumentJsonSerializer {
   private void appendTerms(final JsonGenerator json, final List<EdmTerm> terms) 
       throws SerializerException, IOException {
     for (EdmTerm term : terms) {
-      json.writeObjectFieldStart(term.getName());
-      json.writeStringField(KIND, Kind.Term.name());
+      json.writeObjectPropertyStart(term.getName());
+      json.writeStringProperty(KIND, Kind.Term.name());
 
-      json.writeStringField(TYPE, getAliasedFullQualifiedName(term.getType()));
+      json.writeStringProperty(TYPE, getAliasedFullQualifiedName(term.getType()));
 
       if (term.getBaseTerm() != null) {
-        json.writeStringField(BASE_TERM, getAliasedFullQualifiedName(term.getBaseTerm().getFullQualifiedName()));
+        json.writeStringProperty(BASE_TERM, getAliasedFullQualifiedName(term.getBaseTerm().getFullQualifiedName()));
       }
 
       if (term.getAppliesTo() != null && !term.getAppliesTo().isEmpty()) {
@@ -380,28 +381,28 @@ public class MetadataDocumentJsonSerializer {
             appliesToString = appliesToString + " " + target.toString();
           }
         }
-        json.writeStringField(APPLIES_TO, appliesToString);
+        json.writeStringProperty(APPLIES_TO, appliesToString);
       }
 
       // Facets
       if (!term.isNullable()) {
-        json.writeBooleanField(NULLABLE, term.isNullable());
+        json.writeBooleanProperty(NULLABLE, term.isNullable());
       }
 
       if (term.getDefaultValue() != null) {
-        json.writeStringField(DEFAULT_VALUE, term.getDefaultValue());
+        json.writeStringProperty(DEFAULT_VALUE, term.getDefaultValue());
       }
 
       if (term.getMaxLength() != null) {
-        json.writeNumberField(MAX_LENGTH, term.getMaxLength());
+        json.writeNumberProperty(MAX_LENGTH, term.getMaxLength());
       }
 
       if (term.getPrecision() != null) {
-        json.writeNumberField(PRECISION, term.getPrecision());
+        json.writeNumberProperty(PRECISION, term.getPrecision());
       }
 
       if (term.getScale() != null) {
-        json.writeNumberField(SCALE, term.getScale());
+        json.writeNumberProperty(SCALE, term.getScale());
       }
       
       appendAnnotations(json, term, null);
@@ -426,20 +427,20 @@ public class MetadataDocumentJsonSerializer {
     }
     
     for (Entry<String, List<EdmFunction>> functionsMapEntry : functionsMap.entrySet()) {
-      json.writeArrayFieldStart(functionsMapEntry.getKey());
+      json.writeArrayPropertyStart(functionsMapEntry.getKey());
       List<EdmFunction> functionEntry = functionsMapEntry.getValue();
       for (EdmFunction function : functionEntry) {
         json.writeStartObject();
-        json.writeStringField(KIND, Kind.Function.name());
+        json.writeStringProperty(KIND, Kind.Function.name());
         if (function.getEntitySetPath() != null) {
-          json.writeStringField(ENTITY_SET_PATH, function.getEntitySetPath());
+          json.writeStringProperty(ENTITY_SET_PATH, function.getEntitySetPath());
         }
         if (function.isBound()) {
-          json.writeBooleanField(ISBOUND, function.isBound());
+          json.writeBooleanProperty(ISBOUND, function.isBound());
         }
 
         if (function.isComposable()) {
-          json.writeBooleanField(ISCOMPOSABLE, function.isComposable());
+          json.writeBooleanProperty(ISCOMPOSABLE, function.isComposable());
         }
         
         appendOperationParameters(json, function);
@@ -469,15 +470,15 @@ public class MetadataDocumentJsonSerializer {
       }
     }
     for (Entry<String, List<EdmAction>> actionsMapEntry : actionsMap.entrySet()) {
-      json.writeArrayFieldStart(actionsMapEntry.getKey());
+      json.writeArrayPropertyStart(actionsMapEntry.getKey());
       List<EdmAction> actionEntry = actionsMapEntry.getValue();
       for (EdmAction action : actionEntry) {
         json.writeStartObject();
-        json.writeStringField(KIND, Kind.Action.name());
+        json.writeStringProperty(KIND, Kind.Action.name());
         if (action.getEntitySetPath() != null) {
-          json.writeStringField(ENTITY_SET_PATH, action.getEntitySetPath());
+          json.writeStringProperty(ENTITY_SET_PATH, action.getEntitySetPath());
         }
-        json.writeBooleanField(ISBOUND, action.isBound());
+        json.writeBooleanProperty(ISBOUND, action.isBound());
 
         appendOperationParameters(json, action);
 
@@ -495,16 +496,16 @@ public class MetadataDocumentJsonSerializer {
       final EdmOperation operation) throws SerializerException, IOException {
     EdmReturnType returnType = operation.getReturnType();
     if (returnType != null) {
-      json.writeObjectFieldStart(RETURN_TYPE);
+      json.writeObjectPropertyStart(RETURN_TYPE);
       String returnTypeFqnString;
       if (EdmTypeKind.PRIMITIVE.equals(returnType.getType().getKind())) {
         returnTypeFqnString = getFullQualifiedName(returnType.getType());
       } else {
         returnTypeFqnString = getAliasedFullQualifiedName(returnType.getType());
       }
-      json.writeStringField(TYPE, returnTypeFqnString);
+      json.writeStringProperty(TYPE, returnTypeFqnString);
       if (returnType.isCollection()) {
-        json.writeBooleanField(COLLECTION, returnType.isCollection());
+        json.writeBooleanProperty(COLLECTION, returnType.isCollection());
       }
       
       appendReturnTypeFacets(json, returnType);
@@ -515,37 +516,37 @@ public class MetadataDocumentJsonSerializer {
   private void appendReturnTypeFacets(final JsonGenerator json, 
       final EdmReturnType returnType) throws SerializerException, IOException {
     if (!returnType.isNullable()) {
-      json.writeBooleanField(NULLABLE, returnType.isNullable());
+      json.writeBooleanProperty(NULLABLE, returnType.isNullable());
     }
     if (returnType.getMaxLength() != null) {
-      json.writeNumberField(MAX_LENGTH, returnType.getMaxLength());
+      json.writeNumberProperty(MAX_LENGTH, returnType.getMaxLength());
     }
     if (returnType.getPrecision() != null) {
-      json.writeNumberField(PRECISION, returnType.getPrecision());
+      json.writeNumberProperty(PRECISION, returnType.getPrecision());
     }
     if (returnType.getScale() != null) {
-      json.writeNumberField(SCALE, returnType.getScale());
+      json.writeNumberProperty(SCALE, returnType.getScale());
     }
   }
 
   private void appendOperationParameters(final JsonGenerator json, 
       final EdmOperation operation) throws SerializerException, IOException {
     if (!operation.getParameterNames().isEmpty()) {
-      json.writeArrayFieldStart(PARAMETER);
+      json.writeArrayPropertyStart(PARAMETER);
     }
     for (String parameterName : operation.getParameterNames()) {
       EdmParameter parameter = operation.getParameter(parameterName);
       json.writeStartObject();
-      json.writeStringField(PARAMETER_NAME, parameterName);
+      json.writeStringProperty(PARAMETER_NAME, parameterName);
       String typeFqnString;
       if (EdmTypeKind.PRIMITIVE.equals(parameter.getType().getKind())) {
         typeFqnString = getFullQualifiedName(parameter.getType());
       } else {
         typeFqnString = getAliasedFullQualifiedName(parameter.getType());
       }
-      json.writeStringField(TYPE, typeFqnString);
+      json.writeStringProperty(TYPE, typeFqnString);
       if (parameter.isCollection()) {
-        json.writeBooleanField(COLLECTION, parameter.isCollection());
+        json.writeBooleanProperty(COLLECTION, parameter.isCollection());
       }
       
       appendParameterFacets(json, parameter);
@@ -561,31 +562,31 @@ public class MetadataDocumentJsonSerializer {
   private void appendParameterFacets(final JsonGenerator json, 
       final EdmParameter parameter) throws SerializerException, IOException {
     if (!parameter.isNullable()) {
-      json.writeBooleanField(NULLABLE, parameter.isNullable());
+      json.writeBooleanProperty(NULLABLE, parameter.isNullable());
     }
     if (parameter.getMaxLength() != null) {
-      json.writeNumberField(MAX_LENGTH, parameter.getMaxLength());
+      json.writeNumberProperty(MAX_LENGTH, parameter.getMaxLength());
     }
     if (parameter.getPrecision() != null) {
-      json.writeNumberField(PRECISION, parameter.getPrecision());
+      json.writeNumberProperty(PRECISION, parameter.getPrecision());
     }
     if (parameter.getScale() != null) {
-      json.writeNumberField(SCALE, parameter.getScale());
+      json.writeNumberProperty(SCALE, parameter.getScale());
     }
   }
 
   private void appendComplexTypes(final JsonGenerator json, 
       final List<EdmComplexType> complexTypes) throws SerializerException, IOException {
     for (EdmComplexType complexType : complexTypes) {
-      json.writeObjectFieldStart(complexType.getName());
+      json.writeObjectPropertyStart(complexType.getName());
 
-      json.writeStringField(KIND, Kind.ComplexType.name());
+      json.writeStringProperty(KIND, Kind.ComplexType.name());
       if (complexType.getBaseType() != null) {
-        json.writeStringField(BASE_TYPE, getAliasedFullQualifiedName(complexType.getBaseType()));
+        json.writeStringProperty(BASE_TYPE, getAliasedFullQualifiedName(complexType.getBaseType()));
       }
 
       if (complexType.isAbstract()) {
-        json.writeBooleanField(ABSTRACT, complexType.isAbstract());
+        json.writeBooleanProperty(ABSTRACT, complexType.isAbstract());
       }
 
       appendProperties(json, complexType);
@@ -601,18 +602,18 @@ public class MetadataDocumentJsonSerializer {
   private void appendEntityTypes(JsonGenerator json, 
       List<EdmEntityType> entityTypes) throws SerializerException, IOException {
     for (EdmEntityType entityType : entityTypes) {
-      json.writeObjectFieldStart(entityType.getName());
-      json.writeStringField(KIND, Kind.EntityType.name());
+      json.writeObjectPropertyStart(entityType.getName());
+      json.writeStringProperty(KIND, Kind.EntityType.name());
       if (entityType.hasStream()) {
-        json.writeBooleanField(HAS_STREAM, entityType.hasStream());
+        json.writeBooleanProperty(HAS_STREAM, entityType.hasStream());
       }
 
       if (entityType.getBaseType() != null) {
-        json.writeStringField(BASE_TYPE, getAliasedFullQualifiedName(entityType.getBaseType()));
+        json.writeStringProperty(BASE_TYPE, getAliasedFullQualifiedName(entityType.getBaseType()));
       }
 
       if (entityType.isAbstract()) {
-        json.writeBooleanField(ABSTRACT, entityType.isAbstract());
+        json.writeBooleanProperty(ABSTRACT, entityType.isAbstract());
       }
 
       appendKey(json, entityType);
@@ -635,31 +636,31 @@ public class MetadataDocumentJsonSerializer {
     }
     for (String navigationPropertyName : navigationPropertyNames) {
       EdmNavigationProperty navigationProperty = type.getNavigationProperty(navigationPropertyName);
-      json.writeObjectFieldStart(navigationPropertyName);
-      json.writeStringField(KIND, Kind.NavigationProperty.name());
+      json.writeObjectPropertyStart(navigationPropertyName);
+      json.writeStringProperty(KIND, Kind.NavigationProperty.name());
       
-      json.writeStringField(TYPE, getAliasedFullQualifiedName(navigationProperty.getType()));
+      json.writeStringProperty(TYPE, getAliasedFullQualifiedName(navigationProperty.getType()));
       if (navigationProperty.isCollection()) {
-        json.writeBooleanField(COLLECTION, navigationProperty.isCollection());
+        json.writeBooleanProperty(COLLECTION, navigationProperty.isCollection());
       }
       
       if (!navigationProperty.isNullable()) {
-        json.writeBooleanField(NULLABLE, navigationProperty.isNullable());
+        json.writeBooleanProperty(NULLABLE, navigationProperty.isNullable());
       }
 
       if (navigationProperty.getPartner() != null) {
         EdmNavigationProperty partner = navigationProperty.getPartner();
-        json.writeStringField(PARTNER, partner.getName());
+        json.writeStringProperty(PARTNER, partner.getName());
       }
 
       if (navigationProperty.containsTarget()) {
-        json.writeBooleanField(CONTAINS_TARGET, navigationProperty.containsTarget());
+        json.writeBooleanProperty(CONTAINS_TARGET, navigationProperty.containsTarget());
       }
 
       if (navigationProperty.getReferentialConstraints() != null) {
         for (EdmReferentialConstraint constraint : navigationProperty.getReferentialConstraints()) {
-          json.writeObjectFieldStart(REFERENTIAL_CONSTRAINT);
-          json.writeStringField(constraint.getPropertyName(), constraint.getReferencedPropertyName());
+          json.writeObjectPropertyStart(REFERENTIAL_CONSTRAINT);
+          json.writeStringProperty(constraint.getPropertyName(), constraint.getReferencedPropertyName());
           for (EdmAnnotation annotation : constraint.getAnnotations()) {
             appendAnnotations(json, annotation, null);
           }
@@ -668,8 +669,8 @@ public class MetadataDocumentJsonSerializer {
       }
       
       if (navigationProperty.getOnDelete() != null) {
-        json.writeObjectFieldStart(ON_DELETE);
-        json.writeStringField(ON_DELETE_PROPERTY, navigationProperty.getOnDelete().getAction());
+        json.writeObjectPropertyStart(ON_DELETE);
+        json.writeStringProperty(ON_DELETE_PROPERTY, navigationProperty.getOnDelete().getAction());
         appendAnnotations(json, navigationProperty.getOnDelete(), null);
         json.writeEndObject();
       }
@@ -688,45 +689,45 @@ public class MetadataDocumentJsonSerializer {
     }
     for (String propertyName : propertyNames) {
       EdmProperty property = type.getStructuralProperty(propertyName);
-      json.writeObjectFieldStart(propertyName);
+      json.writeObjectPropertyStart(propertyName);
       String fqnString;
       if (property.isPrimitive()) {
         fqnString = getFullQualifiedName(property.getType());
       } else {
         fqnString = getAliasedFullQualifiedName(property.getType());
       }
-      json.writeStringField(TYPE, fqnString);
+      json.writeStringProperty(TYPE, fqnString);
       if (property.isCollection()) {
-        json.writeBooleanField(COLLECTION, property.isCollection());
+        json.writeBooleanProperty(COLLECTION, property.isCollection());
       }
 
       // Facets
       if (!property.isNullable()) {
-        json.writeBooleanField(NULLABLE, property.isNullable());
+        json.writeBooleanProperty(NULLABLE, property.isNullable());
       }
 
       if (!property.isUnicode()) {
-        json.writeBooleanField(UNICODE, property.isUnicode());
+        json.writeBooleanProperty(UNICODE, property.isUnicode());
       }
 
       if (property.getDefaultValue() != null) {
-        json.writeStringField(DEFAULT_VALUE, property.getDefaultValue());
+        json.writeStringProperty(DEFAULT_VALUE, property.getDefaultValue());
       }
 
       if (property.getMaxLength() != null) {
-        json.writeNumberField(MAX_LENGTH, property.getMaxLength());
+        json.writeNumberProperty(MAX_LENGTH, property.getMaxLength());
       }
 
       if (property.getPrecision() != null) {
-        json.writeNumberField(PRECISION, property.getPrecision());
+        json.writeNumberProperty(PRECISION, property.getPrecision());
       }
 
       if (property.getScale() != null) {
-        json.writeNumberField(SCALE, property.getScale());
+        json.writeNumberProperty(SCALE, property.getScale());
       }
       
       if (property.getSrid() != null) {
-          json.writeStringField(SRID, "" + property.getSrid());
+          json.writeStringProperty(SRID, "" + property.getSrid());
       }
 
       appendAnnotations(json, property, null);
@@ -743,12 +744,12 @@ public class MetadataDocumentJsonSerializer {
       if (baseType != null && baseType.getKeyPropertyRefs() != null && !(baseType.getKeyPropertyRefs().isEmpty())) {
         return;
       }
-      json.writeArrayFieldStart(KEY);
+      json.writeArrayPropertyStart(KEY);
       for (EdmKeyPropertyRef keyRef : keyPropertyRefs) {
         
         if (keyRef.getAlias() != null) {
           json.writeStartObject();
-          json.writeStringField(keyRef.getAlias(), keyRef.getName());
+          json.writeStringProperty(keyRef.getAlias(), keyRef.getName());
           json.writeEndObject();
         } else {
           json.writeString(keyRef.getName());
@@ -766,25 +767,25 @@ public class MetadataDocumentJsonSerializer {
   private void appendTypeDefinitions(final JsonGenerator json, 
       final List<EdmTypeDefinition> typeDefinitions) throws SerializerException, IOException {
     for (EdmTypeDefinition definition : typeDefinitions) {
-      json.writeObjectFieldStart(definition.getName());
-      json.writeStringField(KIND, definition.getKind().name());
-      json.writeStringField(UNDERLYING_TYPE, getFullQualifiedName(definition.getUnderlyingType()));
+      json.writeObjectPropertyStart(definition.getName());
+      json.writeStringProperty(KIND, definition.getKind().name());
+      json.writeStringProperty(UNDERLYING_TYPE, getFullQualifiedName(definition.getUnderlyingType()));
       
       // Facets
       if (definition.getMaxLength() != null) {
-        json.writeStringField(MAX_LENGTH, "" + definition.getMaxLength());
+        json.writeStringProperty(MAX_LENGTH, "" + definition.getMaxLength());
       }
 
       if (definition.getPrecision() != null) {
-        json.writeStringField(PRECISION, "" + definition.getPrecision());
+        json.writeStringProperty(PRECISION, "" + definition.getPrecision());
       }
 
       if (definition.getScale() != null) {
-        json.writeStringField(SCALE, "" + definition.getScale());
+        json.writeStringProperty(SCALE, "" + definition.getScale());
       }
       
       if (definition.getSrid() != null) {
-        json.writeStringField(SRID, "" + definition.getSrid());
+        json.writeStringProperty(SRID, "" + definition.getSrid());
       }
 
       appendAnnotations(json, definition, null);
@@ -795,16 +796,16 @@ public class MetadataDocumentJsonSerializer {
   private void appendEnumTypes(JsonGenerator json, List<EdmEnumType> enumTypes) 
       throws SerializerException, IOException {
     for (EdmEnumType enumType : enumTypes) {
-      json.writeObjectFieldStart(enumType.getName());
-      json.writeStringField(KIND, Kind.EnumType.name());
-      json.writeBooleanField(IS_FLAGS, enumType.isFlags());
-      json.writeStringField(UNDERLYING_TYPE, getFullQualifiedName(enumType.getUnderlyingType()));
+      json.writeObjectPropertyStart(enumType.getName());
+      json.writeStringProperty(KIND, Kind.EnumType.name());
+      json.writeBooleanProperty(IS_FLAGS, enumType.isFlags());
+      json.writeStringProperty(UNDERLYING_TYPE, getFullQualifiedName(enumType.getUnderlyingType()));
 
       for (String memberName : enumType.getMemberNames()) {
 
         EdmMember member = enumType.getMember(memberName);
         if (member.getValue() != null) {
-          json.writeStringField(memberName, member.getValue());
+          json.writeStringProperty(memberName, member.getValue());
         }
 
         appendAnnotations(json, member, memberName);
@@ -826,7 +827,7 @@ public class MetadataDocumentJsonSerializer {
           termName += "#" + annotation.getQualifier();
         } 
         if (annotation.getExpression() == null && termName.length() > 0) {
-          json.writeBooleanField(termName, true);
+          json.writeBooleanProperty(termName, true);
         } else {
           appendExpression(json, annotation.getExpression(), termName);
         }
@@ -852,7 +853,7 @@ public class MetadataDocumentJsonSerializer {
   private void appendDynamicExpression(JsonGenerator json, 
       EdmDynamicExpression dynExp, String termName) throws SerializerException, IOException {
     if (termName != null) {
-	  json.writeFieldName(termName);
+	  json.writeName(termName);
     }
     switch (dynExp.getExpressionType()) {
     // Logical
@@ -886,18 +887,18 @@ public class MetadataDocumentJsonSerializer {
       break;
     case AnnotationPath:
       json.writeStartObject();
-      json.writeStringField(ANNOTATION_PATH, dynExp.asAnnotationPath().getValue());
+      json.writeStringProperty(ANNOTATION_PATH, dynExp.asAnnotationPath().getValue());
       json.writeEndObject();
       break;
     case Apply:
       EdmApply asApply = dynExp.asApply();
       json.writeStartObject();
-      json.writeArrayFieldStart(DOLLAR + asApply.getExpressionName());
+      json.writeArrayPropertyStart(DOLLAR + asApply.getExpressionName());
       for (EdmExpression parameter : asApply.getParameters()) {
         appendExpression(json, parameter, null);
       }
       json.writeEndArray();
-      json.writeStringField(DOLLAR + Kind.Function.name(), asApply.getFunction());
+      json.writeStringProperty(DOLLAR + Kind.Function.name(), asApply.getFunction());
       
       appendAnnotations(json, asApply, null);
       json.writeEndObject();
@@ -906,18 +907,18 @@ public class MetadataDocumentJsonSerializer {
       EdmCast asCast = dynExp.asCast();
       json.writeStartObject();
       appendExpression(json, asCast.getValue(), DOLLAR + asCast.getExpressionName());
-      json.writeStringField(TYPE, getAliasedFullQualifiedName(asCast.getType()));
+      json.writeStringProperty(TYPE, getAliasedFullQualifiedName(asCast.getType()));
      
       if (asCast.getMaxLength() != null) {
-        json.writeNumberField(MAX_LENGTH, asCast.getMaxLength());
+        json.writeNumberProperty(MAX_LENGTH, asCast.getMaxLength());
       }
 
       if (asCast.getPrecision() != null) {
-        json.writeNumberField(PRECISION, asCast.getPrecision());
+        json.writeNumberProperty(PRECISION, asCast.getPrecision());
       }
 
       if (asCast.getScale() != null) {
-        json.writeNumberField(SCALE, asCast.getScale());
+        json.writeNumberProperty(SCALE, asCast.getScale());
       }
       appendAnnotations(json, asCast, null);
       json.writeEndObject();
@@ -932,7 +933,7 @@ public class MetadataDocumentJsonSerializer {
     case If:
       EdmIf asIf = dynExp.asIf();
       json.writeStartObject();
-      json.writeArrayFieldStart(DOLLAR + asIf.getExpressionName());
+      json.writeArrayPropertyStart(DOLLAR + asIf.getExpressionName());
       appendExpression(json, asIf.getGuard(), null);
       appendExpression(json, asIf.getThen(), null);
       appendExpression(json, asIf.getElse(), null);
@@ -945,18 +946,18 @@ public class MetadataDocumentJsonSerializer {
       json.writeStartObject();
       appendExpression(json, asIsOf.getValue(), DOLLAR + asIsOf.getExpressionName());
       
-      json.writeStringField(TYPE, getAliasedFullQualifiedName(asIsOf.getType()));
+      json.writeStringProperty(TYPE, getAliasedFullQualifiedName(asIsOf.getType()));
 
       if (asIsOf.getMaxLength() != null) {
-        json.writeNumberField(MAX_LENGTH, asIsOf.getMaxLength());
+        json.writeNumberProperty(MAX_LENGTH, asIsOf.getMaxLength());
       }
 
       if (asIsOf.getPrecision() != null) {
-        json.writeNumberField(PRECISION, asIsOf.getPrecision());
+        json.writeNumberProperty(PRECISION, asIsOf.getPrecision());
       }
 
       if (asIsOf.getScale() != null) {
-        json.writeNumberField(SCALE, asIsOf.getScale());
+        json.writeNumberProperty(SCALE, asIsOf.getScale());
       }
       appendAnnotations(json, asIsOf, null);
       json.writeEndObject();
@@ -965,41 +966,41 @@ public class MetadataDocumentJsonSerializer {
       EdmLabeledElement asLabeledElement = dynExp.asLabeledElement();
       json.writeStartObject();
       appendExpression(json, asLabeledElement.getValue(), DOLLAR + asLabeledElement.getExpressionName());
-      json.writeStringField(NAME, asLabeledElement.getName());
+      json.writeStringProperty(NAME, asLabeledElement.getName());
       appendAnnotations(json, asLabeledElement, null);
       json.writeEndObject();
       break;
     case LabeledElementReference:
       EdmLabeledElementReference asLabeledElementReference = dynExp.asLabeledElementReference();
       json.writeStartObject();
-      json.writeStringField(DOLLAR + asLabeledElementReference.getExpressionName(), 
+      json.writeStringProperty(DOLLAR + asLabeledElementReference.getExpressionName(), 
           asLabeledElementReference.getValue());
       json.writeEndObject();
       break;
     case Null:
       EdmNull asNull = dynExp.asNull();
       json.writeStartObject();
-      json.writeStringField(DOLLAR + asNull.getExpressionName(), null);
+      json.writeStringProperty(DOLLAR + asNull.getExpressionName(), null);
       appendAnnotations(json, dynExp.asNull(), null);
       json.writeEndObject();
       break;
     case NavigationPropertyPath:
       EdmNavigationPropertyPath asNavigationPropertyPath = dynExp.asNavigationPropertyPath();
       json.writeStartObject();
-      json.writeStringField(DOLLAR + asNavigationPropertyPath.getExpressionName(), 
+      json.writeStringProperty(DOLLAR + asNavigationPropertyPath.getExpressionName(), 
           asNavigationPropertyPath.getValue());
       json.writeEndObject();
       break;
     case Path:
       EdmPath asPath = dynExp.asPath();
       json.writeStartObject();
-      json.writeStringField(DOLLAR + asPath.getExpressionName(), asPath.getValue());
+      json.writeStringProperty(DOLLAR + asPath.getExpressionName(), asPath.getValue());
       json.writeEndObject();
       break;
     case PropertyPath:
       EdmPropertyPath asPropertyPath = dynExp.asPropertyPath();
       json.writeStartObject();
-      json.writeStringField(DOLLAR + asPropertyPath.getExpressionName(), asPropertyPath.getValue());
+      json.writeStringProperty(DOLLAR + asPropertyPath.getExpressionName(), asPropertyPath.getValue());
       json.writeEndObject();
       break;
     case Record:
@@ -1008,12 +1009,12 @@ public class MetadataDocumentJsonSerializer {
       try {
         EdmStructuredType structuredType = asRecord.getType();
         if (structuredType != null) {
-          json.writeStringField(TYPE, getAliasedFullQualifiedName(structuredType));
+          json.writeStringProperty(TYPE, getAliasedFullQualifiedName(structuredType));
         }
       } catch (EdmException e) {
         FullQualifiedName type = asRecord.getTypeFQN();
         if (type != null) {
-          json.writeStringField(TYPE, getAliasedFullQualifiedName(type));
+          json.writeStringProperty(TYPE, getAliasedFullQualifiedName(type));
         }
       }
       for (EdmPropertyValue propValue : asRecord.getPropertyValues()) {
@@ -1046,7 +1047,7 @@ public class MetadataDocumentJsonSerializer {
   private void appendLogicalOrComparisonExpression(final JsonGenerator json, 
       final EdmLogicalOrComparisonExpression exp) throws SerializerException, IOException {
     json.writeStartObject();
-    json.writeArrayFieldStart(DOLLAR + exp.getExpressionName());
+    json.writeArrayPropertyStart(DOLLAR + exp.getExpressionName());
     appendExpression(json, exp.getLeftExpression(), null);
     appendExpression(json, exp.getRightExpression(), null);
     json.writeEndArray();
@@ -1058,65 +1059,65 @@ public class MetadataDocumentJsonSerializer {
       final EdmConstantExpression constExp, String termName) throws SerializerException, IOException {
     switch (constExp.getExpressionType()) {
     case Binary: 
-      json.writeObjectFieldStart(termName);
-      json.writeStringField(DOLLAR + constExp.getExpressionName(), constExp.getValueAsString());
+      json.writeObjectPropertyStart(termName);
+      json.writeStringProperty(DOLLAR + constExp.getExpressionName(), constExp.getValueAsString());
       json.writeEndObject();
       break;
     case Date:
-      json.writeObjectFieldStart(termName);
-      json.writeStringField(DOLLAR + constExp.getExpressionName(), constExp.getValueAsString());
+      json.writeObjectPropertyStart(termName);
+      json.writeStringProperty(DOLLAR + constExp.getExpressionName(), constExp.getValueAsString());
       json.writeEndObject();
       break;
     case DateTimeOffset:
-      json.writeObjectFieldStart(termName);
-      json.writeStringField(DOLLAR + constExp.getExpressionName(), constExp.getValueAsString());
+      json.writeObjectPropertyStart(termName);
+      json.writeStringProperty(DOLLAR + constExp.getExpressionName(), constExp.getValueAsString());
       json.writeEndObject();
       break;
     case Decimal:
-      json.writeObjectFieldStart(termName);      
-      json.writeStringField(DOLLAR + constExp.getExpressionName(), constExp.getValueAsString());
+      json.writeObjectPropertyStart(termName);      
+      json.writeStringProperty(DOLLAR + constExp.getExpressionName(), constExp.getValueAsString());
       json.writeEndObject();
       break;
     case Float:
-      json.writeObjectFieldStart(termName);
-      json.writeStringField(DOLLAR + constExp.getExpressionName(), constExp.getValueAsString());
+      json.writeObjectPropertyStart(termName);
+      json.writeStringProperty(DOLLAR + constExp.getExpressionName(), constExp.getValueAsString());
       json.writeEndObject();
       break;
     case Int:
-      json.writeObjectFieldStart(termName);
-      json.writeStringField(DOLLAR + constExp.getExpressionName(), constExp.getValueAsString());
+      json.writeObjectPropertyStart(termName);
+      json.writeStringProperty(DOLLAR + constExp.getExpressionName(), constExp.getValueAsString());
       json.writeEndObject();
       break;
     case Duration:
-      json.writeObjectFieldStart(termName);
-      json.writeStringField(DOLLAR + constExp.getExpressionName(), constExp.getValueAsString());
+      json.writeObjectPropertyStart(termName);
+      json.writeStringProperty(DOLLAR + constExp.getExpressionName(), constExp.getValueAsString());
       json.writeEndObject();
       break;
     case EnumMember:
-      json.writeObjectFieldStart(termName);
-      json.writeStringField(DOLLAR + constExp.getExpressionName(), constExp.getValueAsString());
+      json.writeObjectPropertyStart(termName);
+      json.writeStringProperty(DOLLAR + constExp.getExpressionName(), constExp.getValueAsString());
       json.writeEndObject();
       break;
     case Guid:
-      json.writeObjectFieldStart(termName);
-      json.writeStringField("$" + constExp.getExpressionName(), constExp.getValueAsString());
+      json.writeObjectPropertyStart(termName);
+      json.writeStringProperty("$" + constExp.getExpressionName(), constExp.getValueAsString());
       json.writeEndObject();
       break;
     case TimeOfDay:
-      json.writeObjectFieldStart(termName);
-      json.writeStringField(DOLLAR + constExp.getExpressionName(), constExp.getValueAsString());
+      json.writeObjectPropertyStart(termName);
+      json.writeStringProperty(DOLLAR + constExp.getExpressionName(), constExp.getValueAsString());
       json.writeEndObject();
       break;
     case Bool:
       if (termName != null && termName.length() > 0) {
-        json.writeBooleanField(termName, Boolean.valueOf(constExp.getValueAsString()));
+        json.writeBooleanProperty(termName, Boolean.valueOf(constExp.getValueAsString()));
       } else {
         json.writeBoolean(Boolean.valueOf(constExp.getValueAsString()));
       }
       break;
     case String:
       if (termName != null && termName.length() > 0) {
-        json.writeStringField(termName, constExp.getValueAsString());
+        json.writeStringProperty(termName, constExp.getValueAsString());
       } else {
         json.writeString(constExp.getValueAsString());
       }
@@ -1143,9 +1144,9 @@ public class MetadataDocumentJsonSerializer {
   }
 
   private void appendReference(JsonGenerator json) throws SerializerException, IOException {
-    json.writeObjectFieldStart(REFERENCES);
+    json.writeObjectPropertyStart(REFERENCES);
     for (final EdmxReference reference : serviceMetadata.getReferences()) {
-      json.writeObjectFieldStart(reference.getUri().toASCIIString());
+      json.writeObjectPropertyStart(reference.getUri().toASCIIString());
 
       List<EdmxReferenceInclude> includes = reference.getIncludes();
       if (!includes.isEmpty()) {
@@ -1163,15 +1164,15 @@ public class MetadataDocumentJsonSerializer {
 
   private void appendIncludeAnnotations(JsonGenerator json, 
       List<EdmxReferenceIncludeAnnotation> includeAnnotations) throws SerializerException, IOException {
-    json.writeArrayFieldStart(INCLUDE_ANNOTATIONS);
+    json.writeArrayPropertyStart(INCLUDE_ANNOTATIONS);
     for (EdmxReferenceIncludeAnnotation includeAnnotation : includeAnnotations) {
       json.writeStartObject();
-      json.writeStringField(TERM_NAMESPACE, includeAnnotation.getTermNamespace());
+      json.writeStringProperty(TERM_NAMESPACE, includeAnnotation.getTermNamespace());
       if (includeAnnotation.getQualifier() != null) {
-        json.writeStringField(QUALIFIER, includeAnnotation.getQualifier());
+        json.writeStringProperty(QUALIFIER, includeAnnotation.getQualifier());
       }
       if (includeAnnotation.getTargetNamespace() != null) {
-        json.writeStringField(TARGET_NAMESPACE, includeAnnotation.getTargetNamespace());
+        json.writeStringProperty(TARGET_NAMESPACE, includeAnnotation.getTargetNamespace());
       }
       json.writeEndObject();
     }
@@ -1180,14 +1181,14 @@ public class MetadataDocumentJsonSerializer {
 
   private void appendIncludes(JsonGenerator json, 
       List<EdmxReferenceInclude> includes) throws SerializerException, IOException {
-   json.writeArrayFieldStart(INCLUDE);
+   json.writeArrayPropertyStart(INCLUDE);
    for (EdmxReferenceInclude include : includes) {
      json.writeStartObject();
-     json.writeStringField(NAMESPACE, include.getNamespace());
+     json.writeStringProperty(NAMESPACE, include.getNamespace());
      if (include.getAlias() != null) {
        namespaceToAlias.put(include.getNamespace(), include.getAlias());
        // Reference Aliases are ignored for now since they are not V2 compatible
-       json.writeStringField(ALIAS, include.getAlias());
+       json.writeStringProperty(ALIAS, include.getAlias());
      }
      json.writeEndObject();
    }

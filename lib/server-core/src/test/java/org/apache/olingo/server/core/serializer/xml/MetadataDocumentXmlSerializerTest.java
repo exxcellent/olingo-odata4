@@ -18,14 +18,15 @@
  */
 package org.apache.olingo.server.core.serializer.xml;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -83,7 +84,7 @@ import org.apache.olingo.commons.api.edm.provider.annotation.CsdlIsOf;
 import org.apache.olingo.commons.api.edm.provider.annotation.CsdlLabeledElement;
 import org.apache.olingo.commons.api.edm.provider.annotation.CsdlLabeledElementReference;
 import org.apache.olingo.commons.api.edm.provider.annotation.CsdlLogicalOrComparisonExpression;
-//CHECKSTYLE:OFF
+// CHECKSTYLE:OFF
 import org.apache.olingo.commons.api.edm.provider.annotation.CsdlLogicalOrComparisonExpression.LogicalOrComparisonExpressionType;
 import org.apache.olingo.commons.api.edm.provider.annotation.CsdlNavigationPropertyPath;
 import org.apache.olingo.commons.api.edm.provider.annotation.CsdlNull;
@@ -95,7 +96,7 @@ import org.apache.olingo.commons.api.edm.provider.annotation.CsdlUrlRef;
 import org.apache.olingo.commons.api.edmx.EdmxReference;
 import org.apache.olingo.commons.api.edmx.EdmxReferenceInclude;
 import org.apache.olingo.commons.api.edmx.EdmxReferenceIncludeAnnotation;
-//CHECKSTYLE:ON
+// CHECKSTYLE:ON
 import org.apache.olingo.commons.api.ex.ODataException;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.server.api.OData;
@@ -103,14 +104,14 @@ import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.core.ServiceMetadataImpl;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 public class MetadataDocumentXmlSerializerTest {
 
   private static ODataSerializer serializer;
 
-  @BeforeClass
+  @BeforeAll
   public static void init() throws SerializerException {
     serializer = OData.newInstance().createSerializer(ContentType.APPLICATION_XML);
   }
@@ -124,7 +125,7 @@ public class MetadataDocumentXmlSerializerTest {
     assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
         + "<edmx:Edmx Version=\"4.0\" xmlns:edmx=\"http://docs.oasis-open.org/odata/ns/edmx\">"
         + "<edmx:DataServices></edmx:DataServices></edmx:Edmx>",
-        IOUtils.toString(serializer.metadataDocument(metadata).getContent()));
+        IOUtils.toString(serializer.metadataDocument(metadata).getContent(), StandardCharsets.UTF_8));
   }
 
   /** Writes simplest (empty) Schema. */
@@ -145,7 +146,7 @@ public class MetadataDocumentXmlSerializerTest {
         + "<Schema xmlns=\"http://docs.oasis-open.org/odata/ns/edm\" Namespace=\"MyNamespace\"></Schema>"
         + "</edmx:DataServices>"
         + "</edmx:Edmx>",
-        IOUtils.toString(metadata));
+        IOUtils.toString(metadata, StandardCharsets.UTF_8));
   }
   
   /** Test if annotations on EnumType Members are added as children of the Member element
@@ -190,7 +191,7 @@ public class MetadataDocumentXmlSerializerTest {
     
     InputStream metadata = serializer.metadataDocument(serviceMetadata).getContent();
     assertNotNull(metadata);
-    String metadataString = IOUtils.toString(metadata);
+    String metadataString = IOUtils.toString(metadata, StandardCharsets.UTF_8);
     
     
     assertTrue(metadataString.contains(
@@ -262,7 +263,7 @@ public class MetadataDocumentXmlSerializerTest {
 
     InputStream metadata = serializer.metadataDocument(serviceMetadata).getContent();
     assertNotNull(metadata);
-    final String metadataString = IOUtils.toString(metadata);
+    final String metadataString = IOUtils.toString(metadata, StandardCharsets.UTF_8);
     // edmx reference
     assertTrue(metadataString.contains(
         "<edmx:Reference Uri=\"http://example.com\"></edmx:Reference>"));
@@ -432,7 +433,7 @@ public class MetadataDocumentXmlSerializerTest {
     CsdlEdmProvider provider = new LocalProvider();
     ServiceMetadata serviceMetadata = new ServiceMetadataImpl(provider, Collections.<EdmxReference> emptyList(), null);
     InputStream metadataStream = serializer.metadataDocument(serviceMetadata).getContent();
-    String metadata = IOUtils.toString(metadataStream);
+    String metadata = IOUtils.toString(metadataStream, StandardCharsets.UTF_8);
     assertNotNull(metadata);
     return metadata;
   }
@@ -485,7 +486,7 @@ public class MetadataDocumentXmlSerializerTest {
     when(schema.getComplexTypes()).thenReturn(complexTypes);
 
     InputStream metadataStream = serializer.metadataDocument(serviceMetadata).getContent();
-    String metadata = IOUtils.toString(metadataStream);
+    String metadata = IOUtils.toString(metadataStream, StandardCharsets.UTF_8);
     assertTrue(metadata.contains("<ComplexType Name=\"ComplexType\" Abstract=\"true\" OpenType=\"true\">"
         + "<Property Name=\"prop1\" Type=\"Edm.String\"></Property>"
         + "<Property Name=\"prop2\" Type=\"Edm.String\"></Property>"

@@ -30,7 +30,7 @@ import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.core.edm.EdmTypeInfo;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonGenerator;
 
 /**
  * Writes out JSON string from <tt>PropertyImpl</tt>.
@@ -54,11 +54,11 @@ public class JsonPropertySerializer extends JsonSerializer {
     jgen.writeStartObject();
 
     if (serverMode && container.getContextURL() != null && !isODataMetadataNone) {
-      jgen.writeStringField(Constants.JSON_CONTEXT, container.getContextURL().toASCIIString());
+      jgen.writeStringProperty(Constants.JSON_CONTEXT, container.getContextURL().toASCIIString());
     }
 
     if (StringUtils.isNotBlank(property.getType()) && isODataMetadataFull) {
-      jgen.writeStringField(Constants.JSON_TYPE,
+      jgen.writeStringProperty(Constants.JSON_TYPE,
           new EdmTypeInfo.Builder().setTypeExpression(property.getType()).build().external());
     }
 
@@ -67,7 +67,8 @@ public class JsonPropertySerializer extends JsonSerializer {
     }
 
     if (property.isNull()) {
-      jgen.writeBooleanField(Constants.JSON_NULL, true);
+      jgen.writeName(Constants.JSON_NULL);
+      jgen.writeBoolean(true);
     } else if (property.isGeospatial() || property.isCollection()) {
       valuable(jgen, property, Constants.VALUE);
     } else if (property.isPrimitive()) {
@@ -75,10 +76,10 @@ public class JsonPropertySerializer extends JsonSerializer {
           ? null
               : new EdmTypeInfo.Builder().setTypeExpression(property.getType()).build();
 
-      jgen.writeFieldName(Constants.VALUE);
+      jgen.writeName(Constants.VALUE);
       primitiveValue(jgen, typeInfo, property.asPrimitive());
     } else if (property.isEnum()) {
-      jgen.writeStringField(Constants.VALUE, property.asEnum().toString());
+      jgen.writeStringProperty(Constants.VALUE, property.asEnum().toString());
     } else if (property.isComplex()) {
       for (Property cproperty : property.asComplex().getValue()) {
         valuable(jgen, cproperty, cproperty.getName());

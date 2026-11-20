@@ -163,12 +163,13 @@ public class ComplexInvocationHandler extends AbstractStructuredInvocationHandle
     }
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  protected List<ClientProperty> getInternalProperties() {
-    final List<ClientProperty> res = new ArrayList<ClientProperty>();
+  protected <T extends ClientProperty> List<T> getInternalProperties() {
+    final List<T> res = new ArrayList<>();
     if (getComplex() != null) {
       for (ClientProperty property : getComplex()) {
-        res.add(property);
+        res.add((T)property);
       }
     }
     return res;

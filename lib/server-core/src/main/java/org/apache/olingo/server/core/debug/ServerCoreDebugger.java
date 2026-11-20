@@ -24,6 +24,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.nio.charset.StandardCharsets;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -40,7 +41,7 @@ import org.apache.olingo.server.api.uri.UriInfo;
 
 public class ServerCoreDebugger {
 
-  private static final Charset DEFAULT_ENCODING = Charset.forName("UTF-8");
+  private static final Charset DEFAULT_ENCODING = StandardCharsets.UTF_8;
   private final List<RuntimeMeasurement> runtimeInformation = new ArrayList<>();
   private final OData odata;
 

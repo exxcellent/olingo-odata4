@@ -20,105 +20,32 @@ package org.apache.olingo.samples.client.core.http;
 
 import java.net.URI;
 
-import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpResponseFactory;
-import org.apache.http.ParseException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.conn.ClientConnectionOperator;
-import org.apache.http.conn.OperatedClientConnection;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.BasicClientConnectionManager;
-import org.apache.http.impl.conn.DefaultClientConnection;
-import org.apache.http.impl.conn.DefaultClientConnectionOperator;
-import org.apache.http.impl.conn.DefaultHttpResponseParser;
-import org.apache.http.io.HttpMessageParser;
-import org.apache.http.io.SessionInputBuffer;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.message.BasicLineParser;
-import org.apache.http.params.CoreProtocolPNames;
-import org.apache.http.params.HttpParams;
-import org.apache.http.util.CharArrayBuffer;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
+import org.apache.olingo.client.api.http.ODataHttpClient;
 import org.apache.olingo.client.core.http.AbstractHttpClientFactory;
+import org.apache.olingo.client.core.http.DefaultHttpClientFactory;
 import org.apache.olingo.commons.api.http.HttpMethod;
 
 /**
  * Shows how to use custom client connections.
  * <br/>
- * In certain situations it may be necessary to customize the way HTTP messages get transmitted across the wire beyond
- * what is possible using HTTP parameters in order to be able to deal non-standard, non-compliant behaviours. For
- * instance, for web crawlers it may be necessary to force HttpClient into accepting malformed response heads in order
- * to salvage the content of the messages.
+ * In HC5, custom connection handling is achieved through HttpClientConnectionManager implementations.
+ * The low-level connection customization of HC4 (DefaultClientConnection, DefaultClientConnectionOperator)
+ * is replaced by the HC5 connection management API.
  * <a
  * href="http://svn.apache.org/repos/asf/httpcomponents/site/httpcomponents-client-4.2.x/tutorial/html/advanced.html#d5e1339">More
  * information</a>.
  */
-public class CustomConnectionsHttpClientFactory extends AbstractHttpClientFactory {
-
-  private static class MyLineParser extends BasicLineParser {
-
-    @Override
-    public Header parseHeader(final CharArrayBuffer buffer) throws ParseException {
-      try {
-        return super.parseHeader(buffer);
-      } catch (ParseException ex) {
-        // Suppress ParseException exception
-        return new BasicHeader("invalid", buffer.toString());
-      }
-    }
-
-  }
-
-  private static class MyClientConnection extends DefaultClientConnection {
-
-    @Override
-    protected HttpMessageParser<HttpResponse> createResponseParser(
-            final SessionInputBuffer buffer,
-            final HttpResponseFactory responseFactory,
-            final HttpParams params) {
-
-      return new DefaultHttpResponseParser(
-              buffer,
-              new MyLineParser(),
-              responseFactory,
-              params);
-    }
-
-  }
-
-  private static class MyClientConnectionOperator extends DefaultClientConnectionOperator {
-
-    public MyClientConnectionOperator(final SchemeRegistry registry) {
-      super(registry);
-    }
-
-    @Override
-    public OperatedClientConnection createConnection() {
-      return new MyClientConnection();
-    }
-
-  }
-
-  private static class MyClientConnManager extends BasicClientConnectionManager {
-
-    @Override
-    protected ClientConnectionOperator createConnectionOperator(final SchemeRegistry registry) {
-      return new MyClientConnectionOperator(registry);
-    }
-
-  }
+public class CustomConnectionsHttpClientFactory extends AbstractHttpClientFactory<ODataHttpClient> {
 
   @Override
-  public DefaultHttpClient create(final HttpMethod method, final URI uri) {
-    final DefaultHttpClient httpClient = new DefaultHttpClient(new MyClientConnManager());
-    httpClient.getParams().setParameter(CoreProtocolPNames.USER_AGENT, USER_AGENT);
+  public ODataHttpClient create(final HttpMethod method, final URI uri) {
+    final BasicHttpClientConnectionManager connManager = new BasicHttpClientConnectionManager();
 
-    return httpClient;
-  }
-
-  @Override
-  public void close(final HttpClient httpClient) {
-    httpClient.getConnectionManager().shutdown();
+    return DefaultHttpClientFactory.wrapHC5Client(HttpClients.custom()
+        .setUserAgent(USER_AGENT)
+        .setConnectionManager(connManager)
+        .build());
   }
 }

@@ -26,10 +26,10 @@ import org.apache.olingo.client.core.edm.xml.ClientCsdlAnnotation;
 import org.apache.olingo.commons.api.edm.geo.SRID;
 import org.apache.olingo.commons.api.edm.provider.annotation.CsdlCast;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(using = ClientCsdlCast.CastDeserializer.class)
 class ClientCsdlCast extends CsdlCast implements Serializable {
@@ -42,24 +42,24 @@ class ClientCsdlCast extends CsdlCast implements Serializable {
     protected ClientCsdlCast doDeserialize(final JsonParser jp, final DeserializationContext ctxt)
             throws IOException {
       final ClientCsdlCast cast = new ClientCsdlCast();
-      for (; jp.getCurrentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
-        final JsonToken token = jp.getCurrentToken();
-        if (token == JsonToken.FIELD_NAME) {
-          if ("Type".equals(jp.getCurrentName())) {
-            cast.setType(jp.nextTextValue());
-          } else if ("Annotation".equals(jp.getCurrentName())) {
+      for (; jp.currentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
+        final JsonToken token = jp.currentToken();
+        if (token == JsonToken.PROPERTY_NAME) {
+          if ("Type".equals(jp.currentName())) {
+            cast.setType(nextTextValue(jp));
+          } else if ("Annotation".equals(jp.currentName())) {
             cast.getAnnotations().add(jp.readValueAs(ClientCsdlAnnotation.class));
-          } else if ("MaxLength".equals(jp.getCurrentName())) {
-            final String maxLenght = jp.nextTextValue();
+          } else if ("MaxLength".equals(jp.currentName())) {
+            final String maxLenght = nextTextValue(jp);
             cast.setMaxLength("max".equalsIgnoreCase(maxLenght) ? Integer.MAX_VALUE : Integer.valueOf(maxLenght));
-          } else if ("Precision".equals(jp.getCurrentName())) {
-            cast.setPrecision(Integer.valueOf(jp.nextTextValue()));
-          } else if ("Scale".equals(jp.getCurrentName())) {
-            final String scale = jp.nextTextValue();
+          } else if ("Precision".equals(jp.currentName())) {
+            cast.setPrecision(Integer.valueOf(nextTextValue(jp)));
+          } else if ("Scale".equals(jp.currentName())) {
+            final String scale = nextTextValue(jp);
             cast.setScale("variable".equalsIgnoreCase(scale) || "floating".equalsIgnoreCase(scale) ?
                 0 : Integer.valueOf(scale));
-          } else if ("SRID".equals(jp.getCurrentName())) {
-            final String srid = jp.nextTextValue();
+          } else if ("SRID".equals(jp.currentName())) {
+            final String srid = nextTextValue(jp);
             if (srid != null) {
               cast.setSrid(SRID.valueOf(srid));
             }

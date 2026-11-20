@@ -18,10 +18,11 @@
  */
 package org.apache.olingo.fit.tecsvc.http;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URI;
 
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.commons.api.http.HttpHeader;
@@ -29,7 +30,7 @@ import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.fit.AbstractBaseTestITCase;
 import org.apache.olingo.fit.tecsvc.TecSvcConst;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +43,7 @@ public class PingITCase extends AbstractBaseTestITCase {
 
   @Test
   public void ping() throws Exception {
-    URL url = new URL(SERVICE_URI);
+    URL url = URI.create(SERVICE_URI).toURL();
 
     LOG.debug("ping request: " + SERVICE_URI);
 
@@ -57,7 +58,7 @@ public class PingITCase extends AbstractBaseTestITCase {
   @Test
   public void redirect() throws Exception {
 
-    URL url = new URL(REDIRECT_URI);
+    URL url = URI.create(REDIRECT_URI).toURL();
 
     LOG.debug("redirect request: " + REDIRECT_URI);
 

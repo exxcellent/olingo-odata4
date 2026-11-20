@@ -20,15 +20,13 @@ package org.apache.olingo.client.api.http;
 
 import java.net.URI;
 
-import org.apache.http.client.HttpClient;
 import org.apache.olingo.commons.api.http.HttpMethod;
 
 /**
  * Interface used by ODataRequest implementations to instantiate HttpClient.
  */
-public interface HttpClientFactory {
+public interface HttpClientFactory<C extends ODataHttpClient> {
 
-  HttpClient create(HttpMethod method, URI uri);
+  public C create(HttpMethod method, URI uri);
 
-  void close(HttpClient httpClient);
 }

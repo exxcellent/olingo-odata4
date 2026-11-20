@@ -20,21 +20,10 @@ package org.apache.olingo.client.core;
 
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.commons.api.format.ContentType;
-import org.custommonkey.xmlunit.XMLUnit;
-import org.junit.BeforeClass;
 
 public abstract class AbstractTest {
 
   protected static final ODataClient client = ODataClientFactory.getClient();
-
-  @BeforeClass
-  public static void setUp() {
-    XMLUnit.setIgnoreComments(true);
-    XMLUnit.setIgnoreAttributeOrder(true);
-    XMLUnit.setIgnoreWhitespace(true);
-    XMLUnit.setNormalizeWhitespace(true);
-    XMLUnit.setCompareUnmatched(false);
-  }
 
   protected String getSuffix(final ContentType contentType) {
     return contentType.isCompatible(ContentType.APPLICATION_ATOM_SVC)

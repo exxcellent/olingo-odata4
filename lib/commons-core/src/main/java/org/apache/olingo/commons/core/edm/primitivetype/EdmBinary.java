@@ -19,6 +19,7 @@
 package org.apache.olingo.commons.core.edm.primitivetype;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
@@ -28,7 +29,7 @@ import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
  */
 public class EdmBinary extends SingletonPrimitiveType {
 
-  private static final Charset UTF_8 = Charset.forName("UTF-8");
+  private static final Charset UTF_8 = StandardCharsets.UTF_8;
 
   /**
    * Byte used to pad output.

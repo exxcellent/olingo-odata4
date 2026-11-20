@@ -20,13 +20,13 @@ package org.apache.olingo.client.core.communication.request.retrieve;
 
 import java.net.URI;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataPropertyRequest;
 import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse;
 import org.apache.olingo.client.api.data.ResWrap;
 import org.apache.olingo.client.api.domain.ClientProperty;
+import org.apache.olingo.client.api.http.ODataHttpClient;
 import org.apache.olingo.client.api.serialization.ODataDeserializerException;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.format.ContentType;
@@ -54,7 +54,7 @@ public class ODataPropertyRequestImpl<T extends ClientProperty>
 
   @Override
   public ODataRetrieveResponse<T> execute() {
-    final HttpResponse res = doExecute();
+    final ClassicHttpResponse res = doExecute();
     return new ODataPropertyResponseImpl(odataClient, httpClient, res);
   }
 
@@ -62,8 +62,8 @@ public class ODataPropertyRequestImpl<T extends ClientProperty>
 
     private T property = null;
 
-    private ODataPropertyResponseImpl(final ODataClient odataClient, final HttpClient httpClient,
-            final HttpResponse res) {
+    private ODataPropertyResponseImpl(final ODataClient odataClient, final ODataHttpClient httpClient,
+            final ClassicHttpResponse res) {
 
       super(odataClient, httpClient, res);
     }

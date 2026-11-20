@@ -19,59 +19,51 @@
 package org.apache.olingo.samples.client.core.http;
 
 import java.net.URI;
-import java.security.cert.X509Certificate;
-import org.apache.http.client.HttpClient;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.conn.ssl.TrustStrategy;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.BasicClientConnectionManager;
-import org.apache.http.params.CoreProtocolPNames;
-import org.apache.olingo.commons.api.http.HttpMethod;
+
+import javax.net.ssl.SSLContext;
+
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
+import org.apache.hc.client5.http.ssl.HostnameVerificationPolicy;
+import org.apache.hc.client5.http.ssl.HttpsSupport;
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
+import org.apache.hc.client5.http.ssl.TlsSocketStrategy;
+import org.apache.hc.core5.reactor.ssl.SSLBufferMode;
+import org.apache.hc.core5.ssl.SSLContextBuilder;
+import org.apache.olingo.client.api.http.ODataHttpClient;
 import org.apache.olingo.client.core.http.AbstractHttpClientFactory;
+import org.apache.olingo.client.core.http.DefaultHttpClientFactory;
 import org.apache.olingo.commons.api.ex.ODataRuntimeException;
+import org.apache.olingo.commons.api.http.HttpMethod;
 
 /**
- * Shows how to customize the way how the underlying network socket are managed by the HTTP component; the specific
- * sample is about how to trust self-signed SSL certificates and also empowers connection management.
- * <br/>
- * HTTP connections make use of a java.net.Socket object internally to handle transmission of data across the wire.
- * However they rely on the SchemeSocketFactory interface to create, initialize and connect sockets. This enables the
- * users of HttpClient to provide application specific socket initialization code at runtime. PlainSocketFactory is the
- * default factory for creating and initializing plain (unencrypted) sockets.
+ * Shows how to customize the way how the underlying network sockets are managed by the HTTP component; the specific
+ * sample is about how to trust self-signed SSL certificates.
  * <a
  * href="http://svn.apache.org/repos/asf/httpcomponents/site/httpcomponents-client-4.2.x/tutorial/html/connmgmt.html#d5e512">More
  * information</a>.
  */
-public class SocketFactoryHttpClientFactory extends AbstractHttpClientFactory {
+public class SocketFactoryHttpClientFactory extends AbstractHttpClientFactory<ODataHttpClient> {
 
   @Override
-  public DefaultHttpClient create(final HttpMethod method, final URI uri) {
-    final TrustStrategy acceptTrustStrategy = new TrustStrategy() {
-      @Override
-      public boolean isTrusted(final X509Certificate[] certificate, final String authType) {
-        return true;
-      }
-    };
-
-    final SchemeRegistry registry = new SchemeRegistry();
+  public ODataHttpClient create(final HttpMethod method, final URI uri) {
     try {
-      final SSLSocketFactory ssf =
-              new SSLSocketFactory(acceptTrustStrategy, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-      registry.register(new Scheme(uri.getScheme(), uri.getPort(), ssf));
+      final SSLContext sslContext = SSLContextBuilder.create()
+          .loadTrustMaterial(null, (chain, authType) -> true)
+          .build();
+
+      TlsSocketStrategy tls = new DefaultClientTlsStrategy(sslContext, HttpsSupport.getSystemProtocols(),
+          HttpsSupport.getSystemCipherSuits(),
+          SSLBufferMode.STATIC,
+          HostnameVerificationPolicy.BUILTIN, NoopHostnameVerifier.INSTANCE);
+      return DefaultHttpClientFactory.wrapHC5Client(HttpClients.custom()
+          .setUserAgent(USER_AGENT)
+          .setConnectionManager(PoolingHttpClientConnectionManagerBuilder.create().setTlsSocketStrategy(tls).build())
+          .build());
     } catch (Exception e) {
       throw new ODataRuntimeException(e);
     }
-
-    final DefaultHttpClient httpClient = new DefaultHttpClient(new BasicClientConnectionManager(registry));
-    httpClient.getParams().setParameter(CoreProtocolPNames.USER_AGENT, USER_AGENT);
-
-    return httpClient;
   }
 
-  @Override
-  public void close(final HttpClient httpClient) {
-    httpClient.getConnectionManager().shutdown();
-  }
 }

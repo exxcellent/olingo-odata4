@@ -19,7 +19,6 @@
 package org.apache.olingo.samples.client;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -50,7 +49,6 @@ import org.apache.olingo.client.api.domain.ClientEntitySetIterator;
 import org.apache.olingo.client.api.domain.ClientEnumValue;
 import org.apache.olingo.client.api.domain.ClientProperty;
 import org.apache.olingo.client.api.domain.ClientValue;
-import org.apache.olingo.client.api.serialization.ODataDeserializerException;
 import org.apache.olingo.client.core.ODataClientFactory;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.EdmComplexType;
@@ -58,7 +56,6 @@ import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmProperty;
 import org.apache.olingo.commons.api.edm.EdmSchema;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
-import org.apache.olingo.commons.api.format.ContentType;
 
 
 /**
@@ -107,24 +104,24 @@ public class OlingoSampleApp {
 
     while (iterator.hasNext()) {
       ClientEntity ce = iterator.next();
-      print("Entry:\n" + prettyPrint(ce.getProperties(), 0));
+      print("Entry:\n" + prettyPrintCollection(ce.getProperties(), 0));
     }
 
     print("\n----- Read Entry ------------------------------");
     ClientEntity entry = readEntityWithKey(edm, serviceUrl, "Manufacturers", 1);
-    print("Single Entry:\n" + prettyPrint(entry.getProperties(), 0));
+    print("Single Entry:\n" + prettyPrintCollection(entry.getProperties(), 0));
 
     //
     print("\n----- Read Entity with $expand  ------------------------------");
     entry = readEntityWithKeyExpand(edm, serviceUrl, "Manufacturers", 1, "Cars");
-    print("Single Entry with expanded Cars relation:\n" + prettyPrint(entry.getProperties(), 0));
+    print("Single Entry with expanded Cars relation:\n" + prettyPrintCollection(entry.getProperties(), 0));
 
     //
     print("\n----- Read Entities with $filter  ------------------------------");
     iterator = readEntitiesWithFilter(edm, serviceUrl, "Manufacturers", "Name eq 'Horse Powered Racing'");
     while (iterator.hasNext()) {
       ClientEntity ce = iterator.next();
-      print("Entry:\n" + prettyPrint(ce.getProperties(), 0));
+      print("Entry:\n" + prettyPrintCollection(ce.getProperties(), 0));
     }
 
     // skip everything as odata4 sample/server only supporting retrieval
@@ -164,7 +161,8 @@ public class OlingoSampleApp {
       System.out.println();
   }
 
-  private static String prettyPrint(Map<String, Object> properties, int level) {
+  @SuppressWarnings("unchecked")
+  private static String prettyPrintMap(Map<String, Object> properties, int level) {
     StringBuilder b = new StringBuilder();
     Set<Entry<String, Object>> entries = properties.entrySet();
 
@@ -173,7 +171,7 @@ public class OlingoSampleApp {
       b.append(entry.getKey()).append(": ");
       Object value = entry.getValue();
       if(value instanceof Map) {
-        value = prettyPrint((Map<String, Object>) value, level+1);
+        value = prettyPrintMap((Map<String, Object>) value, level+1);
       } else if(value instanceof Calendar) {
         Calendar cal = (Calendar) value;
         value = SimpleDateFormat.getInstance().format(cal.getTime());
@@ -185,18 +183,28 @@ public class OlingoSampleApp {
     return b.toString();
   }
   
-  private static String prettyPrint(Collection<ClientProperty> properties, int level) {
+  private static String prettyPrintValues(Collection<Object> values, int level) {
+    StringBuilder b = new StringBuilder();
+    intend(b, level);
+    
+    for (Object v : values) {
+      b.append(v != null ? v.toString() : "null").append(", ");
+    }
+    return b.toString();
+  }
+  
+  private static String prettyPrintCollection(Collection<ClientProperty> properties, int level) {
     StringBuilder b = new StringBuilder();
 
     for (ClientProperty entry : properties) {
       intend(b, level);
       ClientValue value = entry.getValue();
       if (value.isCollection()) {
-        ClientCollectionValue cclvalue = value.asCollection();
-        b.append(prettyPrint(cclvalue.asJavaCollection(), level + 1));
+        ClientCollectionValue<ClientValue> cclvalue = value.asCollection();
+        b.append(prettyPrintValues(cclvalue.asJavaCollection(), level + 1));
       } else if (value.isComplex()) {
         ClientComplexValue cpxvalue = value.asComplex();
-        b.append(prettyPrint(cpxvalue.asJavaMap(), level + 1));
+        b.append(prettyPrintMap(cpxvalue.asJavaMap(), level + 1));
       } else if (value.isEnum()) {
         ClientEnumValue cnmvalue = value.asEnum();
         b.append(entry.getName()).append(": ");
@@ -234,7 +242,6 @@ public class OlingoSampleApp {
   }
 
   private ClientEntitySetIterator<ClientEntitySet, ClientEntity> readEntities(Edm edm, URI absoluteUri) {
-    System.out.println("URI = " + absoluteUri);
     ODataEntitySetIteratorRequest<ClientEntitySet, ClientEntity> request = 
       client.getRetrieveRequestFactory().getEntitySetIteratorRequest(absoluteUri);
     // odata4 sample/server limitation not handling metadata=full
@@ -266,11 +273,6 @@ public class OlingoSampleApp {
     return response.getBody();
   }
   
-  private ClientEntity loadEntity(String path) throws ODataDeserializerException {
-    InputStream input = getClass().getResourceAsStream(path);
-    return client.getBinder().getODataEntity(client.getDeserializer(ContentType.APPLICATION_JSON).toEntity(input));
-  }
-
   public ClientEntity createEntity(Edm edm, String serviceUri, String entitySetName, ClientEntity ce) {
     URI absoluteUri = client.newURIBuilder(serviceUri).appendEntitySetSegment(entitySetName).build();
     return createEntity(edm, absoluteUri, ce);

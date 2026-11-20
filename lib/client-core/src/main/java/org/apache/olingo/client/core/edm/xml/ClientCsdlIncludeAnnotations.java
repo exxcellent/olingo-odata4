@@ -18,10 +18,10 @@
  */
 package org.apache.olingo.client.core.edm.xml;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 import org.apache.olingo.client.api.edm.xml.IncludeAnnotations;
 import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmItem;
@@ -72,15 +72,15 @@ class ClientCsdlIncludeAnnotations extends CsdlAbstractEdmItem implements Serial
 
       final ClientCsdlIncludeAnnotations member = new ClientCsdlIncludeAnnotations();
 
-      for (; jp.getCurrentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
-        final JsonToken token = jp.getCurrentToken();
-        if (token == JsonToken.FIELD_NAME) {
-          if ("TermNamespace".equals(jp.getCurrentName())) {
-            member.setTermNamespace(jp.nextTextValue());
-          } else if ("Qualifier".equals(jp.getCurrentName())) {
-            member.setQualifier(jp.nextTextValue());
-          } else if ("TargetNamespace".equals(jp.getCurrentName())) {
-            member.setTargetNamespace(jp.nextTextValue());
+      for (; jp.currentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
+        final JsonToken token = jp.currentToken();
+        if (token == JsonToken.PROPERTY_NAME) {
+          if ("TermNamespace".equals(jp.currentName())) {
+            member.setTermNamespace(nextTextValue(jp));
+          } else if ("Qualifier".equals(jp.currentName())) {
+            member.setQualifier(nextTextValue(jp));
+          } else if ("TargetNamespace".equals(jp.currentName())) {
+            member.setTargetNamespace(nextTextValue(jp));
           }
         }
       }

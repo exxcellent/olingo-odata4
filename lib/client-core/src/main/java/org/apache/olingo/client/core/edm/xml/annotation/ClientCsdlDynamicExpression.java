@@ -27,17 +27,17 @@ import org.apache.olingo.commons.api.edm.provider.annotation.CsdlDynamicExpressi
 import org.apache.olingo.commons.api.edm.provider.annotation.CsdlExpression;
 import org.apache.olingo.commons.api.edm.provider.annotation.CsdlIf;
 import org.apache.olingo.commons.api.edm.provider.annotation.CsdlLogicalOrComparisonExpression;
-//CHECKSTYLE:OFF
+// CHECKSTYLE:OFF
 import org.apache.olingo.commons.api.edm.provider.annotation.CsdlLogicalOrComparisonExpression.LogicalOrComparisonExpressionType;
-//CHECKSTYLE:ON
+// CHECKSTYLE:ON
 import org.apache.olingo.commons.api.edm.provider.annotation.CsdlNavigationPropertyPath;
 import org.apache.olingo.commons.api.edm.provider.annotation.CsdlPath;
 import org.apache.olingo.commons.api.edm.provider.annotation.CsdlPropertyPath;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(using = ClientCsdlDynamicExpression.DynamicExpressionDeserializer.class)
 public abstract class ClientCsdlDynamicExpression extends CsdlDynamicExpression implements Serializable {
@@ -81,60 +81,60 @@ public abstract class ClientCsdlDynamicExpression extends CsdlDynamicExpression 
 
       CsdlDynamicExpression expression = null;
 
-      if ("Not".equals(jp.getCurrentName())) {
+      if ("Not".equals(jp.currentName())) {
         final CsdlLogicalOrComparisonExpression not =
             new CsdlLogicalOrComparisonExpression(LogicalOrComparisonExpressionType.Not);
         jp.nextToken();
         // Search for field name
-        while (jp.getCurrentToken() != JsonToken.FIELD_NAME) {
+        while (jp.currentToken() != JsonToken.PROPERTY_NAME) {
           jp.nextToken();
         }
         not.setLeft(jp.readValueAs(ClientCsdlDynamicExpression.class));
         // Search for end object
-        while (jp.getCurrentToken() != JsonToken.END_OBJECT || !"Not".equals(jp.getCurrentName())) {
+        while (jp.currentToken() != JsonToken.END_OBJECT || !"Not".equals(jp.currentName())) {
           jp.nextToken();
         }
 
         expression = not;
-      } else if (LogicalOrComparisonExpressionType.fromString(jp.getCurrentName()) != null) {
+      } else if (LogicalOrComparisonExpressionType.fromString(jp.currentName()) != null) {
         final CsdlLogicalOrComparisonExpression logicalOrComparissonExp =
-            new CsdlLogicalOrComparisonExpression(LogicalOrComparisonExpressionType.fromString(jp.getCurrentName()));
+            new CsdlLogicalOrComparisonExpression(LogicalOrComparisonExpressionType.fromString(jp.currentName()));
         jp.nextToken();
         // Search for field name
-        while (jp.getCurrentToken() != JsonToken.FIELD_NAME) {
+        while (jp.currentToken() != JsonToken.PROPERTY_NAME) {
           jp.nextToken();
         }
         // TODO: Read as expression
         logicalOrComparissonExp.setLeft(jp.readValueAs(ClientCsdlDynamicExpression.class));
         logicalOrComparissonExp.setRight(jp.readValueAs(ClientCsdlDynamicExpression.class));
         // Search for expression
-        while (jp.getCurrentToken() != JsonToken.END_OBJECT || !jp.getCurrentName().equals(logicalOrComparissonExp
+        while (jp.currentToken() != JsonToken.END_OBJECT || !jp.currentName().equals(logicalOrComparissonExp
             .getType().name())) {
           jp.nextToken();
         }
 
         expression = logicalOrComparissonExp;
-      } else if (PATH.equals(jp.getCurrentName())) {
-        expression = new CsdlPath().setValue(jp.nextTextValue());
-      } else if (NAVIGATION_PROPERTY_PATH.equals(jp.getCurrentName())) {
-        expression = new CsdlNavigationPropertyPath().setValue(jp.nextTextValue());
-      } else if (PROPERTY_PATH.equals(jp.getCurrentName())) {
-        expression = new CsdlPropertyPath().setValue(jp.nextTextValue());
-      } else if (ANNOTATION_PATH.equals(jp.getCurrentName())) {
-        expression = new CsdlAnnotationPath().setValue(jp.nextTextValue());
-      } else if (APPLY.equals(jp.getCurrentName())) {
+      } else if (PATH.equals(jp.currentName())) {
+        expression = new CsdlPath().setValue(nextTextValue(jp));
+      } else if (NAVIGATION_PROPERTY_PATH.equals(jp.currentName())) {
+        expression = new CsdlNavigationPropertyPath().setValue(nextTextValue(jp));
+      } else if (PROPERTY_PATH.equals(jp.currentName())) {
+        expression = new CsdlPropertyPath().setValue(nextTextValue(jp));
+      } else if (ANNOTATION_PATH.equals(jp.currentName())) {
+        expression = new CsdlAnnotationPath().setValue(nextTextValue(jp));
+      } else if (APPLY.equals(jp.currentName())) {
         jp.nextToken();
         expression = jp.readValueAs(ClientCsdlApply.class);
-      } else if (CAST.equals(jp.getCurrentName())) {
+      } else if (CAST.equals(jp.currentName())) {
         jp.nextToken();
         expression = jp.readValueAs(ClientCsdlCast.class);
-      } else if (COLLECTION.equals(jp.getCurrentName())) {
+      } else if (COLLECTION.equals(jp.currentName())) {
         jp.nextToken();
         expression = jp.readValueAs(ClientCsdlCollection.class);
         if(expression == null) {
           expression = new ClientCsdlCollection();
         }
-      } else if (IF.equals(jp.getCurrentName())) {
+      } else if (IF.equals(jp.currentName())) {
         jp.nextToken();
         jp.nextToken();
 
@@ -144,19 +144,19 @@ public abstract class ClientCsdlDynamicExpression extends CsdlDynamicExpression 
         ifImpl.setElse(parseConstOrEnumExpression(jp));
 
         expression = ifImpl;
-      } else if (IS_OF.equals(jp.getCurrentName())) {
+      } else if (IS_OF.equals(jp.currentName())) {
         jp.nextToken();
         expression = jp.readValueAs(ClientCsdlIsOf.class);
-      } else if (LABELED_ELEMENT.equals(jp.getCurrentName())) {
+      } else if (LABELED_ELEMENT.equals(jp.currentName())) {
         jp.nextToken();
         expression = jp.readValueAs(ClientCsdlLabeledElement.class);
-      } else if (NULL.equals(jp.getCurrentName())) {
+      } else if (NULL.equals(jp.currentName())) {
         jp.nextToken();
         expression = jp.readValueAs(ClientCsdlNull.class);
-      } else if (RECORD.equals(jp.getCurrentName())) {
+      } else if (RECORD.equals(jp.currentName())) {
         jp.nextToken();
         expression = jp.readValueAs(ClientCsdlRecord.class);
-      } else if (URL_REF.equals(jp.getCurrentName())) {
+      } else if (URL_REF.equals(jp.currentName())) {
         jp.nextToken();
         expression = jp.readValueAs(ClientCsdlUrlRef.class);
       }

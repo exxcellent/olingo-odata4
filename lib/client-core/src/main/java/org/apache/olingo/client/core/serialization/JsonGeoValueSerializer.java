@@ -35,15 +35,15 @@ import org.apache.olingo.commons.api.edm.geo.Polygon;
 import org.apache.olingo.commons.api.edm.geo.SRID;
 import org.apache.olingo.commons.core.edm.primitivetype.EdmDouble;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonGenerator;
 
 class JsonGeoValueSerializer {
 
   private void srid(final JsonGenerator jgen, final SRID srid) throws IOException {
-    jgen.writeObjectFieldStart(Constants.JSON_CRS);
-    jgen.writeStringField(Constants.ATTR_TYPE, Constants.JSON_NAME);
-    jgen.writeObjectFieldStart(Constants.PROPERTIES);
-    jgen.writeStringField(Constants.JSON_NAME, "EPSG:" + srid.toString());
+    jgen.writeObjectPropertyStart(Constants.JSON_CRS);
+    jgen.writeStringProperty(Constants.ATTR_TYPE, Constants.JSON_NAME);
+    jgen.writeObjectPropertyStart(Constants.PROPERTIES);
+    jgen.writeStringProperty(Constants.JSON_NAME, "EPSG:" + srid.toString());
     jgen.writeEndObject();
     jgen.writeEndObject();
   }
@@ -103,7 +103,7 @@ class JsonGeoValueSerializer {
   }
 
   private void collection(final JsonGenerator jgen, final GeospatialCollection collection) throws IOException {
-    jgen.writeArrayFieldStart(Constants.JSON_GEOMETRIES);
+    jgen.writeArrayPropertyStart(Constants.JSON_GEOMETRIES);
     for (Geospatial geospatial : collection) {
       jgen.writeStartObject();
       serialize(jgen, geospatial);
@@ -116,52 +116,52 @@ class JsonGeoValueSerializer {
     if (value.getEdmPrimitiveTypeKind().equals(EdmPrimitiveTypeKind.GeographyCollection)
         || value.getEdmPrimitiveTypeKind().equals(EdmPrimitiveTypeKind.GeometryCollection)) {
 
-      jgen.writeStringField(Constants.ATTR_TYPE, EdmPrimitiveTypeKind.GeometryCollection.name());
+      jgen.writeStringProperty(Constants.ATTR_TYPE, EdmPrimitiveTypeKind.GeometryCollection.name());
     } else {
       final int yIdx = value.getEdmPrimitiveTypeKind().name().indexOf('y');
       final String itemType = value.getEdmPrimitiveTypeKind().name().substring(yIdx + 1);
-      jgen.writeStringField(Constants.ATTR_TYPE, itemType);
+      jgen.writeStringProperty(Constants.ATTR_TYPE, itemType);
     }
 
     switch (value.getEdmPrimitiveTypeKind()) {
     case GeographyPoint:
     case GeometryPoint:
-      jgen.writeArrayFieldStart(Constants.JSON_COORDINATES);
+      jgen.writeArrayPropertyStart(Constants.JSON_COORDINATES);
       point(jgen, (Point) value);
       jgen.writeEndArray();
       break;
 
     case GeographyMultiPoint:
     case GeometryMultiPoint:
-      jgen.writeArrayFieldStart(Constants.JSON_COORDINATES);
+      jgen.writeArrayPropertyStart(Constants.JSON_COORDINATES);
       multipoint(jgen, (MultiPoint) value);
       jgen.writeEndArray();
       break;
 
     case GeographyLineString:
     case GeometryLineString:
-      jgen.writeArrayFieldStart(Constants.JSON_COORDINATES);
+      jgen.writeArrayPropertyStart(Constants.JSON_COORDINATES);
       lineString(jgen, (LineString) value);
       jgen.writeEndArray();
       break;
 
     case GeographyMultiLineString:
     case GeometryMultiLineString:
-      jgen.writeArrayFieldStart(Constants.JSON_COORDINATES);
+      jgen.writeArrayPropertyStart(Constants.JSON_COORDINATES);
       multiLineString(jgen, (MultiLineString) value);
       jgen.writeEndArray();
       break;
 
     case GeographyPolygon:
     case GeometryPolygon:
-      jgen.writeArrayFieldStart(Constants.JSON_COORDINATES);
+      jgen.writeArrayPropertyStart(Constants.JSON_COORDINATES);
       polygon(jgen, (Polygon) value);
       jgen.writeEndArray();
       break;
 
     case GeographyMultiPolygon:
     case GeometryMultiPolygon:
-      jgen.writeArrayFieldStart(Constants.JSON_COORDINATES);
+      jgen.writeArrayPropertyStart(Constants.JSON_COORDINATES);
       multiPolygon(jgen, (MultiPolygon) value);
       jgen.writeEndArray();
       break;

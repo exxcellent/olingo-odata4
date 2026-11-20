@@ -19,7 +19,7 @@
 #set( $clsSuffix = ".class" )
 package ${package};
 
-//CHECKSTYLE:OFF (Maven checkstyle)
+// CHECKSTYLE:OFF (Maven checkstyle)
 import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.ext.proxy.api.annotations.Operation;
 import org.apache.olingo.ext.proxy.api.annotations.Parameter;
@@ -52,7 +52,7 @@ import java.util.UUID;
 import java.util.Collection;
 import java.util.Calendar;
 import javax.xml.datatype.Duration;
-//CHECKSTYLE:ON (Maven checkstyle)
+// CHECKSTYLE:ON (Maven checkstyle)
 
 @org.apache.olingo.ext.proxy.api.annotations.Namespace("$namespace")
 @org.apache.olingo.ext.proxy.api.annotations.EntityContainer(name = "$container.Name",

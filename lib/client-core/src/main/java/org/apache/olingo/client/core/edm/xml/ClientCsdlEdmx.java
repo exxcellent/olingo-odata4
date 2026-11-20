@@ -23,16 +23,16 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
 
 import org.apache.olingo.client.api.edm.xml.DataServices;
 import org.apache.olingo.client.api.edm.xml.Edmx;
 import org.apache.olingo.client.api.edm.xml.Reference;
 import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmItem;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(using = ClientCsdlEdmx.EdmxDeserializer.class)
 public class ClientCsdlEdmx extends CsdlAbstractEdmItem implements Serializable, Edmx {
@@ -76,15 +76,15 @@ public class ClientCsdlEdmx extends CsdlAbstractEdmItem implements Serializable,
 
       final ClientCsdlEdmx edmx = new ClientCsdlEdmx();
 
-      for (; (jp.getCurrentToken() != null && jp.getCurrentToken() != JsonToken.END_OBJECT); jp.nextToken()) {
-        final JsonToken token = jp.getCurrentToken();
-        if (token == JsonToken.FIELD_NAME) {
-          if ("Version".equals(jp.getCurrentName())) {
-            edmx.setVersion(jp.nextTextValue());
-          } else if ("DataServices".equals(jp.getCurrentName())) {
+      for (; (jp.currentToken() != null && jp.currentToken() != JsonToken.END_OBJECT); jp.nextToken()) {
+        final JsonToken token = jp.currentToken();
+        if (token == JsonToken.PROPERTY_NAME) {
+          if ("Version".equals(jp.currentName())) {
+            edmx.setVersion(nextTextValue(jp));
+          } else if ("DataServices".equals(jp.currentName())) {
             jp.nextToken();
             edmx.setDataServices(jp.readValueAs(ClientCsdlDataServices.class));
-          } else if ("Reference".equals(jp.getCurrentName())) {
+          } else if ("Reference".equals(jp.currentName())) {
             jp.nextToken();
             edmx.getReferences().add(jp.readValueAs(ClientCsdlReference.class));
           }

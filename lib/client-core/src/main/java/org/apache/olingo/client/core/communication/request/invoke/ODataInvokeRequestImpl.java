@@ -22,8 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.api.communication.request.invoke.ClientNoContent;
 import org.apache.olingo.client.api.communication.response.ODataInvokeResponse;
@@ -32,6 +31,7 @@ import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.client.api.domain.ClientInvokeResult;
 import org.apache.olingo.client.api.domain.ClientProperty;
 import org.apache.olingo.client.api.http.HttpClientException;
+import org.apache.olingo.client.api.http.ODataHttpClient;
 import org.apache.olingo.client.api.serialization.ODataDeserializerException;
 import org.apache.olingo.client.core.communication.response.AbstractODataResponse;
 import org.apache.olingo.commons.api.format.ContentType;
@@ -64,8 +64,8 @@ public class ODataInvokeRequestImpl<T extends ClientInvokeResult> extends Abstra
 
     private T invokeResult = null;
 
-    private ODataInvokeResponseImpl(final ODataClient odataClient, final HttpClient httpClient,
-        final HttpResponse res) {
+    private ODataInvokeResponseImpl(final ODataClient odataClient, final ODataHttpClient httpClient,
+        final ClassicHttpResponse res) {
 
       super(odataClient, httpClient, res);
     }

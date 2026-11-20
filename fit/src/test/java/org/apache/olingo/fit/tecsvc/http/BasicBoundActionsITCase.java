@@ -18,13 +18,14 @@
  */
 package org.apache.olingo.fit.tecsvc.http;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -46,7 +47,7 @@ import org.apache.olingo.commons.api.http.HttpHeader;
 import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.fit.tecsvc.TecSvcConst;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class BasicBoundActionsITCase {
 
@@ -55,8 +56,8 @@ public class BasicBoundActionsITCase {
     
   @Test
   public void boundActionReturningBaseType() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESTwoBaseTwoKeyNav(PropertyInt16=1,PropertyString='1')/"
-        + "olingo.odata.test1.BAETTwoBaseTwoKeyNavRTETBaseTwoKeyNav");
+    URL url = URI.create(SERVICE_URI + "ESTwoBaseTwoKeyNav(PropertyInt16=1,PropertyString='1')/"
+        + "olingo.odata.test1.BAETTwoBaseTwoKeyNavRTETBaseTwoKeyNav").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.POST.name());
@@ -96,8 +97,8 @@ public class BasicBoundActionsITCase {
   
   @Test
   public void boundActionReturningEntityWithNavigationSegInAction() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESTwoKeyNav(PropertyInt16=1,PropertyString='1')/"
-        + "NavPropertyETTwoKeyNavOne/olingo.odata.test1.BAETTwoKeyNavRTETTwoKeyNavParam");
+    URL url = URI.create(SERVICE_URI + "ESTwoKeyNav(PropertyInt16=1,PropertyString='1')/"
+        + "NavPropertyETTwoKeyNavOne/olingo.odata.test1.BAETTwoKeyNavRTETTwoKeyNavParam").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.POST.name());

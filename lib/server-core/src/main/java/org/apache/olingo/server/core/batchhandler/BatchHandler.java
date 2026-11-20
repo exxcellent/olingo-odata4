@@ -30,18 +30,18 @@ import org.apache.olingo.server.api.ODataResponse;
 import org.apache.olingo.server.api.batch.BatchFacade;
 import org.apache.olingo.server.api.deserializer.batch.BatchDeserializerException;
 import org.apache.olingo.server.api.deserializer.batch.BatchDeserializerException.MessageKeys;
+import org.apache.olingo.server.api.ODataHandler;
 import org.apache.olingo.server.api.processor.BatchProcessor;
 import org.apache.olingo.server.core.ODataHandlerException;
-import org.apache.olingo.server.core.ODataHandlerImpl;
 import org.apache.olingo.server.core.deserializer.batch.BatchParserCommon;
 
 public class BatchHandler {
   private final BatchProcessor batchProcessor;
-  private final ODataHandlerImpl oDataHandler;
+  private final ODataHandler oDataHandler;
   private static final String RETURN_MINIMAL = "return=minimal";
   private static final String RETURN_REPRESENTATION = "return=representation";
 
-  public BatchHandler(final ODataHandlerImpl oDataHandler, final BatchProcessor batchProcessor) {
+  public BatchHandler(final ODataHandler oDataHandler, final BatchProcessor batchProcessor) {
 
     this.batchProcessor = batchProcessor;
     this.oDataHandler = oDataHandler;

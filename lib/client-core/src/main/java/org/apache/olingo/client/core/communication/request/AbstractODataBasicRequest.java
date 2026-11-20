@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
@@ -43,7 +44,7 @@ import org.apache.olingo.commons.api.http.HttpMethod;
 public abstract class AbstractODataBasicRequest<T extends ODataResponse>
     extends AbstractODataRequest implements ODataBasicRequest<T> {
 
-  private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+  private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
   private static final byte[] CRLF = {13, 10};
 
   /**

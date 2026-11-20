@@ -18,9 +18,9 @@
  */
 package org.apache.olingo.server.core.serializer.json;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.olingo.commons.api.edm.Edm;
@@ -106,14 +107,15 @@ import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.core.ServiceMetadataImpl;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class MetadataDocumentJsonSerializerTest {
 
   private static ODataSerializer serializer;
   
-  @BeforeClass
+  @BeforeAll
   public static void init() throws SerializerException {
     serializer = OData.newInstance().createSerializer(ContentType.APPLICATION_JSON);
   }
@@ -125,7 +127,7 @@ public class MetadataDocumentJsonSerializerTest {
     when(metadata.getEdm()).thenReturn(edm);
 
     assertEquals("{\"$Version\":\"4.01\"}",
-        IOUtils.toString(serializer.metadataDocument(metadata).getContent()));
+        IOUtils.toString(serializer.metadataDocument(metadata).getContent(), StandardCharsets.UTF_8));
   }
   
   @Test
@@ -185,7 +187,7 @@ public class MetadataDocumentJsonSerializerTest {
 
     InputStream metadata = serializer.metadataDocument(serviceMetadata).getContent();
     assertNotNull(metadata);
-    final String metadataString = IOUtils.toString(metadata);
+    final String metadataString = IOUtils.toString(metadata, StandardCharsets.UTF_8);
     // edmx reference
     assertTrue(metadataString.contains(
         "\"$Reference\":{\"http://example.com\":{},"));
@@ -267,7 +269,7 @@ public class MetadataDocumentJsonSerializerTest {
     
     InputStream metadata = serializer.metadataDocument(serviceMetadata).getContent();
     assertNotNull(metadata);
-    String metadataString = IOUtils.toString(metadata);
+    String metadataString = IOUtils.toString(metadata, StandardCharsets.UTF_8);
     
     
     assertTrue(metadataString.contains(
@@ -292,19 +294,23 @@ public class MetadataDocumentJsonSerializerTest {
     InputStream metadata = serializer.metadataDocument(serviceMetadata).getContent();
     assertNotNull(metadata);
     assertEquals("{\"$Version\":\"4.01\",\"MyNamespace\":{}}",
-        IOUtils.toString(metadata));
+        IOUtils.toString(metadata, StandardCharsets.UTF_8));
   }
   
-  @Test(expected=SerializerException.class)
+  @Test
   public void testNullMetadata() throws Exception {
-    serializer.metadataDocument(null).getContent();
+      assertThrows(SerializerException.class, () -> {
+      serializer.metadataDocument(null).getContent();
+      });
   }
   
-  @Test(expected=SerializerException.class)
+  @Test
   public void testNullEdm() throws Exception {
-    ServiceMetadata serviceMetadata = mock(ServiceMetadata.class);
-    when(serviceMetadata.getEdm()).thenReturn(null);
-    serializer.metadataDocument(serviceMetadata).getContent();
+      assertThrows(SerializerException.class, () -> {
+      ServiceMetadata serviceMetadata = mock(ServiceMetadata.class);
+      when(serviceMetadata.getEdm()).thenReturn(null);
+      serializer.metadataDocument(serviceMetadata).getContent();
+      });
   }
   
   @Test
@@ -343,7 +349,7 @@ public class MetadataDocumentJsonSerializerTest {
     
     InputStream metadata = serializer.metadataDocument(serviceMetadata).getContent();
     assertNotNull(metadata);
-    String metadataStr = IOUtils.toString(metadata);
+    String metadataStr = IOUtils.toString(metadata, StandardCharsets.UTF_8);
     assertEquals("{\"$Version\":\"4.01\","
         + "\"MyNamespace\":"
         + "{\"MyTypeDefinition\":{"
@@ -482,7 +488,7 @@ public class MetadataDocumentJsonSerializerTest {
     CsdlEdmProvider provider = new LocalProvider();
     ServiceMetadata serviceMetadata = new ServiceMetadataImpl(provider, Collections.<EdmxReference> emptyList(), null);
     InputStream metadataStream = serializer.metadataDocument(serviceMetadata).getContent();
-    String metadata = IOUtils.toString(metadataStream);
+    String metadata = IOUtils.toString(metadataStream, StandardCharsets.UTF_8);
     assertNotNull(metadata);
     return metadata;
   }

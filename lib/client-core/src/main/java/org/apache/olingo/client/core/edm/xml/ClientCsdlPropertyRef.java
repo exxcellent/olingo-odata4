@@ -18,10 +18,10 @@
  */
 package org.apache.olingo.client.core.edm.xml;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 import org.apache.olingo.commons.api.edm.provider.CsdlPropertyRef;
 
@@ -40,13 +40,13 @@ class ClientCsdlPropertyRef extends CsdlPropertyRef implements Serializable {
 
       final CsdlPropertyRef propertyRef = new ClientCsdlPropertyRef();
 
-      for (; jp.getCurrentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
-        final JsonToken token = jp.getCurrentToken();
-        if (token == JsonToken.FIELD_NAME) {
-          if ("Name".equals(jp.getCurrentName())) {
-            propertyRef.setName(jp.nextTextValue());
-          } else if ("Alias".equals(jp.getCurrentName())) {
-            propertyRef.setAlias(jp.nextTextValue());
+      for (; jp.currentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
+        final JsonToken token = jp.currentToken();
+        if (token == JsonToken.PROPERTY_NAME) {
+          if ("Name".equals(jp.currentName())) {
+            propertyRef.setName(nextTextValue(jp));
+          } else if ("Alias".equals(jp.currentName())) {
+            propertyRef.setAlias(nextTextValue(jp));
           }
         }
       }

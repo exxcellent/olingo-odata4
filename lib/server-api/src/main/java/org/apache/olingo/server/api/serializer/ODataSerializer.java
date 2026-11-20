@@ -18,9 +18,10 @@
  */
 package org.apache.olingo.server.api.serializer;
 
-import org.apache.olingo.commons.api.Constants;
-import org.apache.olingo.commons.api.data.Entity;
+import java.nio.charset.StandardCharsets;
+
 import org.apache.olingo.commons.api.data.AbstractEntityCollection;
+import org.apache.olingo.commons.api.data.Entity;
 import org.apache.olingo.commons.api.data.EntityIterator;
 import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.edm.EdmComplexType;
@@ -34,7 +35,7 @@ import org.apache.olingo.server.api.ServiceMetadata;
 public interface ODataSerializer {
 
   /** The default character set is UTF-8. */
-  public static final String DEFAULT_CHARSET =  Constants.UTF8;
+  public static final String DEFAULT_CHARSET =  StandardCharsets.UTF_8.name();
 
   /**
    * Writes the service document into an InputStream.

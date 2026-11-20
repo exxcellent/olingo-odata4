@@ -18,10 +18,10 @@
  */
 package org.apache.olingo.client.core.edm.xml;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 import org.apache.olingo.commons.api.edm.provider.CsdlActionImport;
 
@@ -41,16 +41,16 @@ class ClientCsdlActionImport extends CsdlActionImport implements Serializable {
 
       final ClientCsdlActionImport action = new ClientCsdlActionImport();
 
-      for (; jp.getCurrentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
-        final JsonToken token = jp.getCurrentToken();
-        if (token == JsonToken.FIELD_NAME) {
-          if ("Action".equals(jp.getCurrentName())) {
-            action.setAction(jp.nextTextValue());
-          } else if ("Name".equals(jp.getCurrentName())) {
-            action.setName(jp.nextTextValue());
-          } else if ("EntitySet".equals(jp.getCurrentName())) {
-            action.setEntitySet(jp.nextTextValue());
-          } else if ("Annotation".equals(jp.getCurrentName())) {
+      for (; jp.currentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
+        final JsonToken token = jp.currentToken();
+        if (token == JsonToken.PROPERTY_NAME) {
+          if ("Action".equals(jp.currentName())) {
+            action.setAction(nextTextValue(jp));
+          } else if ("Name".equals(jp.currentName())) {
+            action.setName(nextTextValue(jp));
+          } else if ("EntitySet".equals(jp.currentName())) {
+            action.setEntitySet(nextTextValue(jp));
+          } else if ("Annotation".equals(jp.currentName())) {
               jp.nextToken();
               action.getAnnotations().add(jp.readValueAs(ClientCsdlAnnotation.class));
           }

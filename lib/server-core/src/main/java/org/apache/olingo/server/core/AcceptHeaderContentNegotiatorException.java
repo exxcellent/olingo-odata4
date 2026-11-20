@@ -18,8 +18,6 @@
  */
 package org.apache.olingo.server.core;
 
-import org.apache.olingo.server.api.ODataLibraryException.MessageKey;
-
 public class AcceptHeaderContentNegotiatorException extends ContentNegotiatorException {
   private static final long serialVersionUID = -8112658467394158700L;
 

@@ -25,26 +25,26 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.api.communication.request.ODataBatchableRequest;
 import org.apache.olingo.client.api.communication.request.invoke.ClientNoContent;
 import org.apache.olingo.client.api.communication.request.invoke.ODataInvokeRequest;
 import org.apache.olingo.client.api.communication.response.ODataInvokeResponse;
-import org.apache.olingo.client.api.http.HttpClientException;
-import org.apache.olingo.client.api.serialization.ODataDeserializerException;
-import org.apache.olingo.client.api.serialization.ODataSerializerException;
-import org.apache.olingo.client.core.communication.request.AbstractODataBasicRequest;
-import org.apache.olingo.client.core.communication.response.AbstractODataResponse;
-import org.apache.olingo.client.core.uri.URIUtils;
 import org.apache.olingo.client.api.domain.ClientEntity;
 import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.client.api.domain.ClientInvokeResult;
 import org.apache.olingo.client.api.domain.ClientProperty;
 import org.apache.olingo.client.api.domain.ClientValue;
+import org.apache.olingo.client.api.http.HttpClientException;
+import org.apache.olingo.client.api.http.ODataHttpClient;
+import org.apache.olingo.client.api.serialization.ODataDeserializerException;
+import org.apache.olingo.client.api.serialization.ODataSerializerException;
+import org.apache.olingo.client.core.communication.request.AbstractODataBasicRequest;
+import org.apache.olingo.client.core.communication.response.AbstractODataResponse;
+import org.apache.olingo.client.core.uri.URIUtils;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpMethod;
 
@@ -156,7 +156,7 @@ public abstract class AbstractODataInvokeRequest<T extends ClientInvokeResult>
 
     if (!this.parameters.isEmpty()) {
       if (this.method == HttpMethod.GET) {
-        ((HttpRequestBase) this.request).setURI(
+        ((HttpUriRequestBase) this.request).setUri(
             URIUtils.buildFunctionInvokeURI(this.uri, parameters));
       } else if (this.method == HttpMethod.POST) {
         ((HttpPost) request).setEntity(URIUtils.buildInputStreamEntity(odataClient, input));
@@ -179,8 +179,8 @@ public abstract class AbstractODataInvokeRequest<T extends ClientInvokeResult>
 
     private T invokeResult = null;
 
-    private ODataInvokeResponseImpl(final ODataClient odataClient, final HttpClient httpClient,
-        final HttpResponse res) {
+    private ODataInvokeResponseImpl(final ODataClient odataClient, final ODataHttpClient httpClient,
+        final ClassicHttpResponse res) {
 
       super(odataClient, httpClient, res);
     }

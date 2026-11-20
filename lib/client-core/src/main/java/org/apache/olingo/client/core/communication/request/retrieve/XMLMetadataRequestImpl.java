@@ -21,9 +21,8 @@ package org.apache.olingo.client.core.communication.request.retrieve;
 import java.net.URI;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.api.communication.request.retrieve.XMLMetadataRequest;
 import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse;
@@ -31,6 +30,7 @@ import org.apache.olingo.client.api.edm.xml.Include;
 import org.apache.olingo.client.api.edm.xml.IncludeAnnotations;
 import org.apache.olingo.client.api.edm.xml.Reference;
 import org.apache.olingo.client.api.edm.xml.XMLMetadata;
+import org.apache.olingo.client.api.http.ODataHttpClient;
 import org.apache.olingo.commons.api.edm.provider.CsdlAnnotation;
 import org.apache.olingo.commons.api.edm.provider.CsdlAnnotations;
 import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
@@ -135,18 +135,18 @@ public class XMLMetadataRequestImpl
 
   private class SingleXMLMetadatRequestImpl extends AbstractMetadataRequestImpl<XMLMetadata> {
 
-    private HttpResponse httpResponse;
+    private ClassicHttpResponse httpResponse;
 
     public SingleXMLMetadatRequestImpl(final ODataClient odataClient, final URI uri) {
       super(odataClient, uri);
     }
 
-    public HttpResponse getHttpResponse() {
+    public ClassicHttpResponse getHttpResponse() {
       return httpResponse;
     }
 
     @Override
-    protected void checkRequest(final ODataClient odataClient, final HttpUriRequest request) {
+    protected void checkRequest(final ODataClient odataClient, final HttpUriRequestBase request) {
       // override the parent check, as the reference urls in metadata can be spanning cross-site
     }
 
@@ -176,8 +176,8 @@ public class XMLMetadataRequestImpl
 
     private final XMLMetadata metadata;
 
-    private XMLMetadataResponseImpl(final ODataClient odataClient, final HttpClient httpClient,
-        final HttpResponse res, final XMLMetadata metadata) {
+    private XMLMetadataResponseImpl(final ODataClient odataClient, final ODataHttpClient httpClient,
+        final ClassicHttpResponse res, final XMLMetadata metadata) {
 
       super(odataClient, httpClient, null);
       initFromHttpResponse(res);

@@ -18,12 +18,13 @@
  */
 package org.apache.olingo.fit.proxy;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.UUID;
@@ -36,7 +37,7 @@ import org.apache.olingo.ext.proxy.api.EdmStreamValue;
 import org.apache.olingo.fit.proxy.demo.Service;
 import org.apache.olingo.fit.proxy.demo.odatademo.DemoService;
 import org.apache.olingo.fit.proxy.demo.odatademo.types.Advertisement;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * This is the unit test class to check media entity retrieve operations.
@@ -81,20 +82,23 @@ public class MediaEntityTestITCase extends AbstractTestITCase {
   public void update() throws IOException {
     final UUID uuid = UUID.fromString("f89dee73-af9f-4cd4-b330-db93c25ff3c7");
     final Advertisement adv = getContainer().getAdvertisements().getByKey(uuid);
-    final String random = RandomStringUtils.random(124, "abcdefghijklmnopqrstuvwxyz");
-    adv.uploadStream(getContainer().newEdmStreamValue("application/octet-stream", IOUtils.toInputStream(random)));
+    final String random = RandomStringUtils.secure().next(124, "abcdefghijklmnopqrstuvwxyz");
+    adv.uploadStream(getContainer().newEdmStreamValue("application/octet-stream",
+        IOUtils.toInputStream(random, StandardCharsets.UTF_8)));
     getContainer().flush();
     assertEquals(random,
-        IOUtils.toString(getContainer().getAdvertisements().getByKey(uuid).loadStream().getStream()));
+        IOUtils.toString(getContainer().getAdvertisements().getByKey(uuid).loadStream().getStream(),
+            StandardCharsets.UTF_8));
     getService().getContext().detachAll();
   }
 
   @Test
   public void create() throws IOException {
-    final String random = RandomStringUtils.random(124, "abcdefghijklmnopqrstuvwxyz");
+    final String random = RandomStringUtils.secure().next(124, "abcdefghijklmnopqrstuvwxyz");
 
     final Advertisement adv = getContainer().newEntityInstance(Advertisement.class);
-    adv.uploadStream(getContainer().newEdmStreamValue("application/octet-stream", IOUtils.toInputStream(random)));
+    adv.uploadStream(getContainer().newEdmStreamValue("application/octet-stream",
+        IOUtils.toInputStream(random, StandardCharsets.UTF_8)));
     adv.setAirDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
 
     getContainer().getAdvertisements().add(adv);
@@ -103,7 +107,8 @@ public class MediaEntityTestITCase extends AbstractTestITCase {
     final UUID uuid = adv.getID();
     getService().getContext().detachAll();
 
-    assertEquals(random, IOUtils.toString(getContainer().getAdvertisements().getByKey(uuid).loadStream().getStream()));
+    assertEquals(random, IOUtils.toString(getContainer().getAdvertisements().getByKey(uuid).loadStream().getStream(),
+        StandardCharsets.UTF_8));
 
     getService().getContext().detachAll();
 

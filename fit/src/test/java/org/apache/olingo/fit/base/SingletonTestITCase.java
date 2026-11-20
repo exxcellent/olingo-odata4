@@ -18,10 +18,10 @@
  */
 package org.apache.olingo.fit.base;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.URI;
 
@@ -37,7 +37,7 @@ import org.apache.olingo.client.api.uri.URIBuilder;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.format.ContentType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class SingletonTestITCase extends AbstractTestITCase {
 
@@ -122,6 +122,7 @@ public class SingletonTestITCase extends AbstractTestITCase {
     assertEquals(132520, updated.getProperty("Revenue").getPrimitiveValue().toCastValue(Integer.class), 0);
   }
 
+  //TODO this is a flaky test... why?
   @Test
   public void atomUpdate() throws EdmPrimitiveTypeException {
     update(ContentType.APPLICATION_ATOM_XML);

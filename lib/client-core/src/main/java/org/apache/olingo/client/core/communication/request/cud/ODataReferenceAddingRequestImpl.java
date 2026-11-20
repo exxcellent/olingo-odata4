@@ -22,13 +22,13 @@ import java.io.InputStream;
 import java.net.URI;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.api.communication.request.cud.ODataReferenceAddingRequest;
 import org.apache.olingo.client.api.communication.response.ODataReferenceAddingResponse;
 import org.apache.olingo.client.api.data.ResWrap;
+import org.apache.olingo.client.api.http.ODataHttpClient;
 import org.apache.olingo.client.api.serialization.ODataSerializerException;
 import org.apache.olingo.client.api.serialization.ODataWriter;
 import org.apache.olingo.client.core.communication.request.AbstractODataBasicRequest;
@@ -79,7 +79,7 @@ public class ODataReferenceAddingRequestImpl extends AbstractODataBasicRequest<O
   @Override
   public ODataReferenceAddingResponse execute() {
     final InputStream input = getPayload();
-    ((HttpEntityEnclosingRequestBase) request).setEntity(URIUtils.buildInputStreamEntity(odataClient, input));
+    ((HttpUriRequestBase) request).setEntity(URIUtils.buildInputStreamEntity(odataClient, input));
 
     try {
       return new ODataReferenceAddingResponseImpl(odataClient, httpClient, doExecute());
@@ -94,7 +94,7 @@ public class ODataReferenceAddingRequestImpl extends AbstractODataBasicRequest<O
   private class ODataReferenceAddingResponseImpl extends AbstractODataResponse implements ODataReferenceAddingResponse {
 
     private ODataReferenceAddingResponseImpl(
-        final ODataClient odataClient, final HttpClient httpClient, final HttpResponse res) {
+        final ODataClient odataClient, final ODataHttpClient httpClient, final ClassicHttpResponse res) {
 
       super(odataClient, httpClient, res);
       this.close();

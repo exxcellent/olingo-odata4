@@ -42,7 +42,7 @@ import org.apache.olingo.server.api.uri.queryoption.SystemQueryOptionKind;
 public class UriValidator {
 
   //@formatter:off (Eclipse formatter)
-  //CHECKSTYLE:OFF (Maven checkstyle)
+  // CHECKSTYLE:OFF (Maven checkstyle)
   private static final boolean[][] decisionMatrix =
     {
       /*                                          0-FILTER 1-FORMAT 2-EXPAND 3-ID     4-COUNT  5-ORDERBY 6-SEARCH 7-SELECT 8-SKIP   9-SKIPTOKEN 10-TOP 11-APPLY  12-DELTATOKEN */
@@ -67,7 +67,7 @@ public class UriValidator {
       /*           propertyPrimitiveValue 18 */ { false,   true ,   false,   false,   false,   false,    false,   false,   false,   false,      false, false,     false },
       /*                             none 19 */ { false,   true ,   false,   false,   false,   false,    false,   false,   false,   false,      false, false,     false }
     };
-  //CHECKSTYLE:ON
+  // CHECKSTYLE:ON
   //@formatter:on
 
   private enum UriType {

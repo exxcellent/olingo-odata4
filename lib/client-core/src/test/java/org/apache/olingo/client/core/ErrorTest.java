@@ -18,7 +18,8 @@
  */
 package org.apache.olingo.client.core;
 
-import org.apache.http.StatusLine;
+import org.apache.hc.core5.http.HttpVersion;
+import org.apache.hc.core5.http.message.StatusLine;
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.api.communication.ODataClientErrorException;
 import org.apache.olingo.client.api.communication.ODataServerErrorException;
@@ -28,18 +29,17 @@ import org.apache.olingo.commons.api.ex.ODataError;
 import org.apache.olingo.commons.api.ex.ODataErrorDetail;
 import org.apache.olingo.commons.api.ex.ODataRuntimeException;
 import org.apache.olingo.commons.api.format.ContentType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 public class ErrorTest extends AbstractTest {
 
@@ -58,9 +58,9 @@ public class ErrorTest extends AbstractTest {
 
     // verify details
     final ODataErrorDetail detail = error.getDetails().get(0);
-    assertEquals("Code should be correct", "301", detail.getCode());
-    assertEquals("Target should be correct", "$search", detail.getTarget());
-    assertEquals("Message should be correct", "$search query option not supported", detail.getMessage());
+    assertEquals("301", detail.getCode(), "Code should be correct");
+    assertEquals("$search", detail.getTarget(), "Target should be correct");
+    assertEquals("$search query option not supported", detail.getMessage(), "Message should be correct");
     return error;
   }
 
@@ -70,11 +70,11 @@ public class ErrorTest extends AbstractTest {
 
     // verify inner error dictionary
     final Map<String, String> innerErr = error.getInnerError();
-    assertEquals("innerError dictionary size should be correct", 2, innerErr.size());
-    assertEquals("innerError['context'] should be correct",
-        "{\"key1\":\"for debug deployment only\"}", innerErr.get("context"));
-    assertEquals("innerError['trace'] should be correct",
-        "[\"callmethod1 etc\",\"callmethod2 etc\"]", innerErr.get("trace"));
+    assertEquals(2, innerErr.size(), "innerError dictionary size should be correct");
+    assertEquals("{\"key1\":\"for debug deployment only\"}", innerErr.get("context"),
+        "innerError['context'] should be correct");
+    assertEquals("[\"callmethod1 etc\",\"callmethod2 etc\"]", innerErr.get("trace"),
+        "innerError['trace'] should be correct");
   }
 
   @Test
@@ -86,9 +86,7 @@ public class ErrorTest extends AbstractTest {
   public void test1OLINGO1102() throws Exception {
     ODataClient odataClient = ODataClientFactory.getClient();
     InputStream entity = getClass().getResourceAsStream("500error." + getSuffix(ContentType.JSON));
-    StatusLine statusLine = mock(StatusLine.class);
-    when(statusLine.getStatusCode()).thenReturn(500);
-    when(statusLine.toString()).thenReturn("Internal Server Error");
+    StatusLine statusLine = new StatusLine(HttpVersion.HTTP_1_1, 500, "Internal Server Error");
 
     ODataClientErrorException exp = (ODataClientErrorException) ODataErrorResponseChecker.
         checkResponse(odataClient, statusLine, entity, ContentType.JSON);
@@ -107,9 +105,7 @@ public class ErrorTest extends AbstractTest {
   public void test2OLINGO1102() throws Exception {
     ODataClient odataClient = ODataClientFactory.getClient();
     InputStream entity = getClass().getResourceAsStream("500error1." + getSuffix(ContentType.JSON));
-    StatusLine statusLine = mock(StatusLine.class);
-    when(statusLine.getStatusCode()).thenReturn(500);
-    when(statusLine.toString()).thenReturn("Internal Server Error");
+    StatusLine statusLine = new StatusLine(HttpVersion.HTTP_1_1, 500, "Internal Server Error");
 
     ODataServerErrorException exp = (ODataServerErrorException) ODataErrorResponseChecker.
         checkResponse(odataClient, statusLine, entity, ContentType.JSON);
@@ -119,9 +115,7 @@ public class ErrorTest extends AbstractTest {
   @Test
   public void testWithNull() throws Exception {
     ODataClient odataClient = ODataClientFactory.getClient();
-    StatusLine statusLine = mock(StatusLine.class);
-    when(statusLine.getStatusCode()).thenReturn(500);
-    when(statusLine.toString()).thenReturn("Internal Server Error");
+    StatusLine statusLine = new StatusLine(HttpVersion.HTTP_1_1, 500, "Internal Server Error");
 
     ODataRuntimeException exp = ODataErrorResponseChecker.
         checkResponse(odataClient, statusLine, null, ContentType.JSON);
@@ -132,10 +126,7 @@ public class ErrorTest extends AbstractTest {
   public void testExpTextMsg403() throws Exception {
     ODataClient odataClient = ODataClientFactory.getClient();
     InputStream entity = new ByteArrayInputStream("CSRF Validation Exception".getBytes());
-    StatusLine statusLine = mock(StatusLine.class);
-    when(statusLine.getStatusCode()).thenReturn(403);
-    when(statusLine.toString()).thenReturn("Validation Exception");
-    when(statusLine.getReasonPhrase()).thenReturn("Forbidden");
+    StatusLine statusLine = new StatusLine(HttpVersion.HTTP_1_1, 403, "Forbidden");
 
     ODataClientErrorException exp = (ODataClientErrorException) ODataErrorResponseChecker.
         checkResponse(odataClient, statusLine, entity, ContentType.TEXT_PLAIN);

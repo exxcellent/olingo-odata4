@@ -18,12 +18,14 @@
  */
 package org.apache.olingo.fit.tecsvc.http;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.olingo.client.api.ODataClient;
@@ -32,7 +34,7 @@ import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.fit.AbstractBaseTestITCase;
 import org.apache.olingo.fit.tecsvc.TecSvcConst;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class BasicBoundFunctionITCase extends AbstractBaseTestITCase {
 
@@ -40,8 +42,8 @@ public class BasicBoundFunctionITCase extends AbstractBaseTestITCase {
 
   @Test
   public void boundFunctionReturningDerievedType() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESBase(111)/olingo.odata.test1.ETTwoBase/"
-        + "olingo.odata.test1.BFESBaseRTESTwoBase()");
+    URL url = URI.create(SERVICE_URI + "ESBase(111)/olingo.odata.test1.ETTwoBase/"
+        + "olingo.odata.test1.BFESBaseRTESTwoBase()").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -49,19 +51,19 @@ public class BasicBoundFunctionITCase extends AbstractBaseTestITCase {
     connection.connect();
 
     assertEquals(HttpStatusCode.OK.getStatusCode(), connection.getResponseCode());
-    final String expected =  "\"PropertyInt16\":111,"
-        +  "\"PropertyString\":\"TEST A\","
-        +  "\"AdditionalPropertyString_5\":\"TEST A 0815\","
-        +  "\"AdditionalPropertyString_6\":\"TEST B 0815\"";
-    String content = IOUtils.toString(connection.getInputStream());
+    final String expected = "\"PropertyInt16\":111,"
+        + "\"PropertyString\":\"TEST A\","
+        + "\"AdditionalPropertyString_5\":\"TEST A 0815\","
+        + "\"AdditionalPropertyString_6\":\"TEST B 0815\"";
+    String content = IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8);
     assertTrue(content.contains(expected));
     connection.disconnect();
   }
-  
+
   @Test
   public void boundFunctionReturningNavigationType() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESTwoKeyNav(PropertyInt16=1,PropertyString='1')"
-        + "/NavPropertyETTwoKeyNavMany/olingo.odata.test1.BFC_RTESTwoKeyNav_()");
+    URL url = URI.create(SERVICE_URI + "ESTwoKeyNav(PropertyInt16=1,PropertyString='1')"
+        + "/NavPropertyETTwoKeyNavMany/olingo.odata.test1.BFC_RTESTwoKeyNav_()").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -69,33 +71,33 @@ public class BasicBoundFunctionITCase extends AbstractBaseTestITCase {
     connection.connect();
 
     assertEquals(HttpStatusCode.OK.getStatusCode(), connection.getResponseCode());
-    final String expected =    "\"PropertyCompNav\":{"
-        +             "\"PropertyInt16\":1,"
-        +             "\"PropertyComp\":{"
-        +             "\"PropertyString\":\"First Resource - positive values\","
-        +             "\"PropertyBinary\":\"ASNFZ4mrze8=\","
-        +             "\"PropertyBoolean\":true,"
-        +             "\"PropertyByte\":255,"
-        +             "\"PropertyDate\":\"2012-12-03\","
-        +             "\"PropertyDateTimeOffset\":\"2012-12-03T07:16:23Z\","
-        +             "\"PropertyDecimal\":34,"
-        +             "\"PropertySingle\":1.79E20,"
-        +             "\"PropertyDouble\":-1.79E20,"
-        +             "\"PropertyDuration\":\"PT6S\","
-        +             "\"PropertyGuid\":\"01234567-89ab-cdef-0123-456789abcdef\","
-        +             "\"PropertyInt16\":32767,"
-        +             "\"PropertyInt32\":2147483647,"
-        +             "\"PropertyInt64\":9223372036854775807,"
-        +             "\"PropertySByte\":127,"
-        +             "\"PropertyTimeOfDay\":\"21:05:59\"";
-    String content = IOUtils.toString(connection.getInputStream());
+    final String expected = "\"PropertyCompNav\":{"
+        + "\"PropertyInt16\":1,"
+        + "\"PropertyComp\":{"
+        + "\"PropertyString\":\"First Resource - positive values\","
+        + "\"PropertyBinary\":\"ASNFZ4mrze8=\","
+        + "\"PropertyBoolean\":true,"
+        + "\"PropertyByte\":255,"
+        + "\"PropertyDate\":\"2012-12-03\","
+        + "\"PropertyDateTimeOffset\":\"2012-12-03T07:16:23Z\","
+        + "\"PropertyDecimal\":34,"
+        + "\"PropertySingle\":1.79E20,"
+        + "\"PropertyDouble\":-1.79E20,"
+        + "\"PropertyDuration\":\"PT6S\","
+        + "\"PropertyGuid\":\"01234567-89ab-cdef-0123-456789abcdef\","
+        + "\"PropertyInt16\":32767,"
+        + "\"PropertyInt32\":2147483647,"
+        + "\"PropertyInt64\":9223372036854775807,"
+        + "\"PropertySByte\":127,"
+        + "\"PropertyTimeOfDay\":\"21:05:59\"";
+    String content = IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8);
     assertTrue(content.contains(expected));
     connection.disconnect();
   }
-  
+
   @Test
   public void boundFunctionCETReturningCT() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim/olingo.odata.test1.BFNESAllPrimRTCTAllPrim()");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim/olingo.odata.test1.BFNESAllPrimRTCTAllPrim()").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -103,15 +105,14 @@ public class BasicBoundFunctionITCase extends AbstractBaseTestITCase {
     connection.connect();
 
     assertEquals(HttpStatusCode.OK.getStatusCode(), connection.getResponseCode());
-    String content = IOUtils.toString(connection.getInputStream());
+    String content = IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8);
     assertNotNull(content);
     connection.disconnect();
   }
-  
-  
+
   @Test
   public void boundFunctionCETReturningET() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESTwoKeyNav/olingo.odata.test1.BFCESTwoKeyNavRTTwoKeyNav()");
+    URL url = URI.create(SERVICE_URI + "ESTwoKeyNav/olingo.odata.test1.BFCESTwoKeyNavRTTwoKeyNav()").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -119,14 +120,15 @@ public class BasicBoundFunctionITCase extends AbstractBaseTestITCase {
     connection.connect();
 
     assertEquals(HttpStatusCode.OK.getStatusCode(), connection.getResponseCode());
-    String content = IOUtils.toString(connection.getInputStream());
+    String content = IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8);
     assertNotNull(content);
     connection.disconnect();
   }
-  
+
   @Test
   public void boundFunctionCETWithParamReturningET() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESKeyNav/olingo.odata.test1.BFCESKeyNavRTETKeyNavParam(ParameterString='qw')");
+    URL url = URI.create(SERVICE_URI + "ESKeyNav/olingo.odata.test1.BFCESKeyNavRTETKeyNavParam(ParameterString='qw')")
+        .toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -134,16 +136,15 @@ public class BasicBoundFunctionITCase extends AbstractBaseTestITCase {
     connection.connect();
 
     assertEquals(HttpStatusCode.OK.getStatusCode(), connection.getResponseCode());
-    String content = IOUtils.toString(connection.getInputStream());
+    String content = IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8);
     assertNotNull(content);
     connection.disconnect();
   }
-  
-  
+
   @Test
   public void boundFunctionCETParamReturningET() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESKeyNav/olingo.odata.test1.BFCESKeyNavRTETKeyNavParam"
-        + "(ParameterString=@p1)?@p1=%27qw%27");
+    URL url = URI.create(SERVICE_URI + "ESKeyNav/olingo.odata.test1.BFCESKeyNavRTETKeyNavParam"
+        + "(ParameterString=@p1)?@p1=%27qw%27").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -151,15 +152,14 @@ public class BasicBoundFunctionITCase extends AbstractBaseTestITCase {
     connection.connect();
 
     assertEquals(HttpStatusCode.OK.getStatusCode(), connection.getResponseCode());
-    String content = IOUtils.toString(connection.getInputStream());
+    String content = IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8);
     assertNotNull(content);
     connection.disconnect();
   }
-  
-  
+
   @Test
   public void boundFunctionCETParamReturningCET() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESBaseTwoKeyNav/olingo.odata.test1.BFCESBaseTwoKeyNavRTESBaseTwoKey()");
+    URL url = URI.create(SERVICE_URI + "ESBaseTwoKeyNav/olingo.odata.test1.BFCESBaseTwoKeyNavRTESBaseTwoKey()").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -167,15 +167,14 @@ public class BasicBoundFunctionITCase extends AbstractBaseTestITCase {
     connection.connect();
 
     assertEquals(HttpStatusCode.OK.getStatusCode(), connection.getResponseCode());
-    String content = IOUtils.toString(connection.getInputStream());
+    String content = IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8);
     assertNotNull(content);
     connection.disconnect();
   }
-  
-  
+
   @Test
   public void boundFunctionCETReturningPT() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESTwoKeyNav/olingo.odata.test1.BFNESTwoKeyNavRTString()");
+    URL url = URI.create(SERVICE_URI + "ESTwoKeyNav/olingo.odata.test1.BFNESTwoKeyNavRTString()").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -183,15 +182,14 @@ public class BasicBoundFunctionITCase extends AbstractBaseTestITCase {
     connection.connect();
 
     assertEquals(HttpStatusCode.OK.getStatusCode(), connection.getResponseCode());
-    String content = IOUtils.toString(connection.getInputStream());
+    String content = IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8);
     assertNotNull(content);
     connection.disconnect();
   }
-  
-  
+
   @Test
   public void boundFunctionCETReturningCCT() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESTwoKeyNav/olingo.odata.test1.BFCESTwoKeyNavRTCollCTNavFiveProp()");
+    URL url = URI.create(SERVICE_URI + "ESTwoKeyNav/olingo.odata.test1.BFCESTwoKeyNavRTCollCTNavFiveProp()").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -199,15 +197,14 @@ public class BasicBoundFunctionITCase extends AbstractBaseTestITCase {
     connection.connect();
 
     assertEquals(HttpStatusCode.OK.getStatusCode(), connection.getResponseCode());
-    String content = IOUtils.toString(connection.getInputStream());
+    String content = IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8);
     assertNotNull(content);
     connection.disconnect();
   }
-  
-  
+
   @Test
   public void boundFunctionCETReturningCPT() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESTwoKeyNav/olingo.odata.test1.BFCESTwoKeyNavRTCollDecimal()");
+    URL url = URI.create(SERVICE_URI + "ESTwoKeyNav/olingo.odata.test1.BFCESTwoKeyNavRTCollDecimal()").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -215,15 +212,15 @@ public class BasicBoundFunctionITCase extends AbstractBaseTestITCase {
     connection.connect();
 
     assertEquals(HttpStatusCode.OK.getStatusCode(), connection.getResponseCode());
-    String content = IOUtils.toString(connection.getInputStream());
+    String content = IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8);
     assertNotNull(content);
     connection.disconnect();
   }
-  
+
   @Test
   public void boundFunctionETReturningCT() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESTwoKeyNav(PropertyInt16=1,PropertyString='1')/"
-        + "olingo.odata.test1.BFCETTwoKeyNavRTCTTwoPrim()");
+    URL url = URI.create(SERVICE_URI + "ESTwoKeyNav(PropertyInt16=1,PropertyString='1')/"
+        + "olingo.odata.test1.BFCETTwoKeyNavRTCTTwoPrim()").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -231,14 +228,14 @@ public class BasicBoundFunctionITCase extends AbstractBaseTestITCase {
     connection.connect();
 
     assertEquals(HttpStatusCode.OK.getStatusCode(), connection.getResponseCode());
-    String content = IOUtils.toString(connection.getInputStream());
+    String content = IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8);
     assertNotNull(content);
     connection.disconnect();
   }
-  
+
   @Test
   public void boundFunctionETReturningET() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESKeyNav(1)/olingo.odata.test1.BFCETKeyNavRTETKeyNav()");
+    URL url = URI.create(SERVICE_URI + "ESKeyNav(1)/olingo.odata.test1.BFCETKeyNavRTETKeyNav()").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -246,15 +243,15 @@ public class BasicBoundFunctionITCase extends AbstractBaseTestITCase {
     connection.connect();
 
     assertEquals(HttpStatusCode.OK.getStatusCode(), connection.getResponseCode());
-    String content = IOUtils.toString(connection.getInputStream());
+    String content = IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8);
     assertNotNull(content);
     connection.disconnect();
   }
-  
+
   @Test
   public void boundFunctionETReturningCET() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESTwoKeyNav(PropertyInt16=1,PropertyString='1')/"
-        + "olingo.odata.test1.BFCSINavRTESTwoKeyNav()");
+    URL url = URI.create(SERVICE_URI + "ESTwoKeyNav(PropertyInt16=1,PropertyString='1')/"
+        + "olingo.odata.test1.BFCSINavRTESTwoKeyNav()").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -262,16 +259,15 @@ public class BasicBoundFunctionITCase extends AbstractBaseTestITCase {
     connection.connect();
 
     assertEquals(HttpStatusCode.OK.getStatusCode(), connection.getResponseCode());
-    String content = IOUtils.toString(connection.getInputStream());
+    String content = IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8);
     assertNotNull(content);
     connection.disconnect();
   }
-  
-  
+
   @Test
   public void boundFunctionETSetPath() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESTwoKeyNav(PropertyInt16=1,PropertyString='1')/"
-        + "NavPropertyETTwoKeyNavMany/olingo.odata.test1.BFC_RTESTwoKeyNav_()");
+    URL url = URI.create(SERVICE_URI + "ESTwoKeyNav(PropertyInt16=1,PropertyString='1')/"
+        + "NavPropertyETTwoKeyNavMany/olingo.odata.test1.BFC_RTESTwoKeyNav_()").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -279,15 +275,15 @@ public class BasicBoundFunctionITCase extends AbstractBaseTestITCase {
     connection.connect();
 
     assertEquals(HttpStatusCode.OK.getStatusCode(), connection.getResponseCode());
-    String content = IOUtils.toString(connection.getInputStream());
+    String content = IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8);
     assertNotNull(content);
     connection.disconnect();
   }
-  
+
   @Test
   public void boundFunctionETIsComposible() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESTwoKeyNav/olingo.odata.test1.BFESTwoKeyNavRTESTwoKeyNav()"
-        + "?$top=1&$skip=1&$select=PropertyString");
+    URL url = URI.create(SERVICE_URI + "ESTwoKeyNav/olingo.odata.test1.BFESTwoKeyNavRTESTwoKeyNav()"
+        + "?$top=1&$skip=1&$select=PropertyString").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -295,15 +291,15 @@ public class BasicBoundFunctionITCase extends AbstractBaseTestITCase {
     connection.connect();
 
     assertEquals(HttpStatusCode.OK.getStatusCode(), connection.getResponseCode());
-    String content = IOUtils.toString(connection.getInputStream());
+    String content = IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8);
     assertNotNull(content);
     connection.disconnect();
   }
-  
+
   @Test
   public void boundFunctionETIsComposibleFilter() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESTwoKeyNav/olingo.odata.test1.BFESTwoKeyNavRTESTwoKeyNav()?"
-        + "$filter=PropertyString%20eq%20%272%27");
+    URL url = URI.create(SERVICE_URI + "ESTwoKeyNav/olingo.odata.test1.BFESTwoKeyNavRTESTwoKeyNav()?"
+        + "$filter=PropertyString%20eq%20%272%27").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -311,15 +307,15 @@ public class BasicBoundFunctionITCase extends AbstractBaseTestITCase {
     connection.connect();
 
     assertEquals(HttpStatusCode.OK.getStatusCode(), connection.getResponseCode());
-    String content = IOUtils.toString(connection.getInputStream());
+    String content = IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8);
     assertNotNull(content);
     connection.disconnect();
   }
-  
+
   @Test
   public void boundFunctionETIsComposibleOrderBy() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESTwoKeyNav/olingo.odata.test1.BFESTwoKeyNavRTESTwoKeyNav()?"
-        + "$orderby=PropertyInt16%20desc");
+    URL url = URI.create(SERVICE_URI + "ESTwoKeyNav/olingo.odata.test1.BFESTwoKeyNavRTESTwoKeyNav()?"
+        + "$orderby=PropertyInt16%20desc").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -327,14 +323,14 @@ public class BasicBoundFunctionITCase extends AbstractBaseTestITCase {
     connection.connect();
 
     assertEquals(HttpStatusCode.OK.getStatusCode(), connection.getResponseCode());
-    String content = IOUtils.toString(connection.getInputStream());
+    String content = IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8);
     assertNotNull(content);
     connection.disconnect();
   }
-  
+
   @Test
   public void boundFunctionOverload() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESTwoKeyNav/olingo.odata.test1.BFC_RTESTwoKeyNav_()");
+    URL url = URI.create(SERVICE_URI + "ESTwoKeyNav/olingo.odata.test1.BFC_RTESTwoKeyNav_()").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -342,14 +338,15 @@ public class BasicBoundFunctionITCase extends AbstractBaseTestITCase {
     connection.connect();
 
     assertEquals(HttpStatusCode.OK.getStatusCode(), connection.getResponseCode());
-    String content = IOUtils.toString(connection.getInputStream());
+    String content = IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8);
     assertNotNull(content);
     connection.disconnect();
   }
-  
+
   @Test
   public void boundFunctionOverloadParam() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESTwoKeyNav/olingo.odata.test1.BFC_RTESTwoKeyNav_(ParameterString='abc')");
+    URL url = URI.create(SERVICE_URI + "ESTwoKeyNav/olingo.odata.test1.BFC_RTESTwoKeyNav_(ParameterString='abc')")
+        .toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -357,13 +354,11 @@ public class BasicBoundFunctionITCase extends AbstractBaseTestITCase {
     connection.connect();
 
     assertEquals(HttpStatusCode.OK.getStatusCode(), connection.getResponseCode());
-    String content = IOUtils.toString(connection.getInputStream());
+    String content = IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8);
     assertNotNull(content);
     connection.disconnect();
   }
-  
-  
-  
+
   @Override
   protected ODataClient getClient() {
     return null;

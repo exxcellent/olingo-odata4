@@ -41,8 +41,8 @@ import org.apache.olingo.commons.api.edm.geo.Geospatial;
 import org.apache.olingo.commons.core.edm.EdmTypeInfo;
 import org.apache.olingo.server.api.deserializer.DeserializerException;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 public class ODataJsonInstanceAnnotationDeserializer {
 
@@ -85,12 +85,12 @@ public class ODataJsonInstanceAnnotationDeserializer {
 
 		switch (propType) {
 		case COLLECTION:
-			fromCollection(valuable, node.elements(), typeInfo);
+			fromCollection(valuable, node.iterator(), typeInfo);
 			break;
 
 		case COMPLEX:
 			if (node.has(Constants.JSON_TYPE)) {
-				valuable.setType(node.get(Constants.JSON_TYPE).asText());
+				valuable.setType(node.get(Constants.JSON_TYPE).asString());
 				((ObjectNode) node).remove(Constants.JSON_TYPE);
 			}
 			final Object value = fromComplex((ObjectNode) node);
@@ -102,7 +102,7 @@ public class ODataJsonInstanceAnnotationDeserializer {
 
 		case ENUM:
 			if (!node.isNull()) {
-				valuable.setValue(ValueType.ENUM, node.asText());
+				valuable.setValue(ValueType.ENUM, node.asString());
 			}
 			break;
 
@@ -125,8 +125,8 @@ public class ODataJsonInstanceAnnotationDeserializer {
 	private Object fromPrimitive(final JsonNode node, final EdmTypeInfo typeInfo) 
 			throws EdmPrimitiveTypeException {
 		return node.isNull() ? null
-				: typeInfo == null ? node.asText()
-				: ((EdmPrimitiveType) typeInfo.getType()).valueOfString(node.asText(), true, null,
+				: typeInfo == null ? node.asString()
+				: ((EdmPrimitiveType) typeInfo.getType()).valueOfString(node.asString(), true, null,
 				Constants.DEFAULT_PRECISION, Constants.DEFAULT_SCALE, true,
 				((EdmPrimitiveType) typeInfo.getType()).getDefaultType());
 	}
@@ -135,8 +135,7 @@ public class ODataJsonInstanceAnnotationDeserializer {
 
 		final ComplexValue complexValue = new ComplexValue();
 		final Set<String> toRemove = new HashSet<>();
-		for (final Iterator<Map.Entry<String, JsonNode>> itor = node.fields(); itor.hasNext();) {
-			final Map.Entry<String, JsonNode> field = itor.next();
+		for (final Map.Entry<String, JsonNode> field : node.properties()) {
 			if (field.getKey().contains(ODATA_CONTROL_INFORMATION_PREFIX)) {
 				toRemove.add(field.getKey());
 			} else {
@@ -172,12 +171,12 @@ public class ODataJsonInstanceAnnotationDeserializer {
 					values.add(value);
 				} else {
 					valueType = ValueType.COLLECTION_ENUM;
-					values.add(child.asText());
+					values.add(child.asString());
 				}
-			} else if (child.isContainerNode()) {
+			} else if (child.isContainer()) {
 				EdmTypeInfo childType = null;
 				if (child.has(Constants.JSON_TYPE)) {
-					String typeName = child.get(Constants.JSON_TYPE).asText();
+					String typeName = child.get(Constants.JSON_TYPE).asString();
 					childType = typeName == null ? null : new EdmTypeInfo.Builder()
 							.setTypeExpression(typeName).build();
 					((ObjectNode) child).remove(Constants.JSON_TYPE);
@@ -208,7 +207,7 @@ public class ODataJsonInstanceAnnotationDeserializer {
 		} else if (node.isObject()) {
 			if (node.has(Constants.ATTR_TYPE)) {
 				type = PropertyType.PRIMITIVE;
-				typeExpression = "Edm.Geography" + node.get(Constants.ATTR_TYPE).asText();
+				typeExpression = "Edm.Geography" + node.get(Constants.ATTR_TYPE).asString();
 			} else {
 				type = PropertyType.COMPLEX;
 			}

@@ -22,6 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,15 +40,18 @@ import org.apache.olingo.fit.metadata.Metadata;
 import org.apache.olingo.fit.metadata.NavigationProperty;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.StringNode;
 
 public class JSONUtilities extends AbstractUtilities {
 
-  private final ObjectMapper mapper = new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL);
+  private final ObjectMapper mapper = JsonMapper.builder()
+      .changeDefaultPropertyInclusion(v -> v.withValueInclusion(JsonInclude.Include.NON_NULL))
+      .build();
 
   public JSONUtilities(final Metadata metadata) throws IOException {
     super(metadata);
@@ -68,7 +72,7 @@ public class JSONUtilities extends AbstractUtilities {
 
     for (String link : links) {
       srcNode.set(link + Constants.get(ConstantKey.JSON_NAVIGATION_SUFFIX),
-          new TextNode(Commons.getLinksURI(entitySetName, entitykey, link)));
+          new StringNode(Commons.getLinksURI(entitySetName, entitykey, link)));
     }
 
     return IOUtils.toInputStream(srcNode.toString(), Constants.ENCODING);
@@ -81,7 +85,7 @@ public class JSONUtilities extends AbstractUtilities {
 
     final Set<String> links = new HashSet<String>();
 
-    final Iterator<String> fieldIter = srcNode.fieldNames();
+    final Iterator<String> fieldIter = srcNode.propertyNames().iterator();
 
     while (fieldIter.hasNext()) {
       final String field = fieldIter.next();
@@ -110,7 +114,7 @@ public class JSONUtilities extends AbstractUtilities {
 
     final NavigationLinks links = new NavigationLinks();
 
-    final Iterator<Map.Entry<String, JsonNode>> fieldIter = srcNode.fields();
+    final Iterator<Map.Entry<String, JsonNode>> fieldIter = srcNode.properties().iterator();
 
     final Map<String, NavigationProperty> navigationProperties = metadata.getNavigationProperties(entitySetName);
 
@@ -121,11 +125,11 @@ public class JSONUtilities extends AbstractUtilities {
         final List<String> hrefs = new ArrayList<String>();
         if (field.getValue().isArray()) {
           for (JsonNode href : ((ArrayNode) field.getValue())) {
-            final String uri = href.asText();
+            final String uri = href.asString();
             hrefs.add(uri.substring(uri.lastIndexOf('/') + 1));
           }
         } else {
-          final String uri = field.getValue().asText();
+          final String uri = field.getValue().asString();
           hrefs.add(uri.substring(uri.lastIndexOf('/') + 1));
         }
 
@@ -151,7 +155,7 @@ public class JSONUtilities extends AbstractUtilities {
         srcNode.remove(linkTitle + Constants.get(ConstantKey.JSON_NAVIGATION_BIND_SUFFIX));
         srcNode.set(
             linkTitle + Constants.get(ConstantKey.JSON_NAVIGATION_SUFFIX),
-            new TextNode(String.format("%s(%s)/%s", entitySetName, entityKey, linkTitle)));
+            new StringNode(String.format("%s(%s)/%s", entitySetName, entityKey, linkTitle)));
       }
 
       for (String linkTitle : links.getInlineNames()) {
@@ -159,7 +163,7 @@ public class JSONUtilities extends AbstractUtilities {
         srcNode.remove(linkTitle + Constants.get(ConstantKey.JSON_NAVIGATION_BIND_SUFFIX));
         srcNode.set(
             linkTitle + Constants.get(ConstantKey.JSON_NAVIGATION_SUFFIX),
-            new TextNode(String.format("%s(%s)/%s", entitySetName, entityKey, linkTitle)));
+            new StringNode(String.format("%s(%s)/%s", entitySetName, entityKey, linkTitle)));
 
         // remove inline
         srcNode.remove(linkTitle);
@@ -170,7 +174,7 @@ public class JSONUtilities extends AbstractUtilities {
     }
 
     srcNode.set(
-        Constants.get(ConstantKey.JSON_EDITLINK_NAME), new TextNode(
+        Constants.get(ConstantKey.JSON_EDITLINK_NAME), new StringNode(
             Constants.get(ConstantKey.DEFAULT_SERVICE_URL) + entitySetName + "(" + entityKey + ")"));
 
     return IOUtils.toInputStream(srcNode.toString(), Constants.ENCODING);
@@ -286,7 +290,7 @@ public class JSONUtilities extends AbstractUtilities {
         mapper.readTree(new ByteArrayInputStream(bos.toByteArray())));
 
     if (StringUtils.isNotBlank(next)) {
-      node.set(Constants.get(ConstantKey.JSON_NEXTLINK_NAME), new TextNode(next));
+      node.set(Constants.get(ConstantKey.JSON_NEXTLINK_NAME), new StringNode(next));
     }
 
     return IOUtils.toInputStream(node.toString(), Constants.ENCODING);
@@ -320,7 +324,7 @@ public class JSONUtilities extends AbstractUtilities {
 
     final JsonNode srcObject = mapper.readTree(src);
 
-    final Iterator<Map.Entry<String, JsonNode>> fields = srcObject.fields();
+    final Iterator<Map.Entry<String, JsonNode>> fields = srcObject.properties().iterator();
     while (fields.hasNext()) {
       final Map.Entry<String, JsonNode> field = fields.next();
       res.put(field.getKey(), IOUtils.toInputStream(field.getValue().toString(), Constants.ENCODING));
@@ -348,18 +352,18 @@ public class JSONUtilities extends AbstractUtilities {
     if (uris == null) {
       final JsonNode url = srcNode.get("url");
       if (url != null) {
-        links.add(url.textValue());
+        links.add(url.stringValue());
       }
     } else {
       final Iterator<JsonNode> iter = ((ArrayNode) uris).iterator();
       while (iter.hasNext()) {
-        links.add(iter.next().get("url").textValue());
+        links.add(iter.next().get("url").stringValue());
       }
     }
 
     final JsonNode next = srcNode.get(Constants.get(ConstantKey.JSON_NEXTLINK_NAME));
 
-    return new SimpleEntry<String, List<String>>(next == null ? null : next.asText(), links);
+    return new SimpleEntry<String, List<String>>(next == null ? null : next.asString(), links);
   }
 
   @Override
@@ -369,7 +373,7 @@ public class JSONUtilities extends AbstractUtilities {
     final ObjectNode srcNode = (ObjectNode) mapper.readTree(content);
     IOUtils.closeQuietly(content);
 
-    srcNode.set(Constants.get(ConstantKey.JSON_EDITLINK_NAME), new TextNode(href));
+    srcNode.set(Constants.get(ConstantKey.JSON_EDITLINK_NAME), new StringNode(href));
     return IOUtils.toInputStream(srcNode.toString(), Constants.ENCODING);
   }
 
@@ -381,8 +385,8 @@ public class JSONUtilities extends AbstractUtilities {
     IOUtils.closeQuietly(content);
 
     final ObjectNode action = mapper.createObjectNode();
-    action.set("title", new TextNode(name));
-    action.set("target", new TextNode(href));
+    action.set("title", new StringNode(name));
+    action.set("target", new StringNode(href));
 
     srcNode.set(metaAnchor, action);
     return IOUtils.toInputStream(srcNode.toString(), Constants.ENCODING);
@@ -398,7 +402,7 @@ public class JSONUtilities extends AbstractUtilities {
 
     JsonNode replacementNode;
     if (justValue) {
-      replacementNode = new TextNode(IOUtils.toString(replacement));
+      replacementNode = new StringNode(IOUtils.toString(replacement, StandardCharsets.UTF_8));
     } else {
       replacementNode = mapper.readTree(replacement);
       if (replacementNode.has("value")) {

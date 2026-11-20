@@ -19,7 +19,7 @@
 package org.apache.olingo.client.core.communication.header;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.StatusLine;
+import org.apache.hc.core5.http.message.StatusLine;
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.api.communication.ODataClientErrorException;
 import org.apache.olingo.client.api.communication.ODataServerErrorException;
@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public final class ODataErrorResponseChecker {
@@ -83,7 +84,7 @@ public final class ODataErrorResponseChecker {
         error.setCode(String.valueOf(statusLine.getStatusCode()));
         error.setTarget(statusLine.getReasonPhrase());
         try {
-          error.setMessage(IOUtils.toString(entity));
+          error.setMessage(IOUtils.toString(entity, StandardCharsets.UTF_8));
         } catch (IOException e) {
           LOG.warn("Error deserializing error response", e);
           error = getGenericError(

@@ -18,12 +18,13 @@
  */
 package org.apache.olingo.server.core.serializer.json;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.InputStream;
 import java.util.Collections;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.olingo.commons.api.edmx.EdmxReference;
@@ -33,7 +34,7 @@ import org.apache.olingo.server.api.ServiceMetadata;
 import org.apache.olingo.server.api.etag.ServiceMetadataETagSupport;
 import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.tecsvc.provider.EdmTechProvider;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ServiceDocumentTest {
 
@@ -61,7 +62,7 @@ public class ServiceDocumentTest {
 
     InputStream result = serializer.serviceDocument(metadata, serviceRoot).getContent();
     assertNotNull(result);
-    final String jsonString = IOUtils.toString(result);
+    final String jsonString = IOUtils.toString(result, StandardCharsets.UTF_8);
 
     assertTrue(jsonString.contains(
         metadata.getServiceMetadataETagSupport().getMetadataETag().replace("\"", "\\\"")));
@@ -90,7 +91,7 @@ public class ServiceDocumentTest {
   public void serviceDocumentNoMetadata() throws Exception {
     final String result = IOUtils.toString(
         OData.newInstance().createSerializer(ContentType.JSON_NO_METADATA)
-            .serviceDocument(metadata, serviceRoot).getContent());
+            .serviceDocument(metadata, serviceRoot).getContent(), StandardCharsets.UTF_8);
     assertFalse(result.contains("odata.context"));
     assertFalse(result.contains("odata.metadata"));
     assertTrue(result.contains("ESAllPrim"));

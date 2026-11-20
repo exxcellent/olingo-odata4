@@ -18,7 +18,12 @@
  */
 package org.apache.olingo.client.api.http;
 
-public interface WrappingHttpClientFactory extends HttpClientFactory {
+import java.io.IOException;
 
-  HttpClientFactory getWrappedHttpClientFactory();
+import org.apache.hc.core5.http.ClassicHttpRequest;
+import org.apache.hc.core5.http.HttpResponse;
+
+public interface ODataHttpClient extends AutoCloseable {
+
+  public HttpResponse execute(ClassicHttpRequest request) throws IOException;
 }

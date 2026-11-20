@@ -28,7 +28,7 @@ import java.util.Map;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.server.api.ODataResponse;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonGenerator;
 
 /**
  * Response debug information.
@@ -60,19 +60,19 @@ public class DebugTabResponse implements DebugTab {
     gen.writeStartObject();
 
     if (status != null) {
-      gen.writeFieldName("status");
+      gen.writeName("status");
       gen.writeStartObject();
-      gen.writeStringField("code", Integer.toString(status.getStatusCode()));
-      gen.writeStringField("info", status.getInfo());
+      gen.writeStringProperty("code", Integer.toString(status.getStatusCode()));
+      gen.writeStringProperty("info", status.getInfo());
       gen.writeEndObject();
     }
 
     if (headers != null && !headers.isEmpty()) {
-      gen.writeFieldName("headers");
+      gen.writeName("headers");
       DebugResponseHelperImpl.appendJsonTable(gen, map(headers));
     }
 
-    gen.writeFieldName("body");
+    gen.writeName("body");
     if (response != null && response.getContent() != null) {
       new DebugTabBody(response).appendJson(gen);
     } else {

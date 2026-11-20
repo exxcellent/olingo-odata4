@@ -23,6 +23,7 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.util.EnumMap;
 import java.util.Map;
+import java.nio.charset.StandardCharsets;
 
 public class Constants {
 
@@ -32,7 +33,7 @@ public class Constants {
    * CR/LF.
    */
   public static final byte[] CRLF = { 13, 10 };
-  public static final Charset ENCODING = Charset.forName("UTF-8");
+  public static final Charset ENCODING = StandardCharsets.UTF_8;
   public static final CharsetDecoder DECODER = ENCODING.newDecoder();
 
   static {

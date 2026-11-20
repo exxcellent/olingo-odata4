@@ -20,14 +20,14 @@ package org.apache.olingo.fit.tecsvc.client;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.hasItem;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,6 +35,7 @@ import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -43,8 +44,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.Header;
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
+import org.apache.hc.core5.http.Header;
 import org.apache.olingo.client.api.EdmEnabledODataClient;
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.api.communication.ODataClientErrorException;
@@ -103,8 +104,9 @@ import org.apache.olingo.commons.api.ex.ODataError;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class BasicITCase extends AbstractParamTecSvcITCase {
 
@@ -509,7 +511,7 @@ public class BasicITCase extends AbstractParamTecSvcITCase {
  
     StringWriter writer = new StringWriter();
     InputStream stream = response2.getRawResponse();
-    IOUtils.copy(stream, writer);
+    IOUtils.copy(stream, writer, StandardCharsets.UTF_8);
     assertNotNull(writer.toString());  
     final ClientEntity entity = response2.getBody();
     assertNotNull(entity);
@@ -630,7 +632,7 @@ public class BasicITCase extends AbstractParamTecSvcITCase {
     assertNotNull(createRequest);
     final ODataEntityCreateResponse<ClientEntity> createResponse = createRequest.execute();
     assertNotNull(createRequest.getHttpRequest());
-    assertNotNull(((AbstractODataBasicRequest)createRequest).getPayload());
+    assertNotNull(((AbstractODataBasicRequest<?>)createRequest).getPayload());
     assertEquals(HttpStatusCode.CREATED.getStatusCode(), createResponse.getStatusCode());
     assertEquals(SERVICE_URI + ES_ALL_PRIM + "(1)", createResponse.getHeader(HttpHeader.LOCATION).iterator().next());
     final ClientEntity createdEntity = createResponse.getBody();
@@ -985,18 +987,21 @@ public class BasicITCase extends AbstractParamTecSvcITCase {
     assertShortOrInt(34, response.getBody().getProperty(PROPERTY_DECIMAL).getPrimitiveValue().toValue());
   }
 
-  @Test(expected = ODataClientErrorException.class)
+  @Test
   public void updatePropertyWithNullNotAllowed() {
-    final URI targetURI = getClient().newURIBuilder(SERVICE_URI)
-        .appendEntitySetSegment(ES_KEY_NAV)
-        .appendKeySegment(32767)
-        .build();
-
-    final ClientEntity entity = getFactory().newEntity(ET_KEY_NAV);
-    entity.getProperties().add(getFactory().newPrimitiveProperty(PROPERTY_STRING,
-        getFactory().newPrimitiveValueBuilder().buildString(null)));
-
-    getEdmEnabledClient().getCUDRequestFactory().getEntityUpdateRequest(targetURI, UpdateType.PATCH, entity).execute();
+      assertThrows(ODataClientErrorException.class, () -> {
+      final URI targetURI = getClient().newURIBuilder(SERVICE_URI)
+          .appendEntitySetSegment(ES_KEY_NAV)
+          .appendKeySegment(32767)
+          .build();
+  
+      final ClientEntity entity = getFactory().newEntity(ET_KEY_NAV);
+      entity.getProperties().add(getFactory().newPrimitiveProperty(PROPERTY_STRING,
+          getFactory().newPrimitiveValueBuilder().buildString(null)));
+  
+      getEdmEnabledClient().getCUDRequestFactory()
+        .getEntityUpdateRequest(targetURI, UpdateType.PATCH, entity).execute();
+      });
   }
 
   @Test
@@ -1215,7 +1220,7 @@ public class BasicITCase extends AbstractParamTecSvcITCase {
 
   @Test
   public void createEntityWithIEEE754CompatibleParameter() {
-    assumeTrue("There is no IEEE754Compatible content-type parameter in XML.", isJson());
+    assumeTrue(isJson(), "There is no IEEE754Compatible content-type parameter in XML.");
 
     final URI uri = getClient().newURIBuilder(SERVICE_URI).appendEntitySetSegment(ES_ALL_PRIM).build();
     final URI linkURI = getClient().newURIBuilder(SERVICE_URI).appendEntitySetSegment(ES_TWO_PRIM)
@@ -1241,7 +1246,7 @@ public class BasicITCase extends AbstractParamTecSvcITCase {
 
   @Test
   public void createEntityWithIEEE754CompatibleParameterNull() {
-    assumeTrue("There is no IEEE754Compatible content-type parameter in XML.", isJson());
+    assumeTrue(isJson(), "There is no IEEE754Compatible content-type parameter in XML.");
 
     final URI uri = getClient().newURIBuilder(SERVICE_URI).appendEntitySetSegment(ES_ALL_PRIM).build();
     final URI linkURI = getClient().newURIBuilder(SERVICE_URI).appendEntitySetSegment(ES_TWO_PRIM)
@@ -1266,7 +1271,7 @@ public class BasicITCase extends AbstractParamTecSvcITCase {
 
   @Test
   public void updateEntityWithIEEE754CompatibleParameter() {
-    assumeTrue("There is no IEEE754Compatible content-type parameter in XML.", isJson());
+    assumeTrue(isJson(), "There is no IEEE754Compatible content-type parameter in XML.");
 
     final URI uri = getClient().newURIBuilder(SERVICE_URI)
         .appendEntitySetSegment(ES_ALL_PRIM).appendKeySegment(0).build();
@@ -1299,7 +1304,7 @@ public class BasicITCase extends AbstractParamTecSvcITCase {
 
   @Test
   public void updateEntityWithIEEE754CompatibleParameterNull() {
-    assumeTrue("There is no IEEE754Compatible content-type parameter in XML.", isJson());
+    assumeTrue(isJson(), "There is no IEEE754Compatible content-type parameter in XML.");
 
     final URI uri = getClient().newURIBuilder(SERVICE_URI)
         .appendEntitySetSegment(ES_ALL_PRIM).appendKeySegment(0).build();
@@ -1329,7 +1334,7 @@ public class BasicITCase extends AbstractParamTecSvcITCase {
 
   @Test
   public void updateEntityWithIEEE754CompatibleParameterWithNullString() {
-    assumeTrue("There is no IEEE754Compatible content-type parameter in XML.", isJson());
+    assumeTrue(isJson(), "There is no IEEE754Compatible content-type parameter in XML.");
 
     final URI uri = getClient().newURIBuilder(SERVICE_URI)
         .appendEntitySetSegment(ES_ALL_PRIM).appendKeySegment(0).build();
@@ -1355,7 +1360,7 @@ public class BasicITCase extends AbstractParamTecSvcITCase {
 
   @Test
   public void updateEdmInt64PropertyWithIEE754CompatibleParameter() {
-    assumeTrue("There is no IEEE754Compatible content-type parameter in XML.", isJson());
+    assumeTrue(isJson(), "There is no IEEE754Compatible content-type parameter in XML.");
 
     final URI uri = getClient().newURIBuilder(SERVICE_URI).appendEntitySetSegment(ES_ALL_PRIM)
         .appendKeySegment(0)
@@ -1382,7 +1387,7 @@ public class BasicITCase extends AbstractParamTecSvcITCase {
 
   @Test
   public void updateComplexPropertyWithIEEE754CompatibleParamter() {
-    assumeTrue("There is no IEEE754Compatible content-type parameter in XML.", isJson());
+    assumeTrue(isJson(), "There is no IEEE754Compatible content-type parameter in XML.");
 
     final URI uri = getClient().newURIBuilder(SERVICE_URI).appendEntitySetSegment(ES_KEY_NAV)
         .appendKeySegment(1)
@@ -1419,7 +1424,7 @@ public class BasicITCase extends AbstractParamTecSvcITCase {
 
   @Test
   public void updatePropertyEdmDecimalWithIEE754CompatibleParameter() {
-    assumeTrue("There is no IEEE754Compatible content-type parameter in XML.", isJson());
+    assumeTrue(isJson(), "There is no IEEE754Compatible content-type parameter in XML.");
 
     final URI uri = getClient().newURIBuilder(SERVICE_URI).appendEntitySetSegment(ES_ALL_PRIM)
         .appendKeySegment(0)
@@ -1446,7 +1451,7 @@ public class BasicITCase extends AbstractParamTecSvcITCase {
 
   @Test
   public void readESAllPrimCollectionWithIEEE754CompatibleParameter() {
-    assumeTrue("There is no IEEE754Compatible content-type parameter in XML.", isJson());
+    assumeTrue(isJson(), "There is no IEEE754Compatible content-type parameter in XML.");
 
     final URI uri = getClient().newURIBuilder(SERVICE_URI).appendEntitySetSegment(ES_ALL_PRIM)
         .orderBy(PROPERTY_INT16)
@@ -1486,7 +1491,7 @@ public class BasicITCase extends AbstractParamTecSvcITCase {
 
   @Test
   public void readESKeyNavCheckComplexPropertyWithIEEE754CompatibleParameter() {
-    assumeTrue("There is no IEEE754Compatible content-type parameter in XML.", isJson());
+    assumeTrue(isJson(), "There is no IEEE754Compatible content-type parameter in XML.");
 
     final URI uri = getClient().newURIBuilder(SERVICE_URI)
         .appendEntitySetSegment(ES_KEY_NAV).appendKeySegment(1).build();
@@ -1515,7 +1520,7 @@ public class BasicITCase extends AbstractParamTecSvcITCase {
 
   @Test
   public void readESKEyNavComplexPropertyWithIEEE754CompatibleParameter() {
-    assumeTrue("There is no IEEE754Compatible content-type parameter in XML.", isJson());
+    assumeTrue(isJson(), "There is no IEEE754Compatible content-type parameter in XML.");
 
     final URI uri = getClient().newURIBuilder(SERVICE_URI).appendEntitySetSegment(ES_KEY_NAV)
         .appendKeySegment(1)
@@ -1541,9 +1546,9 @@ public class BasicITCase extends AbstractParamTecSvcITCase {
   }
 
   @Test
-  @Ignore("The client does not recognize the IEEE754Compatible content-type parameter.")
+  @Disabled("The client does not recognize the IEEE754Compatible content-type parameter.")
   public void readEdmInt64PropertyWithIEEE754CompatibleParameter() {
-    assumeTrue("There is no IEEE754Compatible content-type parameter in XML.", isJson());
+    assumeTrue(isJson(), "There is no IEEE754Compatible content-type parameter in XML.");
 
     final URI uri = getClient().newURIBuilder(SERVICE_URI).appendEntitySetSegment(ES_KEY_NAV)
         .appendKeySegment(1)
@@ -1562,9 +1567,9 @@ public class BasicITCase extends AbstractParamTecSvcITCase {
   }
 
   @Test
-  @Ignore("The client does not recognize the IEEE754Compatible content-type parameter.")
+  @Disabled("The client does not recognize the IEEE754Compatible content-type parameter.")
   public void readEdmDecimalPropertyWithIEEE754CompatibleParameter() {
-    assumeTrue("There is no IEEE754Compatible content-type parameter in XML.", isJson());
+    assumeTrue(isJson(), "There is no IEEE754Compatible content-type parameter in XML.");
 
     final URI uri = getClient().newURIBuilder(SERVICE_URI).appendEntitySetSegment(ES_KEY_NAV)
         .appendKeySegment(1)

@@ -18,15 +18,17 @@
  */
 package org.apache.olingo.server.core.deserializer;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import java.nio.charset.StandardCharsets;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.edm.EdmProperty;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.deserializer.FixedFormatDeserializer;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 public class FixedFormatDeserializerTest {
@@ -37,7 +39,7 @@ public class FixedFormatDeserializerTest {
   @Test
   public void binary() throws Exception {
     assertArrayEquals(new byte[] { 0x41, 0x42, 0x43 },
-        deserializer.binary(IOUtils.toInputStream("ABC")));
+        deserializer.binary(IOUtils.toInputStream("ABC", StandardCharsets.UTF_8)));
   }
 
   @Test
@@ -47,7 +49,8 @@ public class FixedFormatDeserializerTest {
             "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ"
                 + "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ"
                 + "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                + "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ")).length);
+                + "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ",
+            StandardCharsets.UTF_8)).length);
   }
 
   @Test
@@ -55,7 +58,7 @@ public class FixedFormatDeserializerTest {
     EdmProperty property = Mockito.mock(EdmProperty.class);
     Mockito.when(property.getType()).thenReturn(oData.createPrimitiveTypeInstance(EdmPrimitiveTypeKind.Int64));
     Mockito.when(property.isPrimitive()).thenReturn(true);
-    assertEquals(42L, deserializer.primitiveValue(IOUtils.toInputStream("42"), property));
+    assertEquals(42L, deserializer.primitiveValue(IOUtils.toInputStream("42", StandardCharsets.UTF_8), property));
   }
 
   @Test
@@ -68,6 +71,6 @@ public class FixedFormatDeserializerTest {
     final String value = "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ\n"
         + "ÄÖÜ€\uFDFC\n"
         + String.valueOf(Character.toChars(0x1F603));
-    assertEquals(value, deserializer.primitiveValue(IOUtils.toInputStream(value), property));
+    assertEquals(value, deserializer.primitiveValue(IOUtils.toInputStream(value, StandardCharsets.UTF_8), property));
   }
 }

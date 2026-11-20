@@ -47,6 +47,7 @@ public class ResponseUtil {
     return new Property(type, name, ValueType.COMPLEX, complexValue);
   }
 
+  @SafeVarargs
   public static Property createComplexCollection(final String name, final String type,
       final List<Property>... propertiesList) {
     List<ComplexValue> complexCollection = new ArrayList<ComplexValue>();

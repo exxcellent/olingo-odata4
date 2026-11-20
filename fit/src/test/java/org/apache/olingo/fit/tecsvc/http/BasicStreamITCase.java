@@ -18,16 +18,17 @@
  */
 package org.apache.olingo.fit.tecsvc.http;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.BufferedOutputStream;
 import java.io.InputStream;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URI;
 import java.nio.charset.Charset;
 
 import org.apache.commons.io.IOUtils;
@@ -38,7 +39,7 @@ import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.fit.AbstractBaseTestITCase;
 import org.apache.olingo.fit.tecsvc.TecSvcConst;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class BasicStreamITCase extends AbstractBaseTestITCase {
 
@@ -46,7 +47,7 @@ public class BasicStreamITCase extends AbstractBaseTestITCase {
 
   @Test
   public void streamESStreamJson() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESStream?$format=json");
+    URL url = URI.create(SERVICE_URI + "ESStream?$format=json").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -66,7 +67,7 @@ public class BasicStreamITCase extends AbstractBaseTestITCase {
   
   @Test
   public void streamESWithStreamJson() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESWithStream?$expand=PropertyStream&$format=json");
+    URL url = URI.create(SERVICE_URI + "ESWithStream?$expand=PropertyStream&$format=json").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -78,7 +79,7 @@ public class BasicStreamITCase extends AbstractBaseTestITCase {
 
   @Test
   public void streamESStreamXml() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESStream?$format=xml");
+    URL url = URI.create(SERVICE_URI + "ESStream?$format=xml").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -97,7 +98,7 @@ public class BasicStreamITCase extends AbstractBaseTestITCase {
 
   @Test
   public void streamESStreamServerSidePagingXml() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESStreamServerSidePaging?$format=xml");
+    URL url = URI.create(SERVICE_URI + "ESStreamServerSidePaging?$format=xml").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -116,7 +117,7 @@ public class BasicStreamITCase extends AbstractBaseTestITCase {
   
   @Test
   public void streamESStreamServerSidePagingNextXml() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESStreamServerSidePaging?$format=xml&$skiptoken=1%2A10");
+    URL url = URI.create(SERVICE_URI + "ESStreamServerSidePaging?$format=xml&$skiptoken=1%2A10").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -135,7 +136,7 @@ public class BasicStreamITCase extends AbstractBaseTestITCase {
   
   @Test
   public void streamESStreamServerSidePagingJson() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESStreamServerSidePaging?$format=json");
+    URL url = URI.create(SERVICE_URI + "ESStreamServerSidePaging?$format=json").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -155,7 +156,7 @@ public class BasicStreamITCase extends AbstractBaseTestITCase {
   
   @Test
   public void streamESStreamServerSidePagingJsonNext() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESStreamServerSidePaging?$format=json&$skiptoken=1%2A10");
+    URL url = URI.create(SERVICE_URI + "ESStreamServerSidePaging?$format=json&$skiptoken=1%2A10").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -175,7 +176,7 @@ public class BasicStreamITCase extends AbstractBaseTestITCase {
   
   @Test
   public void streamCountXml() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESStreamServerSidePaging?$count=true&$format=xml");
+    URL url = URI.create(SERVICE_URI + "ESStreamServerSidePaging?$count=true&$format=xml").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -196,7 +197,7 @@ public class BasicStreamITCase extends AbstractBaseTestITCase {
    
   @Test
   public void streamCountJson() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESStreamServerSidePaging?$count=true&$format=json");
+    URL url = URI.create(SERVICE_URI + "ESStreamServerSidePaging?$count=true&$format=json").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -216,7 +217,7 @@ public class BasicStreamITCase extends AbstractBaseTestITCase {
   
   @Test
   public void streamCountFalsetXml() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESStreamServerSidePaging?$count=false&$format=xml");
+    URL url = URI.create(SERVICE_URI + "ESStreamServerSidePaging?$count=false&$format=xml").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -237,7 +238,7 @@ public class BasicStreamITCase extends AbstractBaseTestITCase {
    
   @Test
   public void streamCountFalseJson() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESStreamServerSidePaging?$count=false&$format=json");
+    URL url = URI.create(SERVICE_URI + "ESStreamServerSidePaging?$count=false&$format=json").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -257,9 +258,9 @@ public class BasicStreamITCase extends AbstractBaseTestITCase {
   
   @Test
   public void expandStreamPropOnComplexTypeJson() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESStreamOnComplexProp(7)?$expand=PropertyCompWithStream/PropertyStream,"
+    URL url = URI.create(SERVICE_URI + "ESStreamOnComplexProp(7)?$expand=PropertyCompWithStream/PropertyStream,"
         + "PropertyEntityStream,PropertyCompWithStream/NavPropertyETStreamOnComplexPropOne($expand=PropertyStream),"
-        + "PropertyCompWithStream/NavPropertyETStreamOnComplexPropMany/$count&$format=json");
+        + "PropertyCompWithStream/NavPropertyETStreamOnComplexPropMany/$count&$format=json").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -291,8 +292,8 @@ public class BasicStreamITCase extends AbstractBaseTestITCase {
   
   @Test
   public void expandStreamPropOnComplexTypeWithRefJson() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESStreamOnComplexProp(7)?$expand="
-        + "PropertyCompWithStream/NavPropertyETStreamOnComplexPropMany/$ref&$format=json");
+    URL url = URI.create(SERVICE_URI + "ESStreamOnComplexProp(7)?$expand="
+        + "PropertyCompWithStream/NavPropertyETStreamOnComplexPropMany/$ref&$format=json").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -317,7 +318,7 @@ public class BasicStreamITCase extends AbstractBaseTestITCase {
   
   @Test
   public void putRequestOnStreamProperty() throws Exception {
-    URL url = new URL(SERVICE_URI  + "ESWithStream(7)/PropertyStream");
+    URL url = URI.create(SERVICE_URI  + "ESWithStream(7)/PropertyStream").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.PUT.name());

@@ -18,8 +18,8 @@
  */
 package org.apache.olingo.client.core.communication.response.batch;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.io.LineIterator;
-import org.apache.http.HttpResponse;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.olingo.client.api.communication.request.batch.ODataBatchLineIterator;
 import org.apache.olingo.client.api.communication.request.batch.ODataBatchResponseItem;
 import org.apache.olingo.client.api.communication.response.ODataBatchResponse;
@@ -42,7 +42,7 @@ import org.apache.olingo.client.api.communication.response.ODataResponse;
 import org.apache.olingo.client.core.communication.request.batch.ODataBatchLineIteratorImpl;
 import org.apache.olingo.client.core.communication.request.batch.ODataBatchUtilities;
 import org.apache.olingo.client.core.communication.request.batch.ODataChangesetResponseItem;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ODataBatchResponseTest {
 
@@ -123,7 +123,7 @@ public class ODataBatchResponseTest {
     }
 
     @Override
-    public ODataResponse initFromHttpResponse(HttpResponse res) {
+    public ODataResponse initFromHttpResponse(ClassicHttpResponse res) {
       return null;
     }
 

@@ -19,15 +19,16 @@
 package org.apache.olingo.client.core.communication.request.retrieve;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataValueRequest;
 import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse;
 import org.apache.olingo.client.api.domain.ClientPrimitiveValue;
 import org.apache.olingo.client.api.http.HttpClientException;
+import org.apache.olingo.client.api.http.ODataHttpClient;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.format.ContentType;
 
@@ -54,7 +55,7 @@ public class ODataValueRequestImpl extends AbstractODataRetrieveRequest<ClientPr
 
   @Override
   public ODataRetrieveResponse<ClientPrimitiveValue> execute() {
-    final HttpResponse res = doExecute();
+    final ClassicHttpResponse res = doExecute();
     return new ODataValueResponseImpl(odataClient, httpClient, res);
   }
 
@@ -65,8 +66,8 @@ public class ODataValueRequestImpl extends AbstractODataRetrieveRequest<ClientPr
 
     private ClientPrimitiveValue value = null;
 
-    private ODataValueResponseImpl(final ODataClient odataClient, final HttpClient httpClient,
-            final HttpResponse res) {
+    private ODataValueResponseImpl(final ODataClient odataClient, final ODataHttpClient httpClient,
+            final ClassicHttpResponse res) {
 
       super(odataClient, httpClient, res);
     }
@@ -80,7 +81,7 @@ public class ODataValueRequestImpl extends AbstractODataRetrieveRequest<ClientPr
           value = odataClient.getObjectFactory().newPrimitiveValueBuilder().
                   setType(contentType.isCompatible(ContentType.TEXT_PLAIN)
                           ? EdmPrimitiveTypeKind.String : EdmPrimitiveTypeKind.Stream).
-                  setValue(IOUtils.toString(getRawResponse())).build();
+                  setValue(IOUtils.toString(getRawResponse(), StandardCharsets.UTF_8)).build();
         } catch (Exception e) {
           throw new HttpClientException(e);
         } finally {

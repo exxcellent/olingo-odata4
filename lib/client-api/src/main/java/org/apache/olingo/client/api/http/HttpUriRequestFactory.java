@@ -20,7 +20,7 @@ package org.apache.olingo.client.api.http;
 
 import java.net.URI;
 
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.apache.olingo.commons.api.http.HttpMethod;
 
 /**
@@ -28,5 +28,5 @@ import org.apache.olingo.commons.api.http.HttpMethod;
  */
 public interface HttpUriRequestFactory {
 
-  HttpUriRequest create(HttpMethod method, URI uri);
+  HttpUriRequestBase create(HttpMethod method, URI uri);
 }

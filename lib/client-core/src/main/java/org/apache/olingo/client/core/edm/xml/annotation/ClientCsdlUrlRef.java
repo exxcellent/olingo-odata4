@@ -24,10 +24,10 @@ import java.io.Serializable;
 import org.apache.olingo.client.core.edm.xml.AbstractClientCsdlEdmDeserializer;
 import org.apache.olingo.commons.api.edm.provider.annotation.CsdlUrlRef;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(using = ClientCsdlUrlRef.UrlRefDeserializer.class)
 class ClientCsdlUrlRef extends CsdlUrlRef implements Serializable  {
@@ -39,9 +39,9 @@ class ClientCsdlUrlRef extends CsdlUrlRef implements Serializable  {
     protected ClientCsdlUrlRef doDeserialize(final JsonParser jp, final DeserializationContext ctxt)
             throws IOException {
       final ClientCsdlUrlRef urlref = new ClientCsdlUrlRef();
-      for (; jp.getCurrentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
-        final JsonToken token = jp.getCurrentToken();
-        if (token == JsonToken.FIELD_NAME) {
+      for (; jp.currentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
+        final JsonToken token = jp.currentToken();
+        if (token == JsonToken.PROPERTY_NAME) {
           if (isAnnotationConstExprConstruct(jp)) {
             urlref.setValue(parseAnnotationConstExprConstruct(jp));
           } else {

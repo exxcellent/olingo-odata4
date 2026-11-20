@@ -18,12 +18,13 @@
  */
 package org.apache.olingo.client.core.communication.response.batch;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.olingo.client.api.communication.request.batch.ODataBatchLineIterator;
@@ -32,7 +33,6 @@ import org.apache.olingo.client.api.communication.response.ODataBatchResponse;
 import org.apache.olingo.client.core.communication.request.batch.ODataBatchLineIteratorImpl;
 import org.apache.olingo.client.core.communication.request.batch.ODataBatchUtilities;
 import org.apache.olingo.client.core.communication.request.batch.ODataChangesetResponseItem;
-import org.apache.olingo.commons.api.Constants;
 import org.apache.olingo.commons.api.http.HttpHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,7 +90,7 @@ public class ODataBatchResponseManager implements Iterator<ODataBatchResponseIte
     this.continueOnError = continueOnError;
     this.expectedItemsIterator = expectedItems.iterator();
     this.batchLineIterator = new ODataBatchLineIteratorImpl(
-            IOUtils.lineIterator(res.getRawResponse(), Constants.UTF8));
+            IOUtils.lineIterator(res.getRawResponse(), StandardCharsets.UTF_8));
 
     // search for boundary
     batchBoundary = ODataBatchUtilities.getBoundaryFromHeader(

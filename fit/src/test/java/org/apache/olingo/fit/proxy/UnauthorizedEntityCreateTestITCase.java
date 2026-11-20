@@ -24,7 +24,8 @@ import org.apache.olingo.client.core.http.BasicAuthHttpClientFactory;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.fit.proxy.staticservice.Service;
 import org.apache.olingo.fit.proxy.staticservice.odatawcfservice.InMemoryEntities;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class UnauthorizedEntityCreateTestITCase extends AbstractTestITCase {
 
@@ -42,9 +43,11 @@ public class UnauthorizedEntityCreateTestITCase extends AbstractTestITCase {
     return ecf;
   }
 
-  @Test(expected = HttpClientException.class)
+  @Test
   public void unauthorizedCreate() {
-    createPatchAndDeleteOrder(getContainer(), getService());
+      assertThrows(HttpClientException.class, () -> {
+      createPatchAndDeleteOrder(getContainer(), getService());
+      });
   }
 
   protected InMemoryEntities getContainer() {

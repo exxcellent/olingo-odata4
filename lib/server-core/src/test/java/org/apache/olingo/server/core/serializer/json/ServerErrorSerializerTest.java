@@ -18,8 +18,8 @@
  */
 package org.apache.olingo.server.core.serializer.json;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.olingo.commons.api.ex.ODataErrorDetail;
@@ -35,11 +36,12 @@ import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataServerError;
 import org.apache.olingo.server.api.serializer.ODataSerializer;
 import org.apache.olingo.server.api.serializer.SerializerException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.JsonNodeType;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.JsonNodeType;
 
 public class ServerErrorSerializerTest {
 
@@ -54,7 +56,7 @@ public class ServerErrorSerializerTest {
     ODataServerError error = new ODataServerError();
     error.setMessage("ErrorMessage");
     InputStream stream = ser.error(error).getContent();
-    String jsonString = IOUtils.toString(stream);
+    String jsonString = IOUtils.toString(stream, StandardCharsets.UTF_8);
     assertEquals("{\"error\":{\"code\":null,\"message\":\"ErrorMessage\"}}", jsonString);
   }
 
@@ -63,7 +65,7 @@ public class ServerErrorSerializerTest {
     ODataServerError error = new ODataServerError();
     error.setCode("Code").setMessage("ErrorMessage");
     InputStream stream = ser.error(error).getContent();
-    String jsonString = IOUtils.toString(stream);
+    String jsonString = IOUtils.toString(stream, StandardCharsets.UTF_8);
     assertEquals("{\"error\":{\"code\":\"Code\",\"message\":\"ErrorMessage\"}}", jsonString);
   }
 
@@ -72,13 +74,15 @@ public class ServerErrorSerializerTest {
     ODataServerError error = new ODataServerError();
     error.setCode("Code").setMessage("ErrorMessage").setTarget("Target");
     InputStream stream = ser.error(error).getContent();
-    String jsonString = IOUtils.toString(stream);
+    String jsonString = IOUtils.toString(stream, StandardCharsets.UTF_8);
     assertEquals("{\"error\":{\"code\":\"Code\",\"message\":\"ErrorMessage\",\"target\":\"Target\"}}", jsonString);
   }
 
-  @Test(expected = SerializerException.class)
+  @Test
   public void nullErrorResultsInException() throws Exception {
-    ser.error(null);
+      assertThrows(SerializerException.class, () -> {
+      ser.error(null);
+      });
   }
 
   @Test
@@ -86,7 +90,7 @@ public class ServerErrorSerializerTest {
     ODataServerError error = new ODataServerError();
     error.setMessage("ErrorMessage").setDetails(new ArrayList<ODataErrorDetail>());
     InputStream stream = ser.error(error).getContent();
-    String jsonString = IOUtils.toString(stream);
+    String jsonString = IOUtils.toString(stream, StandardCharsets.UTF_8);
     assertEquals("{\"error\":{\"code\":null,\"message\":\"ErrorMessage\",\"details\":[]}}", jsonString);
   }
 
@@ -94,7 +98,7 @@ public class ServerErrorSerializerTest {
   public void nothingSetAtODataErrorObject() throws Exception {
     ODataServerError error = new ODataServerError();
     InputStream stream = ser.error(error).getContent();
-    String jsonString = IOUtils.toString(stream);
+    String jsonString = IOUtils.toString(stream, StandardCharsets.UTF_8);
     assertEquals("{\"error\":{\"code\":null,\"message\":null}}", jsonString);
   }
 
@@ -104,7 +108,7 @@ public class ServerErrorSerializerTest {
     details.add(new ODataErrorDetail());
     ODataServerError error = new ODataServerError().setDetails(details);
     InputStream stream = ser.error(error).getContent();
-    String jsonString = IOUtils.toString(stream);
+    String jsonString = IOUtils.toString(stream, StandardCharsets.UTF_8);
     assertEquals("{\"error\":{\"code\":null,\"message\":null,\"details\":[{\"code\":null,\"message\":null}]}}",
         jsonString);
   }
@@ -120,9 +124,9 @@ public class ServerErrorSerializerTest {
     assertNotNull(tree);
     tree = tree.get("error");
     assertNotNull(tree);
-    assertEquals("Code", tree.get("code").textValue());
-    assertEquals("Message", tree.get("message").textValue());
-    assertEquals("Target", tree.get("target").textValue());
+    assertEquals("Code", tree.get("code").stringValue());
+    assertEquals("Message", tree.get("message").stringValue());
+    assertEquals("Target", tree.get("target").stringValue());
 
     tree = tree.get("details");
     assertNotNull(tree);
@@ -130,9 +134,9 @@ public class ServerErrorSerializerTest {
 
     tree = tree.get(0);
     assertNotNull(tree);
-    assertEquals("detailCode", tree.get("code").textValue());
-    assertEquals("detailMessage", tree.get("message").textValue());
-    assertEquals("detailTarget", tree.get("target").textValue());
+    assertEquals("detailCode", tree.get("code").stringValue());
+    assertEquals("detailMessage", tree.get("message").stringValue());
+    assertEquals("detailTarget", tree.get("target").stringValue());
   }
   
   @Test
@@ -156,13 +160,13 @@ public class ServerErrorSerializerTest {
     assertNotNull(tree);
     tree = tree.get("error");
     assertNotNull(tree);
-    assertEquals("Code", tree.get("code").textValue());
-    assertEquals("Message", tree.get("message").textValue());
-    assertEquals("Target", tree.get("target").textValue());
+    assertEquals("Code", tree.get("code").stringValue());
+    assertEquals("Message", tree.get("message").stringValue());
+    assertEquals("Target", tree.get("target").stringValue());
     assertEquals(1, tree.get("@Common.additionalTargets").size());
-    assertEquals("targetDetail", tree.get("@Common.additionalTargets").get(0).get("targetDetail").textValue());
+    assertEquals("targetDetail", tree.get("@Common.additionalTargets").get(0).get("targetDetail").stringValue());
     assertEquals(4, tree.get("@Common.additionalTargets").get(0).get("@Common.numericSeverity").asInt());
-    assertEquals("url", tree.get("@Common.longtextUrl").textValue());
+    assertEquals("url", tree.get("@Common.longtextUrl").stringValue());
 
     tree = tree.get("details");
     assertNotNull(tree);
@@ -170,11 +174,11 @@ public class ServerErrorSerializerTest {
 
     tree = tree.get(0);
     assertNotNull(tree);
-    assertEquals("detailCode", tree.get("code").textValue());
-    assertEquals("detailMessage", tree.get("message").textValue());
-    assertEquals("detailTarget", tree.get("target").textValue());
+    assertEquals("detailCode", tree.get("code").stringValue());
+    assertEquals("detailMessage", tree.get("message").stringValue());
+    assertEquals("detailTarget", tree.get("target").stringValue());
     assertEquals(1, tree.get("@Common.additionalTargets").size());
-    assertEquals("targetDetail", tree.get("@Common.additionalTargets").get(0).get("targetDetail").textValue());
-    assertEquals("url", tree.get("@Common.longtextUrl").textValue());
+    assertEquals("targetDetail", tree.get("@Common.additionalTargets").get(0).get("targetDetail").stringValue());
+    assertEquals("url", tree.get("@Common.longtextUrl").stringValue());
   }
 }

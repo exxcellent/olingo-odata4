@@ -18,7 +18,6 @@
  */
 package org.apache.olingo.commons.api.edm.geo;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
@@ -31,28 +30,6 @@ public class Polygon extends Geospatial {
   final ComposedGeospatial<LineString> interiorRings;
   final ComposedGeospatial<Point> exterior;
 
-  /**
-   * Creates a new polygon.
-   * 
-   * @param dimension   Dimension of the polygon
-   * @param srid        SRID values
-   * @param interior    List of interior points
-   * @param exterior    List of exterior point
-   * @deprecated
-   */
-  public Polygon(final Dimension dimension, final SRID srid,
-      final List<Point> interior, final List<Point> exterior) {
-
-    super(dimension, Type.POLYGON, srid);
-    if (interior != null) {
-		LineString lineString = new LineString(dimension, srid, interior);
-		this.interiorRings = new MultiLineString(dimension, srid, Arrays.asList(lineString));
-    } else {
-    	this.interiorRings = null;
-    }
-    this.exterior = new LineString(dimension, srid, exterior);
-  }
-  
   /**
    * Creates a new polygon.
    * 
@@ -71,19 +48,6 @@ public class Polygon extends Geospatial {
     	this.interiorRings = null;
     }
     this.exterior = exterior;
-  }
-  /**
-   * Gets interior points.
-   *
-   * @return interior points.
-   * @deprecated
-   * @see #getInterior(int)
-   */
-  public ComposedGeospatial<Point> getInterior() {
-	if (interiorRings == null || interiorRings.geospatials.isEmpty()) {
-		return null;
-	}
-    return getInterior(0);
   }
   
   /**

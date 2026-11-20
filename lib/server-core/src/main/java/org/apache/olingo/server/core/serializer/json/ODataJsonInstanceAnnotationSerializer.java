@@ -38,7 +38,7 @@ import org.apache.olingo.commons.core.edm.primitivetype.EdmPrimitiveTypeFactory;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.core.serializer.utils.ContentTypeHelper;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonGenerator;
 
 public class ODataJsonInstanceAnnotationSerializer {
 
@@ -66,9 +66,9 @@ public class ODataJsonInstanceAnnotationSerializer {
 			throws IOException, SerializerException, DecoderException {
 		for (Annotation annotation : annotations) {
 			if (isODataMetadataFull) {
-				json.writeStringField(constants.getType(), "#" + annotation.getType());
+				json.writeStringProperty(constants.getType(), "#" + annotation.getType());
 			}
-			json.writeFieldName("@" + annotation.getTerm());
+			json.writeName("@" + annotation.getTerm());
 			writeInstanceAnnotation(json, annotation, "");
 		}
 	}
@@ -86,7 +86,7 @@ public class ODataJsonInstanceAnnotationSerializer {
 			final JsonGenerator json) throws IOException, SerializerException, DecoderException {
 		if (property != null) {
 			for (Annotation annotation : property.getAnnotations()) {
-				json.writeFieldName(edmProperty.getName() + "@" + annotation.getTerm());
+				json.writeName(edmProperty.getName() + "@" + annotation.getTerm());
 				writeInstanceAnnotation(json, annotation, "");
 			}
 		}
@@ -99,20 +99,21 @@ public class ODataJsonInstanceAnnotationSerializer {
 			switch (annotation.getValueType()) {
 			case PRIMITIVE:
 				if (isODataMetadataFull && name.length() > 0) {
-					json.writeStringField(name + constants.getType(), "#" + annotation.getType());
+					json.writeStringProperty(name + constants.getType(), 
+					    "#" + annotation.getType());
 				}
 				if (name.length() > 0) {
-					json.writeFieldName(name);
+					json.writeName(name);
 				}
 				writeInstanceAnnotOnPrimitiveProperty(json, annotation, annotation.getValue());
 				break;
 			case COLLECTION_PRIMITIVE:
 				if (isODataMetadataFull && name.length() > 0) {
-					json.writeStringField(name + constants.getType(), 
+					json.writeStringProperty(name + constants.getType(), 
 							"#Collection(" + annotation.getType() + ")");
 				}
 				if (name.length() > 0) {
-					json.writeFieldName(name);
+					json.writeName(name);
 				}
 				json.writeStartArray();
 				List list = annotation.asCollection();
@@ -123,21 +124,22 @@ public class ODataJsonInstanceAnnotationSerializer {
 				break;
 			case COMPLEX:
 				if (isODataMetadataFull && name.length() > 0) {
-					json.writeStringField(name + constants.getType(), "#" + annotation.getType());
+					json.writeStringProperty(name + constants.getType(), 
+					    "#" + annotation.getType());
 				}
 				if (name.length() > 0) {
-					json.writeFieldName(name);
+					json.writeName(name);
 				}
 				ComplexValue complexValue = annotation.asComplex();
 				writeInstanceAnnotOnComplexProperty(json, annotation, complexValue);
 				break;
 			case COLLECTION_COMPLEX:
 				if (isODataMetadataFull && name.length() > 0) {
-					json.writeStringField(name + constants.getType(), 
+					json.writeStringProperty(name + constants.getType(), 
 							"#Collection(" + annotation.getType() + ")");
 				}
 				if (name.length() > 0) {
-					json.writeFieldName(name);
+					json.writeName(name);
 				}
 				json.writeStartArray();
 				List<ComplexValue> complexValues = (List<ComplexValue>) annotation.asCollection();
@@ -160,7 +162,7 @@ public class ODataJsonInstanceAnnotationSerializer {
 			ComplexValue complexValue) throws IOException, SerializerException, DecoderException {
 		json.writeStartObject();
 		if (isODataMetadataFull) {
-			json.writeStringField(constants.getType(), "#" + complexValue.getTypeName());
+			json.writeStringProperty(constants.getType(), "#" + complexValue.getTypeName());
 		}
 		List<Property> properties = complexValue.getValue();
 		for (Property prop : properties) {
@@ -202,23 +204,23 @@ public class ODataJsonInstanceAnnotationSerializer {
 				Link stream = (Link) primitiveValue;
 				if (!isODataMetadataNone) {
 					if (stream.getMediaETag() != null) {
-						json.writeStringField(name + constants.getMediaEtag(), 
+						json.writeStringProperty(name + constants.getMediaEtag(), 
 								stream.getMediaETag());
 					}
 					if (stream.getType() != null) {
-						json.writeStringField(name + constants.getMediaContentType(), 
+						json.writeStringProperty(name + constants.getMediaContentType(), 
 								stream.getType());
 					}
 				}
 				if (isODataMetadataFull) {
 					if (stream.getRel() != null && 
 							stream.getRel().equals(Constants.NS_MEDIA_READ_LINK_REL)) {
-						json.writeStringField(name + constants.getMediaReadLink(), 
+						json.writeStringProperty(name + constants.getMediaReadLink(), 
 								stream.getHref());
 					}
 					if (stream.getRel() == null || 
 							stream.getRel().equals(Constants.NS_MEDIA_EDIT_LINK_REL)) {
-						json.writeStringField(name + constants.getMediaEditLink(), 
+						json.writeStringProperty(name + constants.getMediaEditLink(), 
 								stream.getHref());
 					}
 				}

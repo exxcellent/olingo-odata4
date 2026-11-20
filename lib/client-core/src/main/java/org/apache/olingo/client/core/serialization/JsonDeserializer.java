@@ -31,6 +31,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.olingo.client.api.data.ResWrap;
 import org.apache.olingo.client.api.serialization.ODataDeserializer;
 import org.apache.olingo.client.api.serialization.ODataDeserializerException;
@@ -53,15 +54,15 @@ import org.apache.olingo.commons.api.edm.geo.Geospatial;
 import org.apache.olingo.commons.api.ex.ODataError;
 import org.apache.olingo.commons.core.edm.EdmTypeInfo;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.ObjectCodec;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 public class JsonDeserializer implements ODataDeserializer {
+
+  protected static final ObjectMapper MAPPER = new ObjectMapper();
 
   protected final Pattern CUSTOM_ANNOTATION = Pattern.compile("(.+)@(.+)\\.(.+)");
 
@@ -83,7 +84,7 @@ public class JsonDeserializer implements ODataDeserializer {
   }
 
   protected String getJSONAnnotation(final String string) {
-    return StringUtils.prependIfMissing(string, "@");
+    return Strings.CS.prependIfMissing(string, "@");
   }
 
   protected String getTitle(final Map.Entry<String, JsonNode> entry) {
@@ -91,22 +92,22 @@ public class JsonDeserializer implements ODataDeserializer {
   }
 
   protected String setInline(final String name, final String suffix, final JsonNode tree,
-      final ObjectCodec codec, final Link link) throws IOException {
+      final Link link) throws IOException {
 
     final String entityNamePrefix = name.substring(0, name.indexOf(suffix));
 
     Integer count = null;
     if (tree.hasNonNull(entityNamePrefix+Constants.JSON_COUNT)) {
       count = tree.get(entityNamePrefix+Constants.JSON_COUNT).asInt();
-    }        
-    
+    }
+
     if (tree.has(entityNamePrefix)) {
       final JsonNode inline = tree.path(entityNamePrefix);
       JsonEntityDeserializer entityDeserializer = new JsonEntityDeserializer(serverMode);
 
       if (inline instanceof ObjectNode) {
         link.setType(Constants.ENTITY_NAVIGATION_LINK_TYPE);
-        link.setInlineEntity(entityDeserializer.doDeserialize(inline.traverse(codec)).getPayload());
+        link.setInlineEntity(entityDeserializer.doDeserialize(MAPPER.treeAsTokens(inline)).getPayload());
 
       } else if (inline instanceof ArrayNode) {
         link.setType(Constants.ENTITY_SET_NAVIGATION_LINK_TYPE);
@@ -115,8 +116,9 @@ public class JsonDeserializer implements ODataDeserializer {
         if (count != null) {
           entitySet.setCount(count);
         }
-        for (final Iterator<JsonNode> entries = inline.elements(); entries.hasNext();) {
-          entitySet.getEntities().add(entityDeserializer.doDeserialize(entries.next().traverse(codec)).getPayload());
+        for (final Iterator<JsonNode> entries = inline.iterator(); entries.hasNext();) {
+          entitySet.getEntities().add(
+              entityDeserializer.doDeserialize(MAPPER.treeAsTokens(entries.next())).getPayload());
         }
 
         link.setInlineEntitySet(entitySet);
@@ -126,16 +128,16 @@ public class JsonDeserializer implements ODataDeserializer {
   }
 
   protected void links(final Map.Entry<String, JsonNode> field, final Linked linked, final Set<String> toRemove,
-      final JsonNode tree, final ObjectCodec codec) throws IOException {
+      final JsonNode tree) throws IOException {
     if (serverMode) {
-      serverLinks(field, linked, toRemove, tree, codec);
+      serverLinks(field, linked, toRemove, tree);
     } else {
-      clientLinks(field, linked, toRemove, tree, codec);
+      clientLinks(field, linked, toRemove, tree);
     }
   }
 
   private void clientLinks(final Map.Entry<String, JsonNode> field, final Linked linked, final Set<String> toRemove,
-      final JsonNode tree, final ObjectCodec codec) throws IOException {
+      final JsonNode tree) throws IOException {
 
     if (field.getKey().endsWith(Constants.JSON_NAVIGATION_LINK)) {
       final Link link = new Link();
@@ -143,19 +145,19 @@ public class JsonDeserializer implements ODataDeserializer {
       link.setRel(Constants.NS_NAVIGATION_LINK_REL + getTitle(field));
 
       if (field.getValue().isValueNode()) {
-        link.setHref(field.getValue().textValue());
+        link.setHref(field.getValue().stringValue());
         link.setType(Constants.ENTITY_NAVIGATION_LINK_TYPE);
       }
 
       linked.getNavigationLinks().add(link);
 
       toRemove.add(field.getKey());
-      toRemove.add(setInline(field.getKey(), Constants.JSON_NAVIGATION_LINK, tree, codec, link));
+      toRemove.add(setInline(field.getKey(), Constants.JSON_NAVIGATION_LINK, tree, link));
     } else if (field.getKey().endsWith(Constants.JSON_ASSOCIATION_LINK)) {
       final Link link = new Link();
       link.setTitle(getTitle(field));
       link.setRel(Constants.NS_ASSOCIATION_LINK_REL + getTitle(field));
-      link.setHref(field.getValue().textValue());
+      link.setHref(field.getValue().stringValue());
       link.setType(Constants.ASSOCIATION_LINK_TYPE);
       linked.getAssociationLinks().add(link);
 
@@ -164,7 +166,7 @@ public class JsonDeserializer implements ODataDeserializer {
   }
 
   private void serverLinks(final Map.Entry<String, JsonNode> field, final Linked linked, final Set<String> toRemove,
-      final JsonNode tree, final ObjectCodec codec) throws IOException {
+      final JsonNode tree) throws IOException {
 
     if (field.getKey().endsWith(Constants.JSON_BIND_LINK_SUFFIX)
         || field.getKey().endsWith(Constants.JSON_NAVIGATION_LINK)) {
@@ -175,22 +177,22 @@ public class JsonDeserializer implements ODataDeserializer {
         final Link link = new Link();
         link.setTitle(getTitle(field));
         link.setRel(Constants.NS_NAVIGATION_LINK_REL + getTitle(field));
-        link.setHref(field.getValue().textValue());
+        link.setHref(field.getValue().stringValue());
         link.setType(Constants.ENTITY_NAVIGATION_LINK_TYPE);
         linked.getNavigationLinks().add(link);
 
-        toRemove.add(setInline(field.getKey(), suffix, tree, codec, link));
+        toRemove.add(setInline(field.getKey(), suffix, tree, link));
       } else if (field.getValue().isArray()) {
-        for (final Iterator<JsonNode> itor = field.getValue().elements(); itor.hasNext();) {
+        for (final Iterator<JsonNode> itor = field.getValue().iterator(); itor.hasNext();) {
           final JsonNode node = itor.next();
 
           final Link link = new Link();
           link.setTitle(getTitle(field));
           link.setRel(Constants.NS_NAVIGATION_LINK_REL + getTitle(field));
-          link.setHref(node.asText());
+          link.setHref(node.asString());
           link.setType(Constants.ENTITY_SET_NAVIGATION_LINK_TYPE);
           linked.getNavigationLinks().add(link);
-          toRemove.add(setInline(field.getKey(), Constants.JSON_BIND_LINK_SUFFIX, tree, codec, link));
+          toRemove.add(setInline(field.getKey(), Constants.JSON_BIND_LINK_SUFFIX, tree, link));
         }
       }
       toRemove.add(field.getKey());
@@ -212,7 +214,7 @@ public class JsonDeserializer implements ODataDeserializer {
     } else if (node.isObject()) {
       if (node.has(Constants.ATTR_TYPE)) {
         type = PropertyType.PRIMITIVE;
-        typeExpression = "Edm.Geography" + node.get(Constants.ATTR_TYPE).asText();
+        typeExpression = "Edm.Geography" + node.get(Constants.ATTR_TYPE).asString();
       } else {
         type = PropertyType.COMPLEX;
       }
@@ -237,34 +239,33 @@ public class JsonDeserializer implements ODataDeserializer {
   }
 
   protected void populate(final Annotatable annotatable, final List<Property> properties,
-      final ObjectNode tree, final ObjectCodec codec)
+      final ObjectNode tree)
           throws IOException, EdmPrimitiveTypeException {
 
     String type = null;
     Annotation annotation = null;
-    for (final Iterator<Map.Entry<String, JsonNode>> itor = tree.fields(); itor.hasNext();) {
-      final Map.Entry<String, JsonNode> field = itor.next();
+    for (final Map.Entry<String, JsonNode> field : tree.properties()) {
       final Matcher customAnnotation = CUSTOM_ANNOTATION.matcher(field.getKey());
 
       if (field.getKey().charAt(0) == '@') {
         final Annotation entityAnnot = new Annotation();
         entityAnnot.setTerm(field.getKey().substring(1));
 
-        value(entityAnnot, field.getValue(), codec);
+        value(entityAnnot, field.getValue());
         if (annotatable != null) {
           annotatable.getAnnotations().add(entityAnnot);
         }
       } else if (type == null && field.getKey().endsWith(getJSONAnnotation(Constants.JSON_TYPE))) {
-        type = field.getValue().asText();
+        type = field.getValue().asString();
       } else if (field.getKey().endsWith(getJSONAnnotation(Constants.JSON_COUNT))) {
         final Property property = new Property();
         property.setName(field.getKey());
-        property.setValue(ValueType.PRIMITIVE, Integer.parseInt(field.getValue().asText()));
+        property.setValue(ValueType.PRIMITIVE, Integer.parseInt(field.getValue().asString()));
         properties.add(property);
       } else if (annotation == null && customAnnotation.matches() && !"odata".equals(customAnnotation.group(2))) {
         annotation = new Annotation();
         annotation.setTerm(customAnnotation.group(2) + "." + customAnnotation.group(3));
-        value(annotation, field.getValue(), codec);
+        value(annotation, field.getValue());
       } else {
         final Property property = new Property();
         property.setName(field.getKey());
@@ -273,7 +274,7 @@ public class JsonDeserializer implements ODataDeserializer {
                 : new EdmTypeInfo.Builder().setTypeExpression(type).build().internal());
         type = null;
 
-        value(property, field.getValue(), codec);
+        value(property, field.getValue());
         properties.add(property);
 
         if (annotation != null) {
@@ -286,38 +287,36 @@ public class JsonDeserializer implements ODataDeserializer {
 
   private Object fromPrimitive(final JsonNode node, final EdmTypeInfo typeInfo) throws EdmPrimitiveTypeException {
     return node.isNull() ? null
-        : typeInfo == null ? node.asText()
+        : typeInfo == null ? node.asString()
             : typeInfo.getPrimitiveTypeKind().isGeospatial()
             ? getGeoDeserializer().deserialize(node, typeInfo)
                 : node.isBigDecimal()
                 ?((EdmPrimitiveType) typeInfo.getType())
-                    .valueOfString(node.asText(), true, null,
+                    .valueOfString(node.asString(), true, null,
                            node.decimalValue().precision(), node.decimalValue().scale(), true,
                            ((EdmPrimitiveType) typeInfo.getType()).getDefaultType())
                  :((EdmPrimitiveType) typeInfo.getType())
-                    .valueOfString(node.asText(), true, null,
+                    .valueOfString(node.asString(), true, null,
                            Constants.DEFAULT_PRECISION, Constants.DEFAULT_SCALE, true,
                            ((EdmPrimitiveType) typeInfo.getType()).getDefaultType());
   }
 
-  private Object fromComplex(final ObjectNode node, final ObjectCodec codec)
+  private Object fromComplex(final ObjectNode node)
       throws IOException, EdmPrimitiveTypeException {
 
     final ComplexValue complexValue = new ComplexValue();
     final Set<String> toRemove = new HashSet<>();
-    for (final Iterator<Map.Entry<String, JsonNode>> itor = node.fields(); itor.hasNext();) {
-      final Map.Entry<String, JsonNode> field = itor.next();
-
-      links(field, complexValue, toRemove, node, codec);
+    for (final Map.Entry<String, JsonNode> field : node.properties()) {
+      links(field, complexValue, toRemove, node);
     }
     node.remove(toRemove);
 
-    populate(complexValue, complexValue.getValue(), node, codec);
+    populate(complexValue, complexValue.getValue(), node);
     return complexValue;
   }
 
-  private void fromCollection(final Valuable valuable, final Iterator<JsonNode> nodeItor, final EdmTypeInfo typeInfo,
-      final ObjectCodec codec) throws IOException, EdmPrimitiveTypeException {
+  private void fromCollection(final Valuable valuable, final Iterator<JsonNode> nodeItor, final EdmTypeInfo typeInfo)
+      throws IOException, EdmPrimitiveTypeException {
 
     final List<Object> values = new ArrayList<>();
     ValueType valueType = ValueType.COLLECTION_PRIMITIVE;
@@ -335,17 +334,17 @@ public class JsonDeserializer implements ODataDeserializer {
           values.add(value);
         } else {
           valueType = ValueType.COLLECTION_ENUM;
-          values.add(child.asText());
+          values.add(child.asString());
         }
-      } else if (child.isContainerNode()) {
+      } else if (child.isObject() || child.isArray()) {
         EdmTypeInfo childType = null;
         if (child.has(Constants.JSON_TYPE)) {
-          String typeName = child.get(Constants.JSON_TYPE).asText();
+          String typeName = child.get(Constants.JSON_TYPE).asString();
           childType = typeName == null ? null
               : new EdmTypeInfo.Builder().setTypeExpression(typeName).build();
           ((ObjectNode) child).remove(Constants.JSON_TYPE);
         }
-        final Object value = fromComplex((ObjectNode) child, codec);
+        final Object value = fromComplex((ObjectNode) child);
         if (childType != null) {
           ((ComplexValue)value).setTypeName(childType.external());
         }
@@ -356,7 +355,7 @@ public class JsonDeserializer implements ODataDeserializer {
     valuable.setValue(valueType, values);
   }
 
-  protected void value(final Valuable valuable, final JsonNode node, final ObjectCodec codec)
+  protected void value(final Valuable valuable, final JsonNode node)
       throws IOException, EdmPrimitiveTypeException {
 
     EdmTypeInfo typeInfo = StringUtils.isBlank(valuable.getType()) ? null
@@ -374,15 +373,15 @@ public class JsonDeserializer implements ODataDeserializer {
 
     switch (propType) {
     case COLLECTION:
-      fromCollection(valuable, node.elements(), typeInfo, codec);
+      fromCollection(valuable, node.iterator(), typeInfo);
       break;
 
     case COMPLEX:
       if (node.has(Constants.JSON_TYPE)) {
-        valuable.setType(node.get(Constants.JSON_TYPE).asText());
+        valuable.setType(node.get(Constants.JSON_TYPE).asString());
         ((ObjectNode) node).remove(Constants.JSON_TYPE);
       }
-      final Object value = fromComplex((ObjectNode) node, codec);
+      final Object value = fromComplex((ObjectNode) node);
       if (value instanceof ComplexValue) {
         ((ComplexValue)value).setTypeName(valuable.getType());
       }
@@ -391,7 +390,7 @@ public class JsonDeserializer implements ODataDeserializer {
 
     case ENUM:
       if(!node.isNull()) {
-    	  valuable.setValue(ValueType.ENUM, node.asText());
+    	  valuable.setValue(ValueType.ENUM, node.asString());
       }
       break;
 
@@ -413,7 +412,7 @@ public class JsonDeserializer implements ODataDeserializer {
   @Override
   public ResWrap<EntityCollection> toEntitySet(final InputStream input) throws ODataDeserializerException {
     try {
-      parser = new JsonFactory(new ObjectMapper()).createParser(input);
+      parser = new ObjectMapper().createParser(input);
       return new JsonEntitySetDeserializer(serverMode).doDeserialize(parser);
     } catch (final IOException e) {
       throw new ODataDeserializerException(e);
@@ -423,7 +422,7 @@ public class JsonDeserializer implements ODataDeserializer {
   @Override
   public ResWrap<Entity> toEntity(final InputStream input) throws ODataDeserializerException {
     try {
-      parser = new JsonFactory(new ObjectMapper()).createParser(input);
+      parser = new ObjectMapper().createParser(input);
       return new JsonEntityDeserializer(serverMode).doDeserialize(parser);
     } catch (final IOException e) {
       throw new ODataDeserializerException(e);
@@ -433,7 +432,7 @@ public class JsonDeserializer implements ODataDeserializer {
   @Override
   public ResWrap<Property> toProperty(final InputStream input) throws ODataDeserializerException {
     try {
-      parser = new JsonFactory(new ObjectMapper()).createParser(input);
+      parser = new ObjectMapper().createParser(input);
       return new JsonPropertyDeserializer(serverMode).doDeserialize(parser);
     } catch (final IOException e) {
       throw new ODataDeserializerException(e);
@@ -443,7 +442,7 @@ public class JsonDeserializer implements ODataDeserializer {
   @Override
   public ODataError toError(final InputStream input) throws ODataDeserializerException {
     try {
-      parser = new JsonFactory(new ObjectMapper()).createParser(input);
+      parser = new ObjectMapper().createParser(input);
       return new JsonODataErrorDeserializer(serverMode).doDeserialize(parser);
     } catch (final IOException e) {
       throw new ODataDeserializerException(e);

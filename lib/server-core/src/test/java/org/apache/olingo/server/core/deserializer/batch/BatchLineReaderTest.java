@@ -18,18 +18,20 @@
  */
 package org.apache.olingo.server.core.deserializer.batch;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class BatchLineReaderTest {
 
@@ -202,16 +204,20 @@ public class BatchLineReaderTest {
     assertTrue(l1.hashCode() != l3.hashCode());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void failBufferSizeZero() throws Exception {
-    BatchLineReader reader = create(TEXT_EMPTY, 0);
-    reader.close();
+      assertThrows(IllegalArgumentException.class, () -> {
+      BatchLineReader reader = create(TEXT_EMPTY, 0);
+      reader.close();
+      });
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void failBufferSizeNegative() throws Exception {
-    BatchLineReader reader = create(TEXT_EMPTY, -1);
-    reader.close();
+      assertThrows(IllegalArgumentException.class, () -> {
+      BatchLineReader reader = create(TEXT_EMPTY, -1);
+      reader.close();
+      });
   }
 
   @Test
@@ -302,10 +308,10 @@ public class BatchLineReaderTest {
   }
 
   private BatchLineReader create(final String inputString) throws IOException {
-    return new BatchLineReader(new ByteArrayInputStream(inputString.getBytes("UTF-8")));
+    return new BatchLineReader(new ByteArrayInputStream(inputString.getBytes(StandardCharsets.UTF_8)));
   }
 
   private BatchLineReader create(final String inputString, final int bufferSize) throws IOException {
-    return new BatchLineReader(new ByteArrayInputStream(inputString.getBytes("UTF-8")), bufferSize);
+    return new BatchLineReader(new ByteArrayInputStream(inputString.getBytes(StandardCharsets.UTF_8)), bufferSize);
   }
 }

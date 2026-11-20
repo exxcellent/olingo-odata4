@@ -28,6 +28,7 @@
 -->
 <module name="Checker">
   <property name="severity" value="warning"/>
+  <property name="fileExtensions" value="java"/>
   <module name="TreeWalker">
     <module name="IllegalImport">
       <property name="severity" value="info"/>
@@ -65,9 +66,11 @@
     <module name="RightCurly">
       <property name="severity" value="warning"/>
     </module>
-    <module name="LineLength">
-      <property name="max" value="120"/>
-    </module>
-	<module name="SuppressionCommentFilter"/>
+    <module name="SuppressionCommentFilter"/>
+  </module>
+  <module name="SuppressWithPlainTextCommentFilter">
+  </module>
+  <module name="LineLength">
+    <property name="max" value="120"/>
   </module>
 </module>

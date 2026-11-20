@@ -33,6 +33,7 @@
     <version>5.0.1-SNAPSHOT</version>
     <relativePath>..</relativePath>
   </parent>
+    
     <build>
         <resources>
             <resource>
@@ -51,6 +52,30 @@
                         <goals>
                             <goal>resources</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Install the filtered features.xml to the local repository early enough
+                 so that "mvn test -am" picks up the current version when running karaf-fit tests.
+                 Without this, the install only happens at the "install" lifecycle phase (too late). -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>install-features-xml-early</id>
+                        <phase>process-test-resources</phase>
+                        <goals>
+                            <goal>install-file</goal>
+                        </goals>
+                        <configuration>
+                            <file>${project.build.outputDirectory}/features.xml</file>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>${project.artifactId}</artifactId>
+                            <version>${project.version}</version>
+                            <packaging>xml</packaging>
+                            <classifier>features</classifier>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

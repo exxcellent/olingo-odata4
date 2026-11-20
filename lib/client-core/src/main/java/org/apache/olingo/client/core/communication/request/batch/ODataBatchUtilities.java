@@ -30,12 +30,13 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import java.nio.charset.StandardCharsets;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.olingo.client.api.ODataBatchConstants;
 import org.apache.olingo.client.api.communication.request.batch.ODataBatchLineIterator;
-import org.apache.olingo.commons.api.Constants;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
 import org.slf4j.Logger;
@@ -138,7 +139,7 @@ public class ODataBatchUtilities {
             notEndLine = isNotEndLine(controller, currentLine);
 
             if (notEndLine && os != null && currentLine!=null) {
-              os.write(currentLine.getBytes(Constants.UTF8));
+              os.write(currentLine.getBytes(StandardCharsets.UTF_8));
               os.write(CRLF);
             }
           }
@@ -187,9 +188,10 @@ public class ODataBatchUtilities {
       final ByteArrayOutputStream baos = new ByteArrayOutputStream();
       readBatchPart(new ODataBatchController(iterator, null), baos, true);
 
-      final LineIterator headers = IOUtils.lineIterator(new ByteArrayInputStream(baos.toByteArray()), Constants.UTF8);
+      final LineIterator headers = IOUtils.lineIterator(new ByteArrayInputStream(baos.toByteArray()), 
+          StandardCharsets.UTF_8);
       while (headers.hasNext()) {
-        final String line = headers.nextLine().trim();
+        final String line = headers.next().trim();
         if (StringUtils.isNotBlank(line)) {
           addHeaderLine(line, target);
         }

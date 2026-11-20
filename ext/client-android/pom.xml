@@ -45,8 +45,8 @@
       <artifactId>android</artifactId>
     </dependency>
     <dependency>
-      <groupId>javax.xml.stream</groupId>
-      <artifactId>stax-api</artifactId>
+   		<groupId>jakarta.xml.bind</groupId>
+    	<artifactId>jakarta.xml.bind-api</artifactId>
     </dependency>
   </dependencies>
 
@@ -74,13 +74,13 @@
               <include>org.apache.commons:commons-lang3</include>
               <include>org.slf4j:slf4j-api</include>
               <include>commons-io:commons-io</include>
-              <include>com.fasterxml.jackson.core:jackson-core</include>
-              <include>com.fasterxml.jackson.core:jackson-databind</include>
+              <include>tools.jackson.core:jackson-core</include>
+              <include>tools.jackson.core:jackson-databind</include>
               <include>com.fasterxml.jackson.core:jackson-annotations</include>
-              <include>com.fasterxml.jackson.dataformat:jackson-dataformat-xml</include>
+              <include>tools.jackson.dataformat:jackson-dataformat-xml</include>
               <include>com.fasterxml.jackson.module:jackson-module-jaxb-annotations</include>
               <include>org.codehaus.woodstox:stax2-api</include>
-              <include>javax.xml.stream:stax-api</include>
+              <include>jakarta.xml.bind:jakarta.xml.bind-api</include>
               <include>com.fasterxml:aalto-xml</include>
             </includes>
           </artifactSet>

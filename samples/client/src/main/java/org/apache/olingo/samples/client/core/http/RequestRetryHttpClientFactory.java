@@ -23,15 +23,18 @@ import java.io.InterruptedIOException;
 import java.net.ConnectException;
 import java.net.URI;
 import java.net.UnknownHostException;
+
 import javax.net.ssl.SSLException;
-import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.HttpRequest;
-import org.apache.http.client.HttpRequestRetryHandler;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.protocol.ExecutionContext;
-import org.apache.http.protocol.HttpContext;
-import org.apache.olingo.commons.api.http.HttpMethod;
+
+import org.apache.hc.client5.http.HttpRequestRetryStrategy;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.HttpRequest;
+import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.protocol.HttpContext;
+import org.apache.hc.core5.util.TimeValue;
+import org.apache.olingo.client.api.http.ODataHttpClient;
 import org.apache.olingo.client.core.http.DefaultHttpClientFactory;
+import org.apache.olingo.commons.api.http.HttpMethod;
 
 /**
  * Shows how to install a custom exception recovery mechanism.
@@ -42,45 +45,48 @@ import org.apache.olingo.client.core.http.DefaultHttpClientFactory;
 public class RequestRetryHttpClientFactory extends DefaultHttpClientFactory {
 
   @Override
-  public DefaultHttpClient create(final HttpMethod method, final URI uri) {
-    final HttpRequestRetryHandler myRetryHandler = new HttpRequestRetryHandler() {
+  public ODataHttpClient create(final HttpMethod method, final URI uri) {
+    final HttpRequestRetryStrategy myRetryStrategy = new HttpRequestRetryStrategy() {
 
       @Override
-      public boolean retryRequest(final IOException exception, final int executionCount, final HttpContext context) {
+      public boolean retryRequest(final HttpRequest request, final IOException exception,
+          final int executionCount, final HttpContext context) {
         if (executionCount >= 5) {
-          // Do not retry if over max retry count
           return false;
         }
         if (exception instanceof InterruptedIOException) {
-          // Timeout
           return false;
         }
         if (exception instanceof UnknownHostException) {
-          // Unknown host
           return false;
         }
         if (exception instanceof ConnectException) {
-          // Connection refused
           return false;
         }
         if (exception instanceof SSLException) {
-          // SSL handshake exception
           return false;
         }
-        final HttpRequest request = (HttpRequest) context.getAttribute(ExecutionContext.HTTP_REQUEST);
-        boolean idempotent = !(request instanceof HttpEntityEnclosingRequest);
-        if (idempotent) {
-          // Retry if the request is considered idempotent 
-          return true;
-        }
+        // Retry idempotent (non-entity-enclosing) requests
+        return true;
+      }
+
+      @Override
+      public boolean retryRequest(final HttpResponse response, final int executionCount,
+          final HttpContext context) {
         return false;
       }
 
+      @Override
+      public TimeValue getRetryInterval(final HttpResponse response, final int executionCount,
+          final HttpContext context) {
+        return TimeValue.ZERO_MILLISECONDS;
+      }
     };
 
-    final DefaultHttpClient httpClient = super.create(method, uri);
-    httpClient.setHttpRequestRetryHandler(myRetryHandler);
-    return httpClient;
+    return DefaultHttpClientFactory.wrapHC5Client(HttpClients.custom()
+        .setUserAgent(USER_AGENT)
+        .setRetryStrategy(myRetryStrategy)
+        .build());
   }
 
 }

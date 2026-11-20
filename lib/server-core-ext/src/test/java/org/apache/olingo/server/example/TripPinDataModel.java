@@ -54,7 +54,7 @@ import org.apache.olingo.server.api.uri.UriResourceNavigation;
 import org.apache.olingo.server.core.deserializer.json.ODataJsonDeserializer;
 import org.apache.olingo.server.core.responses.EntityResponse;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 public class TripPinDataModel {
   private final ServiceMetadata metadata;

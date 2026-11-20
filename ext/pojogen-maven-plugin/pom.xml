@@ -25,7 +25,6 @@
 
   <artifactId>pojogen-maven-plugin</artifactId>
   <packaging>maven-plugin</packaging>
-  <name>${project.artifactId}</name>
   <description>Java client API for OData services: Maven plugin generating POJOs from metadata.</description>
 
   <parent>
@@ -36,7 +35,7 @@
   </parent>
 
   <properties>
-    <main.basedir>${project.parent.basedir}</main.basedir>
+  	<skip.pojogen.examplebuild>false</skip.pojogen.examplebuild>
   </properties>
 
   <dependencies>
@@ -48,18 +47,25 @@
 
     <dependency>
       <groupId>org.apache.velocity</groupId>
-      <artifactId>velocity</artifactId>
+      <artifactId>velocity-engine-core</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-plugin-api</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.maven.plugin-tools</groupId>
       <artifactId>maven-plugin-annotations</artifactId>
-      <scope>provided</scope>
     </dependency>
-
+	<dependency>
+      <groupId>org.apache.commons</groupId>
+	  <artifactId>commons-collections4</artifactId>
+	</dependency>
+	<dependency>
+      <groupId>org.apache.commons</groupId>
+	  <artifactId>commons-lang3</artifactId>
+	</dependency>
     <dependency>
       <groupId>commons-logging</groupId>
       <artifactId>commons-logging</artifactId>
@@ -71,14 +77,26 @@
     </dependency>
 
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+          <skip>false</skip>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-plugin-plugin</artifactId>
@@ -108,14 +126,19 @@
         <artifactId>maven-invoker-plugin</artifactId>
         <inherited>true</inherited>
         <configuration>
+          <skipInvocation>${skip.pojogen.examplebuild}</skipInvocation>
           <debug>true</debug>
           <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
+          <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
           <pomIncludes>
             <pomInclude>*/pom.xml</pomInclude>
           </pomIncludes>
           <postBuildHookScript>verify</postBuildHookScript>
+          <showErrors>true</showErrors>
+          <updateSnapshots>true</updateSnapshots>
           <goals>
             <goal>clean</goal>
+            <goal>package</goal>
             <goal>test-compile</goal>
           </goals>
         </configuration>

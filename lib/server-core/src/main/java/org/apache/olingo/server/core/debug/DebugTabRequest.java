@@ -26,7 +26,7 @@ import java.util.Map;
 
 import org.apache.olingo.server.api.ODataRequest;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonGenerator;
 
 /**
  * Request debug information.
@@ -88,14 +88,14 @@ public class DebugTabRequest implements DebugTab {
   @Override
   public void appendJson(final JsonGenerator gen) throws IOException {
     gen.writeStartObject();
-    gen.writeStringField("method", method);
+    gen.writeStringProperty("method", method);
 
-    gen.writeStringField("uri", uri);
+    gen.writeStringProperty("uri", uri);
 
-    gen.writeStringField("protocol", protocol);
+    gen.writeStringProperty("protocol", protocol);
 
     if (!headers.isEmpty()) {
-      gen.writeFieldName("headers");
+      gen.writeName("headers");
 
       gen.writeStartObject();
 
@@ -103,9 +103,9 @@ public class DebugTabRequest implements DebugTab {
         List<String> headersList = entry.getValue();
         if (headersList != null && !headersList.isEmpty()) {
           if (headersList.size() == 1) {
-            gen.writeStringField(entry.getKey(), headersList.get(0));
+            gen.writeStringProperty(entry.getKey(), headersList.get(0));
           } else {
-            gen.writeFieldName(entry.getKey());
+            gen.writeName(entry.getKey());
             gen.writeStartArray();
             for (String headerValue : headersList) {
               if (headerValue != null) {
@@ -117,7 +117,7 @@ public class DebugTabRequest implements DebugTab {
             gen.writeEndArray();
           }
         } else {
-          gen.writeNullField(entry.getKey());
+          gen.writeNullProperty(entry.getKey());
         }
       }
 

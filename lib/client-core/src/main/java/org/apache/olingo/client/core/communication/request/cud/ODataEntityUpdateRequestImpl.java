@@ -22,15 +22,15 @@ import java.io.InputStream;
 import java.net.URI;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.HttpStatus;
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.api.communication.request.cud.ODataEntityUpdateRequest;
 import org.apache.olingo.client.api.communication.response.ODataEntityUpdateResponse;
 import org.apache.olingo.client.api.data.ResWrap;
 import org.apache.olingo.client.api.domain.ClientEntity;
+import org.apache.olingo.client.api.http.ODataHttpClient;
 import org.apache.olingo.client.api.serialization.ODataDeserializerException;
 import org.apache.olingo.client.api.serialization.ODataSerializerException;
 import org.apache.olingo.client.core.communication.request.AbstractODataBasicRequest;
@@ -86,13 +86,13 @@ public class ODataEntityUpdateRequestImpl<E extends ClientEntity>
   @Override
   public ODataEntityUpdateResponse<E> execute() {
     final InputStream input = getPayload();
-    ((HttpEntityEnclosingRequestBase) request).setEntity(URIUtils.buildInputStreamEntity(odataClient, input));
+    ((HttpUriRequestBase) request).setEntity(URIUtils.buildInputStreamEntity(odataClient, input));
 
     try {
-      final HttpResponse httpResponse = doExecute();
+      final ClassicHttpResponse httpResponse = doExecute();
       final ODataEntityUpdateResponseImpl response =
               new ODataEntityUpdateResponseImpl(odataClient, httpClient, httpResponse);
-      if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
+      if (httpResponse.getCode() == HttpStatus.SC_NO_CONTENT) {
         response.close();
       }
       return response;
@@ -111,8 +111,8 @@ public class ODataEntityUpdateRequestImpl<E extends ClientEntity>
      */
     private E entity = null;
 
-    private ODataEntityUpdateResponseImpl(final ODataClient odataClient, final HttpClient httpClient,
-            final HttpResponse res) {
+    private ODataEntityUpdateResponseImpl(final ODataClient odataClient, final ODataHttpClient httpClient,
+            final ClassicHttpResponse res) {
 
       super(odataClient, httpClient, res);
     }

@@ -18,11 +18,8 @@
  */
 package org.apache.olingo.netty.server.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,14 +36,13 @@ import org.apache.olingo.server.api.deserializer.DeserializerException;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.core.MetadataParser;
 import org.apache.olingo.server.core.SchemaBasedEdmProvider;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 
@@ -56,7 +52,7 @@ public class NettyServiceDispatcherTest {
   ODataNetty odata = ODataNetty.newInstance();
   SchemaBasedEdmProvider provider = null;
   
-  @Before
+  @BeforeEach
   public void beforeTest() throws Exception {
     MetadataParser parser = new MetadataParser();
     parser.parseAnnotations(true);
@@ -244,22 +240,12 @@ public class NettyServiceDispatcherTest {
   
   @Test
   public void testMetadata() throws Exception {
-    DefaultFullHttpRequest nettyRequest = Mockito.mock(DefaultFullHttpRequest.class);
-    io.netty.handler.codec.http.HttpMethod httpMethod = mock(io.netty.handler.codec.http.HttpMethod.class);
-    when(httpMethod.name()).thenReturn("GET");
-    when(nettyRequest.method()).thenReturn(httpMethod);
-    HttpVersion httpVersion = mock(HttpVersion.class);
-    when(httpVersion.text()).thenReturn("HTTP/1.0");
-    when(nettyRequest.protocolVersion()).thenReturn(httpVersion);
-    when(nettyRequest.uri()).thenReturn("/trippin/$metadata");
-    HttpHeaders headers = mock(HttpHeaders.class);
-    when(nettyRequest.headers()).thenReturn(headers);
-    when(nettyRequest.content()).thenReturn(Unpooled.buffer());
-    
-    DefaultFullHttpResponse nettyResponse = mock(DefaultFullHttpResponse.class);
-    when(nettyResponse.status()).thenReturn(HttpResponseStatus.OK);
-    when(nettyResponse.headers()).thenReturn(headers);
-    when(nettyResponse.content()).thenReturn(Unpooled.buffer());    
+    // Use real Netty instances — Mockito inline-mocking of concrete Netty classes
+    // is incompatible with Java 21+ (Byte Buddy cannot instrument them).
+    DefaultFullHttpRequest nettyRequest = new DefaultFullHttpRequest(
+        HttpVersion.HTTP_1_0, HttpMethod.GET, "/trippin/$metadata");
+    DefaultFullHttpResponse nettyResponse = new DefaultFullHttpResponse(
+        HttpVersion.HTTP_1_0, HttpResponseStatus.OK, Unpooled.buffer());    
     
     Map<String, String> requestParams = new HashMap<String, String>();
     requestParams.put("contextPath", "/trippin");

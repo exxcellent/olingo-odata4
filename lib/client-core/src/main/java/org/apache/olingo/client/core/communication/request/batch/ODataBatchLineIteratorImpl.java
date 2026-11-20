@@ -76,7 +76,7 @@ public class ODataBatchLineIteratorImpl implements ODataBatchLineIterator {
    */
   @Override
   public String nextLine() {
-    current = batchLineIterator.nextLine();
+    current = batchLineIterator.next();
     return current;
   }
 

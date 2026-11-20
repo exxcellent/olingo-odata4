@@ -21,11 +21,11 @@ package org.apache.olingo.client.core.communication.request.retrieve;
 import java.io.InputStream;
 import java.net.URI;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataMediaRequest;
 import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse;
+import org.apache.olingo.client.api.http.ODataHttpClient;
 import org.apache.olingo.commons.api.format.ContentType;
 
 /**
@@ -53,7 +53,7 @@ public class ODataMediaRequestImpl extends AbstractODataRetrieveRequest<InputStr
 
   @Override
   public ODataRetrieveResponse<InputStream> execute() {
-    final HttpResponse res = doExecute();
+    final ClassicHttpResponse res = doExecute();
     return new ODataMediaResponseImpl(odataClient, httpClient, res);
   }
 
@@ -64,8 +64,8 @@ public class ODataMediaRequestImpl extends AbstractODataRetrieveRequest<InputStr
 
     private InputStream input = null;
 
-    private ODataMediaResponseImpl(final ODataClient odataClient, final HttpClient httpClient,
-            final HttpResponse res) {
+    private ODataMediaResponseImpl(final ODataClient odataClient, final ODataHttpClient httpClient,
+            final ClassicHttpResponse res) {
 
       super(odataClient, httpClient, res);
     }

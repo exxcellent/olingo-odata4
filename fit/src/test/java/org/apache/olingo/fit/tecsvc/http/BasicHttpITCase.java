@@ -18,14 +18,16 @@
  */
 package org.apache.olingo.fit.tecsvc.http;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URI;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.olingo.client.api.ODataClient;
@@ -35,7 +37,7 @@ import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.fit.AbstractBaseTestITCase;
 import org.apache.olingo.fit.tecsvc.TecSvcConst;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class BasicHttpITCase extends AbstractBaseTestITCase {
 
@@ -43,7 +45,7 @@ public class BasicHttpITCase extends AbstractBaseTestITCase {
 
   @Test
   public void testHeadMethodOnServiceDocument() throws Exception {
-    URL url = new URL(SERVICE_URI);
+    URL url = URI.create(SERVICE_URI).toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.HEAD.name());
@@ -52,13 +54,13 @@ public class BasicHttpITCase extends AbstractBaseTestITCase {
 
     assertEquals(HttpStatusCode.OK.getStatusCode(), connection.getResponseCode());
     assertNull(connection.getHeaderField(HttpHeader.CONTENT_TYPE));
-    assertEquals("", IOUtils.toString(connection.getInputStream()));
+    assertEquals("", IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8));
     connection.disconnect();
   }
-  
+
   @Test
   public void testHeadMethodOnMetadataDocument() throws Exception {
-    URL url = new URL(SERVICE_URI + "$metadata");
+    URL url = URI.create(SERVICE_URI + "$metadata").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.HEAD.name());
@@ -67,13 +69,13 @@ public class BasicHttpITCase extends AbstractBaseTestITCase {
 
     assertEquals(HttpStatusCode.OK.getStatusCode(), connection.getResponseCode());
     assertNull(connection.getHeaderField(HttpHeader.CONTENT_TYPE));
-    assertEquals("", IOUtils.toString(connection.getInputStream()));
+    assertEquals("", IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8));
     connection.disconnect();
   }
 
   @Test
   public void testFormat() throws Exception {
-    URL url = new URL(SERVICE_URI + "?$format=json");
+    URL url = URI.create(SERVICE_URI + "?$format=json").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -85,7 +87,7 @@ public class BasicHttpITCase extends AbstractBaseTestITCase {
 
   @Test
   public void testAccept() throws Exception {
-    URL url = new URL(SERVICE_URI);
+    URL url = URI.create(SERVICE_URI).toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
@@ -100,7 +102,7 @@ public class BasicHttpITCase extends AbstractBaseTestITCase {
 
   @Test
   public void testAcceptSimple() throws Exception {
-    URL url = new URL(SERVICE_URI);
+    URL url = URI.create(SERVICE_URI).toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
@@ -115,7 +117,7 @@ public class BasicHttpITCase extends AbstractBaseTestITCase {
 
   @Test
   public void testAcceptCharset() throws Exception {
-    URL url = new URL(SERVICE_URI);
+    URL url = URI.create(SERVICE_URI).toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
@@ -131,7 +133,7 @@ public class BasicHttpITCase extends AbstractBaseTestITCase {
 
   @Test
   public void testODataMaxVersion() throws Exception {
-    URL url = new URL(SERVICE_URI);
+    URL url = URI.create(SERVICE_URI).toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
@@ -147,7 +149,8 @@ public class BasicHttpITCase extends AbstractBaseTestITCase {
 
   @Test
   public void testIEEE754ParameterContentNegotiation() throws Exception {
-    final URL url = new URL(SERVICE_URI + "ESAllPrim(32767)?$format=application/json;IEEE754Compatible=true");
+    final URL url = URI.create(SERVICE_URI + "ESAllPrim(32767)?$format=application/json;IEEE754Compatible=true")
+        .toURL();
     final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
     connection.setRequestProperty(HttpHeader.ACCEPT, "application/json;IEEE754Compatible=false");
@@ -164,7 +167,7 @@ public class BasicHttpITCase extends AbstractBaseTestITCase {
 
   @Test
   public void testIEEE754ParameterViaAcceptHeader() throws Exception {
-    final URL url = new URL(SERVICE_URI + "ESAllPrim(32767)");
+    final URL url = URI.create(SERVICE_URI + "ESAllPrim(32767)").toURL();
     final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
     connection.setRequestProperty(HttpHeader.ACCEPT, "application/json;IEEE754Compatible=true");
@@ -183,35 +186,36 @@ public class BasicHttpITCase extends AbstractBaseTestITCase {
   protected ODataClient getClient() {
     return null;
   }
+
   @Test
   public void testInvalidTopUrl() throws Exception {
-    URL url = new URL(SERVICE_URI + "?$top");
+    URL url = URI.create(SERVICE_URI + "?$top").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
     connection.connect();
 
     assertEquals(HttpStatusCode.BAD_REQUEST.getStatusCode(), connection.getResponseCode());
-    assertTrue(IOUtils.toString(connection.getErrorStream()).
-        contains("The system query option '$top' has the not-allowed value ''."));
+    assertTrue(IOUtils.toString(connection.getErrorStream(), StandardCharsets.UTF_8)
+        .contains("The system query option '$top' has the not-allowed value ''."));
   }
- 
+
   @Test
   public void testInvalidSkipUrl() throws Exception {
-    URL url = new URL(SERVICE_URI + "?$skip=");
+    URL url = URI.create(SERVICE_URI + "?$skip=").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
     connection.connect();
 
     assertEquals(HttpStatusCode.BAD_REQUEST.getStatusCode(), connection.getResponseCode());
-    assertTrue(IOUtils.toString(connection.getErrorStream()).
-        contains("The system query option '$skip' has the not-allowed value ''."));
+    assertTrue(IOUtils.toString(connection.getErrorStream(), StandardCharsets.UTF_8)
+        .contains("The system query option '$skip' has the not-allowed value ''."));
   }
-  
+
   @Test
   public void testBaseTypeDerivedTypeCasting1() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESTwoPrim(111)/olingo.odata.test1.ETBase");
+    URL url = URI.create(SERVICE_URI + "ESTwoPrim(111)/olingo.odata.test1.ETBase").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -226,10 +230,10 @@ public class BasicHttpITCase extends AbstractBaseTestITCase {
     assertTrue(content.contains("\"AdditionalPropertyString_5\":\"TEST A 0815\""));
     assertTrue(content.contains("\"@odata.type\":\"#olingo.odata.test1.ETBase\""));
   }
-  
+
   @Test
   public void testBaseTypeDerivedTypeCasting2() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESTwoPrim(111)/olingo.odata.test1.ETBase/AdditionalPropertyString_5");
+    URL url = URI.create(SERVICE_URI + "ESTwoPrim(111)/olingo.odata.test1.ETBase/AdditionalPropertyString_5").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -240,10 +244,10 @@ public class BasicHttpITCase extends AbstractBaseTestITCase {
     final String content = IOUtils.toString(connection.getInputStream(), Charset.defaultCharset());
     assertTrue(content.contains("\"TEST A 0815\""));
   }
-  
+
   @Test
   public void testBaseTypeDerivedTypeCasting3() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESTwoPrim(32766)/olingo.odata.test1.ETTwoPrim");
+    URL url = URI.create(SERVICE_URI + "ESTwoPrim(32766)/olingo.odata.test1.ETTwoPrim").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -257,10 +261,10 @@ public class BasicHttpITCase extends AbstractBaseTestITCase {
     assertTrue(content.contains("\"PropertyString\":\"Test String1\""));
     assertTrue(content.contains("\"@odata.type\":\"#olingo.odata.test1.ETTwoPrim\""));
   }
-  
+
   @Test
   public void testBaseTypeDerivedTypeCastingException() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESBase(111)/olingo.odata.test1.ETTwoPrim");
+    URL url = URI.create(SERVICE_URI + "ESBase(111)/olingo.odata.test1.ETTwoPrim").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -272,10 +276,10 @@ public class BasicHttpITCase extends AbstractBaseTestITCase {
 
     assertTrue(content.contains("The type filter 'olingo.odata.test1.ETTwoPrim' is incompatible."));
   }
-  
+
   @Test
   public void testBaseTypeDerivedComplexTypeCasting1() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESMixPrimCollComp(32767)/PropertyComp/olingo.odata.test1.CTBase");
+    URL url = URI.create(SERVICE_URI + "ESMixPrimCollComp(32767)/PropertyComp/olingo.odata.test1.CTBase").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -290,11 +294,11 @@ public class BasicHttpITCase extends AbstractBaseTestITCase {
     assertTrue(content.contains("\"AdditionalPropString\":null"));
     assertTrue(content.contains("\"@odata.type\":\"#olingo.odata.test1.CTBase\""));
   }
-  
+
   @Test
   public void testFilterWithSpaceFormEncoding() throws Exception {
-    URL url = new URL(SERVICE_URI + 
-        "ESAllPrim?$filter=PropertyInt16%20eq%201&odata-accept-forms-encoding=true");
+    URL url = URI.create(SERVICE_URI +
+        "ESAllPrim?$filter=PropertyInt16%20eq%201&odata-accept-forms-encoding=true").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -306,11 +310,11 @@ public class BasicHttpITCase extends AbstractBaseTestITCase {
 
     assertNotNull(content);
   }
-  
+
   @Test
   public void testFilterWithSpaceNoFormEncoding() throws Exception {
-    URL url = new URL(SERVICE_URI + 
-        "ESAllPrim?$filter=PropertyInt16%20eq%201");
+    URL url = URI.create(SERVICE_URI +
+        "ESAllPrim?$filter=PropertyInt16%20eq%201").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -322,11 +326,11 @@ public class BasicHttpITCase extends AbstractBaseTestITCase {
 
     assertNotNull(content);
   }
-  
+
   @Test
   public void testFilterWithFormEncoding() throws Exception {
-    URL url = new URL(SERVICE_URI + 
-        "ESAllPrim?$filter=PropertyInt16+eq+1&odata-accept-forms-encoding=true");
+    URL url = URI.create(SERVICE_URI +
+        "ESAllPrim?$filter=PropertyInt16+eq+1&odata-accept-forms-encoding=true").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -338,11 +342,11 @@ public class BasicHttpITCase extends AbstractBaseTestITCase {
 
     assertNotNull(content);
   }
-  
+
   @Test
   public void testFilterWithFormEncodingOrderChange() throws Exception {
-    URL url = new URL(SERVICE_URI + 
-        "ESAllPrim?odata-accept-forms-encoding=true&$filter=PropertyInt16+eq+1");
+    URL url = URI.create(SERVICE_URI +
+        "ESAllPrim?odata-accept-forms-encoding=true&$filter=PropertyInt16+eq+1").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -354,11 +358,11 @@ public class BasicHttpITCase extends AbstractBaseTestITCase {
 
     assertNotNull(content);
   }
-  
+
   @Test
   public void testFilterWithFalseFormEncoding() throws Exception {
-    URL url = new URL(SERVICE_URI + 
-        "ESAllPrim?$filter=PropertyInt16+eq+1&odata-accept-forms-encoding=false");
+    URL url = URI.create(SERVICE_URI +
+        "ESAllPrim?$filter=PropertyInt16+eq+1&odata-accept-forms-encoding=false").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -367,11 +371,11 @@ public class BasicHttpITCase extends AbstractBaseTestITCase {
 
     assertEquals(HttpStatusCode.BAD_REQUEST.getStatusCode(), connection.getResponseCode());
   }
-  
+
   @Test
   public void testFilterWithNoFormEncoding() throws Exception {
-    URL url = new URL(SERVICE_URI + 
-        "ESAllPrim?$filter=PropertyInt16+eq+1");
+    URL url = URI.create(SERVICE_URI +
+        "ESAllPrim?$filter=PropertyInt16+eq+1").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -380,11 +384,11 @@ public class BasicHttpITCase extends AbstractBaseTestITCase {
 
     assertEquals(HttpStatusCode.BAD_REQUEST.getStatusCode(), connection.getResponseCode());
   }
-  
+
   @Test
   public void testFilterWithInvalidFormEncoding() throws Exception {
-    URL url = new URL(SERVICE_URI + 
-        "ESAllPrim?$filter=PropertyInt16+eq+1&odata-accept-forms-encoding=qwer");
+    URL url = URI.create(SERVICE_URI +
+        "ESAllPrim?$filter=PropertyInt16+eq+1&odata-accept-forms-encoding=qwer").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -393,23 +397,23 @@ public class BasicHttpITCase extends AbstractBaseTestITCase {
 
     assertEquals(HttpStatusCode.BAD_REQUEST.getStatusCode(), connection.getResponseCode());
   }
-  
+
   @Test
   public void testCountWithSearch() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESTwoPrim/$count?$search=%2232%22");
+    URL url = URI.create(SERVICE_URI + "ESTwoPrim/$count?$search=%2232%22").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
     connection.connect();
 
     assertEquals(HttpStatusCode.OK.getStatusCode(), connection.getResponseCode());
-    assertEquals("3", IOUtils.toString(connection.getInputStream()));
+    assertEquals("3", IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8));
     connection.disconnect();
   }
-  
+
   @Test
   public void testSubstringOfWithParameterAlias() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim?$filter=substringof(@word,PropertyString)&@word='Second'");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim?$filter=substringof(@word,PropertyString)&@word='Second'").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -417,7 +421,7 @@ public class BasicHttpITCase extends AbstractBaseTestITCase {
     connection.connect();
 
     assertEquals(HttpStatusCode.OK.getStatusCode(), connection.getResponseCode());
-    String content = IOUtils.toString(connection.getInputStream());
+    String content = IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8);
     assertNotNull(content);
     assertTrue(content.contains("\"value\":[{\"PropertyInt16\":-32768,"
         + "\"PropertyString\":\"Second Resource - negative values\","

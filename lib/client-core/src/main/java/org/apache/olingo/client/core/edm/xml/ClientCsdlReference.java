@@ -24,9 +24,9 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
 
 import org.apache.olingo.client.api.edm.xml.Include;
 import org.apache.olingo.client.api.edm.xml.IncludeAnnotations;
@@ -34,7 +34,7 @@ import org.apache.olingo.client.api.edm.xml.Reference;
 import org.apache.olingo.commons.api.edm.provider.CsdlAbstractEdmItem;
 import org.apache.olingo.commons.api.edm.provider.CsdlAnnotation;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(using = ClientCsdlReference.ReferenceDeserializer.class)
 class ClientCsdlReference extends CsdlAbstractEdmItem implements Serializable, Reference {
@@ -76,18 +76,18 @@ class ClientCsdlReference extends CsdlAbstractEdmItem implements Serializable, R
             throws IOException {
       final ClientCsdlReference reference = new ClientCsdlReference();
 
-      for (; jp.getCurrentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
-        final JsonToken token = jp.getCurrentToken();
-        if (token == JsonToken.FIELD_NAME) {
-          if ("Uri".equals(jp.getCurrentName())) {
-            reference.setUri(URI.create(jp.nextTextValue()));
-          } else if ("Include".equals(jp.getCurrentName())) {
+      for (; jp.currentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
+        final JsonToken token = jp.currentToken();
+        if (token == JsonToken.PROPERTY_NAME) {
+          if ("Uri".equals(jp.currentName())) {
+            reference.setUri(URI.create(nextTextValue(jp)));
+          } else if ("Include".equals(jp.currentName())) {
             jp.nextToken();
             reference.getIncludes().add(jp.readValueAs( ClientCsdlInclude.class));
-          } else if ("IncludeAnnotations".equals(jp.getCurrentName())) {
+          } else if ("IncludeAnnotations".equals(jp.currentName())) {
             jp.nextToken();
             reference.getIncludeAnnotations().add(jp.readValueAs( ClientCsdlIncludeAnnotations.class));
-          } else if ("Annotation".equals(jp.getCurrentName())) {
+          } else if ("Annotation".equals(jp.currentName())) {
             jp.nextToken();
             reference.getAnnotations().add(jp.readValueAs( ClientCsdlAnnotation.class));
           }

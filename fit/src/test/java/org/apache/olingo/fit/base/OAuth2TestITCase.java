@@ -18,9 +18,8 @@
  */
 package org.apache.olingo.fit.base;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.URI;
 
@@ -35,9 +34,9 @@ import org.apache.olingo.client.core.ODataClientFactory;
 import org.apache.olingo.client.core.http.DefaultHttpClientFactory;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.fit.CXFOAuth2HttpClientFactory;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 public class OAuth2TestITCase extends AbstractTestITCase {
 
@@ -49,13 +48,13 @@ public class OAuth2TestITCase extends AbstractTestITCase {
 
   private EdmEnabledODataClient _edmClient;
 
-  @BeforeClass
+  @BeforeAll
   public static void enableOAuth2() {
     client.getConfiguration().setHttpClientFactory(
         new CXFOAuth2HttpClientFactory(OAUTH2_GRANT_SERVICE_URI, OAUTH2_TOKEN_SERVICE_URI));
   }
 
-  @AfterClass
+  @AfterAll
   public static void disableOAuth2() {
     client.getConfiguration().setHttpClientFactory(new DefaultHttpClientFactory());
   }
@@ -100,45 +99,23 @@ public class OAuth2TestITCase extends AbstractTestITCase {
     assertEquals("Collection(Edm.Duration)", order.getProperty("OrderShelfLifes").getCollectionValue().getTypeName());
   }
 
+
   @Test
-  public void testOAuth() {
-    try {
-      readAsAtom();
-    } catch (RuntimeException e) {
-      fail("failed for readAsAtom");
-    }
-
-    try {
-      readAsFullJSON();
-    } catch (RuntimeException e) {
-      fail("failed for readAsFullJSON");
-    }
-
-    try {
-      readAsJSON();
-    } catch (RuntimeException e) {
-      fail("failed for readAsJSON");
-    }
-
-    try {
-      createAndDelete();
-    } catch (RuntimeException e) {
-      fail("failed for createAndDelete");
-    }
-  }
-
   public void readAsAtom() {
     read(getLocalClient(), ContentType.APPLICATION_ATOM_XML);
   }
 
+  @Test
   public void readAsFullJSON() {
     read(getLocalClient(), ContentType.JSON_FULL_METADATA);
   }
 
+  @Test
   public void readAsJSON() {
     read(getEdmClient(), ContentType.JSON);
   }
 
+  @Test
   public void createAndDelete() {
     createAndDeleteOrder(testOAuth2ServiceRootURL, ContentType.JSON, 1002);
   }

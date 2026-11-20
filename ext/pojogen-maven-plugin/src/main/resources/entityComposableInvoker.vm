@@ -18,7 +18,7 @@
  *#
 #set( $clsSuffix = ".class" )
 package ${package};
-//CHECKSTYLE:OFF (Maven checkstyle)
+// CHECKSTYLE:OFF (Maven checkstyle)
 import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.ext.proxy.api.annotations.AnnotationsForProperty;
 import org.apache.olingo.ext.proxy.api.annotations.AnnotationsForNavigationProperty;
@@ -47,7 +47,7 @@ import org.apache.olingo.commons.api.edm.geo.MultiPolygon;
 import org.apache.olingo.commons.api.edm.geo.Point;
 import org.apache.olingo.commons.api.edm.geo.Polygon;
 import java.util.concurrent.Future;
-//CHECKSTYLE:ON (Maven checkstyle)
+// CHECKSTYLE:ON (Maven checkstyle)
 
 public interface $utility.capitalize($entityType.Name)ComposableInvoker 
   extends org.apache.olingo.ext.proxy.api.StructuredComposableInvoker<$utility.capitalize($entityType.Name), ${utility.capitalize($entityType.Name)}.Operations>

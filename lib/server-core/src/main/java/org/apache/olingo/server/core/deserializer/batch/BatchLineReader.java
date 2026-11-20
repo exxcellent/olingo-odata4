@@ -25,6 +25,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.api.http.HttpHeader;
@@ -104,7 +105,7 @@ public class BatchLineReader {
           final String charsetString = contentType.getParameter(ContentType.PARAMETER_CHARSET);
           currentCharset = charsetString == null ?
               contentType.isCompatible(ContentType.APPLICATION_JSON) || contentType.getSubtype().contains("xml") ?
-                  Charset.forName("UTF-8") :
+                  StandardCharsets.UTF_8 :
                   DEFAULT_CHARSET :
               Charset.forName(charsetString);
 

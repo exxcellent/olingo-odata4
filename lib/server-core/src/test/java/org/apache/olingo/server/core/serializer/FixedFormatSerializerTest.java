@@ -18,9 +18,10 @@
  */
 package org.apache.olingo.server.core.serializer;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.olingo.commons.api.data.EntityMediaObject;
@@ -31,7 +32,7 @@ import org.apache.olingo.server.api.serializer.FixedFormatSerializer;
 import org.apache.olingo.server.api.serializer.PrimitiveValueSerializerOptions;
 import org.apache.olingo.server.api.serializer.SerializerException;
 import org.apache.olingo.server.api.serializer.SerializerStreamResult;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class FixedFormatSerializerTest {
 
@@ -43,19 +44,19 @@ public class FixedFormatSerializerTest {
 
   @Test
   public void binary() throws Exception {
-    assertEquals("ABC", IOUtils.toString(serializer.binary(new byte[] { 0x41, 0x42, 0x43 })));
+    assertEquals("ABC", IOUtils.toString(serializer.binary(new byte[] { 0x41, 0x42, 0x43 }), StandardCharsets.UTF_8));
   }
 
   @Test
   public void count() throws Exception {
-    assertEquals("42", IOUtils.toString(serializer.count(42)));
+    assertEquals("42", IOUtils.toString(serializer.count(42), StandardCharsets.UTF_8));
   }
 
   @Test
   public void primitiveValue() throws Exception {
     final EdmPrimitiveType type = OData.newInstance().createPrimitiveTypeInstance(EdmPrimitiveTypeKind.Int32);
     assertEquals("42", IOUtils.toString(serializer.primitiveValue(type, 42,
-        PrimitiveValueSerializerOptions.with().nullable(true).build())));
+        PrimitiveValueSerializerOptions.with().nullable(true).build()), StandardCharsets.UTF_8));
   }
   
   @Test

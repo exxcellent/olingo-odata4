@@ -31,6 +31,7 @@ public interface ClientCollectionValue<T extends ClientValue> extends ClientValu
    * Adds a value to the collection.
    * 
    * @param value value to be added.
+   * @return This ClientCollectionValue to support fluent api
    */
   ClientCollectionValue<T> add(ClientValue value);
 
@@ -51,7 +52,7 @@ public interface ClientCollectionValue<T extends ClientValue> extends ClientValu
   /**
    * Converts this instance as POJO collection.
    * 
-   * @return this instance as POJO collection
+   * @return this instance as POJO collection (not as instances of T!)
    */
   Collection<Object> asJavaCollection();
 }

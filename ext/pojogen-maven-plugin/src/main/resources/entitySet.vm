@@ -18,7 +18,7 @@
  *#
 package ${package};
 
-//CHECKSTYLE:OFF (Maven checkstyle)
+// CHECKSTYLE:OFF (Maven checkstyle)
 import org.apache.olingo.ext.proxy.api.AbstractEntitySet;
 import org.apache.olingo.ext.proxy.api.annotations.EntitySet;
 import org.apache.olingo.ext.proxy.api.annotations.CompoundKey;
@@ -42,7 +42,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Calendar;
 import javax.xml.datatype.Duration;
-//CHECKSTYLE:ON (Maven checkstyle)
+// CHECKSTYLE:ON (Maven checkstyle)
 
 #set( $keys = $utility.getEntityKeyType($entitySet) )
 #if( $keys.size() > 1 )

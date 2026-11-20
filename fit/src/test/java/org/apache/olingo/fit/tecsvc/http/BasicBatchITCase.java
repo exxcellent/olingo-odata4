@@ -18,8 +18,8 @@
  */
 package org.apache.olingo.fit.tecsvc.http;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,6 +29,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.net.URI;
 
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.commons.api.format.ContentType;
@@ -37,7 +38,7 @@ import org.apache.olingo.commons.api.http.HttpMethod;
 import org.apache.olingo.commons.api.http.HttpStatusCode;
 import org.apache.olingo.fit.AbstractBaseTestITCase;
 import org.apache.olingo.fit.tecsvc.TecSvcConst;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class BasicBatchITCase extends AbstractBaseTestITCase {
 
@@ -248,19 +249,19 @@ public class BasicBatchITCase extends AbstractBaseTestITCase {
   }
   
   private URL getUrlWithSpecialCharacters() throws MalformedURLException {
-    return new URL(SERVICE_URI + "$batch" + "?#language=de");
+    return URI.create(SERVICE_URI + "$batch" + "?#language=de").toURL();
   }
   
   private URL getUrlForCustomQuery() throws MalformedURLException {
-    return new URL(SERVICE_URI + "$batch" + "?language=de");
+    return URI.create(SERVICE_URI + "$batch" + "?language=de").toURL();
   }
   
   private URL getUrlForCustomQueryWith$() throws MalformedURLException {
-    return new URL(SERVICE_URI + "$batch" + "?$language=de");
+    return URI.create(SERVICE_URI + "$batch" + "?$language=de").toURL();
   }
   
   private URL getUrl() throws MalformedURLException {
-    return new URL(SERVICE_URI + "$batch");
+    return URI.create(SERVICE_URI + "$batch").toURL();
   }
 
   @Override

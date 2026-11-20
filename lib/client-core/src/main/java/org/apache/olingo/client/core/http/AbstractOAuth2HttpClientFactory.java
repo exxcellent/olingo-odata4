@@ -21,97 +21,100 @@ package org.apache.olingo.client.core.http;
 import java.io.IOException;
 import java.net.URI;
 
-import org.apache.http.HttpException;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpResponseInterceptor;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.protocol.HttpContext;
-import org.apache.olingo.client.api.http.HttpClientFactory;
-import org.apache.olingo.client.api.http.WrappingHttpClientFactory;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.EntityDetails;
+import org.apache.hc.core5.http.HttpException;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpRequest;
+import org.apache.hc.core5.http.HttpRequestInterceptor;
+import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.HttpResponseInterceptor;
+import org.apache.hc.core5.http.HttpStatus;
+import org.apache.hc.core5.http.protocol.HttpContext;
+import org.apache.olingo.client.api.http.ODataHttpClient;
 import org.apache.olingo.commons.api.http.HttpMethod;
 
 public abstract class AbstractOAuth2HttpClientFactory
-        extends AbstractHttpClientFactory implements WrappingHttpClientFactory {
-
-  protected final DefaultHttpClientFactory wrapped;
+        extends AbstractHttpClientFactory<ODataHttpClient> {
 
   protected final URI oauth2GrantServiceURI;
 
   protected final URI oauth2TokenServiceURI;
 
-  protected HttpUriRequest currentRequest;
+  protected HttpUriRequestBase currentRequest;
 
   public AbstractOAuth2HttpClientFactory(final URI oauth2GrantServiceURI, final URI oauth2TokenServiceURI) {
-    this(new DefaultHttpClientFactory(), oauth2GrantServiceURI, oauth2TokenServiceURI);
-  }
-
-  public AbstractOAuth2HttpClientFactory(final DefaultHttpClientFactory wrapped,
-          final URI oauth2GrantServiceURI, final URI oauth2TokenServiceURI) {
-
     super();
-    this.wrapped = wrapped;
     this.oauth2GrantServiceURI = oauth2GrantServiceURI;
     this.oauth2TokenServiceURI = oauth2TokenServiceURI;
-  }
-
-  @Override
-  public HttpClientFactory getWrappedHttpClientFactory() {
-    return wrapped;
   }
 
   protected abstract boolean isInited() throws OAuth2Exception;
 
   protected abstract void init() throws OAuth2Exception;
 
-  protected abstract void accessToken(DefaultHttpClient client) throws OAuth2Exception;
+  protected abstract void accessToken(CloseableHttpClient client) throws OAuth2Exception;
 
-  protected abstract void refreshToken(DefaultHttpClient client) throws OAuth2Exception;
+  protected abstract void refreshToken(CloseableHttpClient client) throws OAuth2Exception;
+
+  /**
+   * Returns the value for the {@code Authorization} HTTP header to be added to every outgoing
+   * request, e.g. {@code "Bearer <token>"}. Return {@code null} to skip adding the header.
+   * Subclasses should override this to expose their stored access token.
+   */
+  protected String getAuthorizationHeaderValue() {
+    return null;
+  }
 
   @Override
-  public HttpClient create(final HttpMethod method, final URI uri) {
+  public ODataHttpClient create(final HttpMethod method, final URI uri) {
     if (!isInited()) {
       init();
     }
 
-    final DefaultHttpClient httpClient = wrapped.create(method, uri);
-    accessToken(httpClient);
+    final CloseableHttpClient[] holder = new CloseableHttpClient[1];
 
-    httpClient.addRequestInterceptor(new HttpRequestInterceptor() {
-
-      @Override
-      public void process(final HttpRequest request, final HttpContext context) throws HttpException, IOException {
-        if (request instanceof HttpUriRequest) {
-          currentRequest = (HttpUriRequest) request;
-        } else {
-          currentRequest = null;
-        }
-      }
-    });
-    httpClient.addResponseInterceptor(new HttpResponseInterceptor() {
-
-      @Override
-      public void process(final HttpResponse response, final HttpContext context) throws HttpException, IOException {
-        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
-          refreshToken(httpClient);
-
-          if (currentRequest != null) {
-            httpClient.execute(currentRequest);
+    holder[0] = HttpClients.custom()
+        .setUserAgent(AbstractHttpClientFactory.USER_AGENT)
+        .addRequestInterceptorLast(new HttpRequestInterceptor() {
+          @Override
+          public void process(final HttpRequest request, final EntityDetails entityDetails,
+              final HttpContext context) throws HttpException, IOException {
+            if (request instanceof HttpUriRequestBase) {
+              currentRequest = (HttpUriRequestBase) request;
+            } else {
+              currentRequest = null;
+            }
+            final String authHeader = getAuthorizationHeaderValue();
+            if (authHeader != null && !request.containsHeader(HttpHeaders.AUTHORIZATION)) {
+              request.addHeader(HttpHeaders.AUTHORIZATION, authHeader);
+            }
           }
-        }
-      }
-    });
+        })
+        .addResponseInterceptorLast(new HttpResponseInterceptor() {
+          @Override
+          public void process(final HttpResponse response, final EntityDetails entityDetails,
+              final HttpContext context) throws HttpException, IOException {
+            if (response.getCode() == HttpStatus.SC_UNAUTHORIZED) {
+              refreshToken(holder[0]);
 
-    return httpClient;
-  }
+              if (currentRequest != null) {
+                try {
+                  holder[0].execute(currentRequest, res -> res);
+                } catch (Exception e) {
+                  // ignore retry errors
+                }
+              }
+            }
+          }
+        })
+        .build();
 
-  @Override
-  public void close(final HttpClient httpClient) {
-    wrapped.close(httpClient);
+    accessToken(holder[0]);
+
+    return DefaultHttpClientFactory.wrapHC5Client(holder[0]);
   }
 
 }

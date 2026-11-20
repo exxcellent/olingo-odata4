@@ -21,6 +21,7 @@ package org.apache.olingo.server.core.debug;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.olingo.commons.api.http.HttpHeader;
@@ -28,7 +29,7 @@ import org.apache.olingo.server.api.ODataResponse;
 import org.apache.olingo.server.api.deserializer.DeserializerException;
 import org.apache.olingo.server.core.deserializer.FixedFormatDeserializerImpl;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonGenerator;
 
 /**
  * Response body debug information.
@@ -113,7 +114,7 @@ public class DebugTabBody implements DebugTab {
       final byte[] content = streamToBytes(response.getContent());
       return responseContent == ResponseContent.IMAGE ?
           Base64.encodeBase64String(content) :
-          new String(content, "UTF-8");
+          new String(content, StandardCharsets.UTF_8);
     } catch (final IOException e) {
       return "Could not parse Body for Debug Output";
     }

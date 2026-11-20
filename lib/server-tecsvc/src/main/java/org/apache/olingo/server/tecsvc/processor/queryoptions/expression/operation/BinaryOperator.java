@@ -26,7 +26,6 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.olingo.commons.api.data.Property;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveType;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.edm.EdmType;

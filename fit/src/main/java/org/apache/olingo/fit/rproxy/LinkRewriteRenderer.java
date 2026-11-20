@@ -21,8 +21,9 @@ package org.apache.olingo.fit.rproxy;
 import java.io.IOException;
 import java.io.Writer;
 
-import org.apache.http.HttpEntityEnclosingRequest;
+import org.esigate.HttpErrorPage;
 import org.esigate.Renderer;
+import org.esigate.impl.DriverRequest;
 
 public class LinkRewriteRenderer implements Renderer {
 
@@ -49,9 +50,8 @@ public class LinkRewriteRenderer implements Renderer {
   }
 
   @Override
-  public void render(final HttpEntityEnclosingRequest httpRequest, final String src, final Writer out)
-      throws IOException {
-
+  public void render(DriverRequest originalRequest, String src, Writer out) throws IOException, HttpErrorPage {
     out.write(src.replaceAll(baseUrl, replacementUrl));
+    
   }
 }

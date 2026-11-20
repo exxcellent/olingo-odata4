@@ -19,6 +19,7 @@
 package org.apache.olingo.client.core.communication.request.batch;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 import org.apache.olingo.client.api.communication.request.ODataBatchableRequest;
@@ -39,7 +40,7 @@ public class ODataChangesetImpl extends AbstractODataBatchRequestItem
    * ContentId.
    */
   private int contentId = 0;
-  private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+  private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
   private final ODataBatchRequestContext batchRequestContext;
 
   /**

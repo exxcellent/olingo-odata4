@@ -31,7 +31,7 @@ import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.api.format.ContentType;
 import org.apache.olingo.commons.core.edm.EdmTypeInfo;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonGenerator;
 
 /**
  * Writes out JSON string from an entity.
@@ -57,24 +57,24 @@ public class JsonEntitySerializer extends JsonSerializer {
 
     if (serverMode && !isODataMetadataNone) {
       if (container.getContextURL() != null) {
-        jgen.writeStringField(Constants.JSON_CONTEXT, container.getContextURL().toASCIIString());
+        jgen.writeStringProperty(Constants.JSON_CONTEXT, container.getContextURL().toASCIIString());
       }
       if (container.getMetadataETag() != null) {
-        jgen.writeStringField(Constants.JSON_METADATA_ETAG, container.getMetadataETag());
+        jgen.writeStringProperty(Constants.JSON_METADATA_ETAG, container.getMetadataETag());
       }
 
       if (entity.getETag() != null) {
-        jgen.writeStringField(Constants.JSON_ETAG, entity.getETag());
+        jgen.writeStringProperty(Constants.JSON_ETAG, entity.getETag());
       }
     }
 
     if (entity.getType() != null && isODataMetadataFull) {
-      jgen.writeStringField(Constants.JSON_TYPE,
+      jgen.writeStringProperty(Constants.JSON_TYPE,
           new EdmTypeInfo.Builder().setTypeExpression(entity.getType()).build().external());
     }
 
     if (entity.getId() != null && isODataMetadataFull) {
-      jgen.writeStringField(Constants.JSON_ID, entity.getId().toASCIIString());
+      jgen.writeStringProperty(Constants.JSON_ID, entity.getId().toASCIIString());
     }
 
     for (Annotation annotation : entity.getAnnotations()) {
@@ -87,10 +87,10 @@ public class JsonEntitySerializer extends JsonSerializer {
 
     if (serverMode && entity.getEditLink() != null && 
         entity.getEditLink().getHref() != null && isODataMetadataFull) {
-      jgen.writeStringField(Constants.JSON_EDIT_LINK, entity.getEditLink().getHref());
+      jgen.writeStringProperty(Constants.JSON_EDIT_LINK, entity.getEditLink().getHref());
 
       if (entity.isMediaEntity() && isODataMetadataFull) {
-        jgen.writeStringField(Constants.JSON_MEDIA_READ_LINK,
+        jgen.writeStringProperty(Constants.JSON_MEDIA_READ_LINK,
             entity.getEditLink().getHref() + "/$value");
       }
     }
@@ -102,16 +102,18 @@ public class JsonEntitySerializer extends JsonSerializer {
     if (isODataMetadataFull) {
       for (Link link : entity.getMediaEditLinks()) {
         if (link.getTitle() == null) {
-          jgen.writeStringField(Constants.JSON_MEDIA_EDIT_LINK, link.getHref());
+          jgen.writeStringProperty(Constants.JSON_MEDIA_EDIT_LINK, link.getHref());
         }
 
         if (link.getInlineEntity() != null) {
-          jgen.writeObjectField(link.getTitle(), link.getInlineEntity());
+          jgen.writeName(link.getTitle());
+          new JsonEntitySerializer(serverMode, contentType).doSerialize(link.getInlineEntity(), jgen);
         }
         if (link.getInlineEntitySet() != null) {
-          jgen.writeArrayFieldStart(link.getTitle());
+          jgen.writeArrayPropertyStart(link.getTitle());
+          final JsonEntitySerializer entitySerializer = new JsonEntitySerializer(serverMode, contentType);
           for (Entity subEntry : link.getInlineEntitySet().getEntities()) {
-            jgen.writeObject(subEntry);
+            entitySerializer.doSerialize(subEntry, jgen);
           }
           jgen.writeEndArray();
         }
@@ -122,9 +124,9 @@ public class JsonEntitySerializer extends JsonSerializer {
       for (Operation operation : entity.getOperations()) {
         final String anchor = operation.getMetadataAnchor();
         final int index = anchor.lastIndexOf('#');
-        jgen.writeObjectFieldStart('#' + anchor.substring(index < 0 ? 0 : (index + 1)));
-        jgen.writeStringField(Constants.ATTR_TITLE, operation.getTitle());
-        jgen.writeStringField(Constants.ATTR_TARGET, operation.getTarget().toASCIIString());
+        jgen.writeObjectPropertyStart('#' + anchor.substring(index < 0 ? 0 : (index + 1)));
+        jgen.writeStringProperty(Constants.ATTR_TITLE, operation.getTitle());
+        jgen.writeStringProperty(Constants.ATTR_TARGET, operation.getTarget().toASCIIString());
         jgen.writeEndObject();
       }
     }

@@ -18,16 +18,18 @@
  */
 package org.apache.olingo.fit.tecsvc.http;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.olingo.client.api.ODataClient;
@@ -39,7 +41,7 @@ import org.apache.olingo.fit.AbstractBaseTestITCase;
 import org.apache.olingo.fit.tecsvc.TecSvcConst;
 import org.apache.olingo.fit.util.StringHelper;
 import org.apache.olingo.server.tecsvc.async.TechnicalAsyncService;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class PreferHeaderForGetAndDeleteITCase extends AbstractBaseTestITCase {
 
@@ -47,7 +49,7 @@ public class PreferHeaderForGetAndDeleteITCase extends AbstractBaseTestITCase {
 
   @Test
   public void preferHeaderMinimal_GetEntitySet() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -62,7 +64,7 @@ public class PreferHeaderForGetAndDeleteITCase extends AbstractBaseTestITCase {
   
   @Test
   public void preferHeaderRepresentation_GetEntitySet() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -77,7 +79,7 @@ public class PreferHeaderForGetAndDeleteITCase extends AbstractBaseTestITCase {
   
   @Test
   public void preferHeaderMinimal_GetEntity() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim(32767)");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim(32767)").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -92,7 +94,7 @@ public class PreferHeaderForGetAndDeleteITCase extends AbstractBaseTestITCase {
   
   @Test
   public void preferHeaderRepresentation_GetEntity() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim(32767)");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim(32767)").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -107,7 +109,7 @@ public class PreferHeaderForGetAndDeleteITCase extends AbstractBaseTestITCase {
 
   @Test
   public void preferHeaderRepresentation_DeleteEntity() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim(32767)");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim(32767)").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.DELETE.name());
@@ -122,7 +124,7 @@ public class PreferHeaderForGetAndDeleteITCase extends AbstractBaseTestITCase {
   
   @Test
   public void preferHeaderMinimal_DeleteEntity() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim(32767)");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim(32767)").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.DELETE.name());
@@ -137,7 +139,7 @@ public class PreferHeaderForGetAndDeleteITCase extends AbstractBaseTestITCase {
   
   @Test
   public void preferHeaderRepresentation_GetComplexProperty() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESCompCollDerived(12345)/PropertyCompAno");
+    URL url = URI.create(SERVICE_URI + "ESCompCollDerived(12345)/PropertyCompAno").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -152,7 +154,7 @@ public class PreferHeaderForGetAndDeleteITCase extends AbstractBaseTestITCase {
   
   @Test
   public void preferHeaderMinimal_GetSimpleProperty() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim(32767)/PropertyString");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim(32767)/PropertyString").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -167,7 +169,7 @@ public class PreferHeaderForGetAndDeleteITCase extends AbstractBaseTestITCase {
   
   @Test
   public void preferHeaderMinimal_GetNavigationProperty() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim(32767)/NavPropertyETTwoPrimOne");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim(32767)/NavPropertyETTwoPrimOne").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -182,7 +184,7 @@ public class PreferHeaderForGetAndDeleteITCase extends AbstractBaseTestITCase {
   
   @Test
   public void preferHeaderRepresentation_GetReference() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim(32767)/NavPropertyETTwoPrimOne/$ref");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim(32767)/NavPropertyETTwoPrimOne/$ref").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -197,7 +199,7 @@ public class PreferHeaderForGetAndDeleteITCase extends AbstractBaseTestITCase {
   
   @Test
   public void preferHeaderRepresentation_GetMediaEntitySet() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESMedia");
+    URL url = URI.create(SERVICE_URI + "ESMedia").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -212,7 +214,7 @@ public class PreferHeaderForGetAndDeleteITCase extends AbstractBaseTestITCase {
   
   @Test
   public void preferHeaderMinimal_GetMediaEntity() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESMedia(1)");
+    URL url = URI.create(SERVICE_URI + "ESMedia(1)").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -227,7 +229,7 @@ public class PreferHeaderForGetAndDeleteITCase extends AbstractBaseTestITCase {
   
   @Test
   public void preferHeaderMinimal_PostMediaEntity() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESMedia");
+    URL url = URI.create(SERVICE_URI + "ESMedia").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.POST.name());
@@ -244,7 +246,7 @@ public class PreferHeaderForGetAndDeleteITCase extends AbstractBaseTestITCase {
   
   @Test
   public void preferHeaderRepresentation_PutMediaEntity() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESMedia(1)");
+    URL url = URI.create(SERVICE_URI + "ESMedia(1)").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.PUT.name());
@@ -259,7 +261,7 @@ public class PreferHeaderForGetAndDeleteITCase extends AbstractBaseTestITCase {
   
   @Test
   public void preferHeaderRepresentation_Count() throws Exception {
-    URL url = new URL(SERVICE_URI + "ESAllPrim/$count");
+    URL url = URI.create(SERVICE_URI + "ESAllPrim/$count").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -274,7 +276,7 @@ public class PreferHeaderForGetAndDeleteITCase extends AbstractBaseTestITCase {
   
   @Test
   public void preferHeaderMinimal_UnboundFunction() throws Exception {
-    URL url = new URL(SERVICE_URI + "FICRTETKeyNav()");
+    URL url = URI.create(SERVICE_URI + "FICRTETKeyNav()").toURL();
 
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setRequestMethod(HttpMethod.GET.name());
@@ -293,7 +295,7 @@ public class PreferHeaderForGetAndDeleteITCase extends AbstractBaseTestITCase {
     final HttpURLConnection connection = postBatch(content, "batch_8194-cf13-1f56", 1, true);
 
     assertEquals(HttpStatusCode.BAD_REQUEST.getStatusCode(), connection.getResponseCode());
-    final String response = IOUtils.toString(connection.getErrorStream());
+    final String response = IOUtils.toString(connection.getErrorStream(), StandardCharsets.UTF_8);
     assertTrue(response.contains("The Prefer header 'return=minimal' is not supported for this HTTP Method."));
     
   }
@@ -315,7 +317,7 @@ public class PreferHeaderForGetAndDeleteITCase extends AbstractBaseTestITCase {
       headers.put(HttpHeader.PREFER, "return=minimal");
     }
     StringHelper.Stream s = StringHelper.toStream(content);
-    final URL url = new URL(SERVICE_URI + "$batch");
+    final URL url = URI.create(SERVICE_URI + "$batch").toURL();
     return postRequest(url, s.asString("utf-8"), headers);
   }
   

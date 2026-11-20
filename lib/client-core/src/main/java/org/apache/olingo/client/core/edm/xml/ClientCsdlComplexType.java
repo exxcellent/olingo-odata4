@@ -18,14 +18,14 @@
  */
 package org.apache.olingo.client.core.edm.xml;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.olingo.commons.api.edm.provider.CsdlComplexType;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -43,24 +43,24 @@ class ClientCsdlComplexType extends CsdlComplexType implements Serializable {
 
       final ClientCsdlComplexType complexType = new ClientCsdlComplexType();
 
-      for (; jp.getCurrentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
-        final JsonToken token = jp.getCurrentToken();
-        if (token == JsonToken.FIELD_NAME) {
-          if ("Name".equals(jp.getCurrentName())) {
-            complexType.setName(jp.nextTextValue());
-          } else if ("Abstract".equals(jp.getCurrentName())) {
-            complexType.setAbstract(BooleanUtils.toBoolean(jp.nextTextValue()));
-          } else if ("BaseType".equals(jp.getCurrentName())) {
-            complexType.setBaseType(jp.nextTextValue());
-          } else if ("OpenType".equals(jp.getCurrentName())) {
-            complexType.setOpenType(BooleanUtils.toBoolean(jp.nextTextValue()));
-          } else if ("Property".equals(jp.getCurrentName())) {
+      for (; jp.currentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
+        final JsonToken token = jp.currentToken();
+        if (token == JsonToken.PROPERTY_NAME) {
+          if ("Name".equals(jp.currentName())) {
+            complexType.setName(nextTextValue(jp));
+          } else if ("Abstract".equals(jp.currentName())) {
+            complexType.setAbstract(BooleanUtils.toBoolean(nextTextValue(jp)));
+          } else if ("BaseType".equals(jp.currentName())) {
+            complexType.setBaseType(nextTextValue(jp));
+          } else if ("OpenType".equals(jp.currentName())) {
+            complexType.setOpenType(BooleanUtils.toBoolean(nextTextValue(jp)));
+          } else if ("Property".equals(jp.currentName())) {
             jp.nextToken();
             complexType.getProperties().add(jp.readValueAs(ClientCsdlProperty.class));
-          } else if ("NavigationProperty".equals(jp.getCurrentName())) {
+          } else if ("NavigationProperty".equals(jp.currentName())) {
             jp.nextToken();
             complexType.getNavigationProperties().add(jp.readValueAs(ClientCsdlNavigationProperty.class));
-          } else if ("Annotation".equals(jp.getCurrentName())) {
+          } else if ("Annotation".equals(jp.currentName())) {
             jp.nextToken();
             complexType.getAnnotations().add(jp.readValueAs(ClientCsdlAnnotation.class));
           }

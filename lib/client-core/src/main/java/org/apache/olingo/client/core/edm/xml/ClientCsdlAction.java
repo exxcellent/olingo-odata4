@@ -18,14 +18,14 @@
  */
 package org.apache.olingo.client.core.edm.xml;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.olingo.commons.api.edm.provider.CsdlAction;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -43,21 +43,24 @@ class ClientCsdlAction extends CsdlAction implements Serializable {
 
       final ClientCsdlAction action = new ClientCsdlAction();
 
-      for (; jp.getCurrentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
-        final JsonToken token = jp.getCurrentToken();
-        if (token == JsonToken.FIELD_NAME) {
-          if ("Name".equals(jp.getCurrentName())) {
-            action.setName(jp.nextTextValue());
-          } else if ("IsBound".equals(jp.getCurrentName())) {
-            action.setBound(BooleanUtils.toBoolean(jp.nextTextValue()));
-          } else if ("EntitySetPath".equals(jp.getCurrentName())) {
-            action.setEntitySetPath(jp.nextTextValue());
-          } else if ("Parameter".equals(jp.getCurrentName())) {
+      for (; jp.currentToken() != JsonToken.END_OBJECT; jp.nextToken()) {
+        final JsonToken token = jp.currentToken();
+        if (token == JsonToken.PROPERTY_NAME) {
+          if ("Name".equals(jp.currentName())) {
+            jp.nextToken();
+            action.setName(jp.getString());
+          } else if ("IsBound".equals(jp.currentName())) {
+            jp.nextToken();
+            action.setBound(BooleanUtils.toBoolean(jp.getString()));
+          } else if ("EntitySetPath".equals(jp.currentName())) {
+            jp.nextToken();
+            action.setEntitySetPath(jp.getString());
+          } else if ("Parameter".equals(jp.currentName())) {
             jp.nextToken();
             action.getParameters().add(jp.readValueAs(ClientCsdlParameter.class));
-          } else if ("ReturnType".equals(jp.getCurrentName())) {
+          } else if ("ReturnType".equals(jp.currentName())) {
             action.setReturnType(parseReturnType(jp, "Action"));
-          } else if ("Annotation".equals(jp.getCurrentName())) {
+          } else if ("Annotation".equals(jp.currentName())) {
             jp.nextToken();
             action.getAnnotations().add(jp.readValueAs(ClientCsdlAnnotation.class));
           }

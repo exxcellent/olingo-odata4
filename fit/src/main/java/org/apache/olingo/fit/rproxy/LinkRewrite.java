@@ -28,7 +28,6 @@ import org.esigate.events.EventManager;
 import org.esigate.events.IEventListener;
 import org.esigate.events.impl.RenderEvent;
 import org.esigate.extension.Extension;
-import org.esigate.util.HttpRequestHelper;
 
 public class LinkRewrite implements Extension, IEventListener {
 
@@ -43,11 +42,11 @@ public class LinkRewrite implements Extension, IEventListener {
   @Override
   public boolean event(final EventDefinition eventDef, final Event event) {
     final RenderEvent renderEvent = (RenderEvent) event;
-    final String baseUrl = HttpRequestHelper.getBaseUrl(renderEvent.originalRequest).toString();
-    final LinkRewriteRenderer fixup = new LinkRewriteRenderer(baseUrl, config.getVisibleBaseURL(baseUrl));
+    final String baseUrl = renderEvent.getOriginalRequest().getBaseUrl().toString();
+    final LinkRewriteRenderer fixup = new LinkRewriteRenderer(baseUrl, config.getVisibleBaseURL());
 
     // Add fixup renderer as first renderer.
-    renderEvent.renderers.add(0, fixup);
+    renderEvent.getRenderers().add(0, fixup);
 
     // Continue processing
     return true;
