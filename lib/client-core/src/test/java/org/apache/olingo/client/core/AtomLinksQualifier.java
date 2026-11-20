@@ -18,22 +18,26 @@
  */
 package org.apache.olingo.client.core;
 
-import org.apache.olingo.commons.api.Constants;
-import org.custommonkey.xmlunit.ElementNameQualifier;
-import org.w3c.dom.Element;
+import java.util.Objects;
 
-public class AtomLinksQualifier extends ElementNameQualifier {
+import org.apache.olingo.commons.api.Constants;
+import org.w3c.dom.Element;
+import org.xmlunit.diff.ElementSelector;
+import org.xmlunit.diff.ElementSelectors;
+
+public class AtomLinksQualifier implements ElementSelector {
 
   @Override
-  public boolean qualifyForComparison(final Element control, final Element test) {
+  public boolean canBeCompared(final Element control, final Element test) {
     if (Constants.ATOM_ELEM_LINK.equals(control.getLocalName())
             && Constants.ATOM_ELEM_LINK.equals(test.getLocalName())) {
 
       final String controlHref = control.getAttribute("href");
       final String testHref = test.getAttribute("href");
-      return super.equalsNamespace(control, test) && controlHref != null && controlHref.equals(testHref);
+      return Objects.equals(control.getNamespaceURI(), test.getNamespaceURI())
+              && controlHref != null && controlHref.equals(testHref);
     } else {
-      return super.qualifyForComparison(control, test);
+      return ElementSelectors.byName.canBeCompared(control, test);
     }
   }
 

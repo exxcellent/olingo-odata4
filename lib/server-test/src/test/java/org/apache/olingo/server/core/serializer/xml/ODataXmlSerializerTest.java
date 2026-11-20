@@ -18,7 +18,7 @@
  */
 package org.apache.olingo.server.core.serializer.xml;
 
-import java.io.IOException;
+
 import java.io.InputStream;
 import java.net.URI;
 import java.text.ParseException;
@@ -72,40 +72,26 @@ import org.apache.olingo.server.core.uri.UriHelperImpl;
 import org.apache.olingo.server.tecsvc.MetadataETagSupport;
 import org.apache.olingo.server.tecsvc.data.DataProvider;
 import org.apache.olingo.server.tecsvc.provider.EdmTechProvider;
-import org.custommonkey.xmlunit.Diff;
-import org.custommonkey.xmlunit.Difference;
-import org.custommonkey.xmlunit.DifferenceListener;
-import org.custommonkey.xmlunit.XMLAssert;
-import org.custommonkey.xmlunit.XMLUnit;
 import org.hamcrest.CoreMatchers;
+import org.xmlunit.builder.DiffBuilder;
+import org.xmlunit.diff.ComparisonResult;
+import org.xmlunit.diff.Diff;
+import org.xmlunit.diff.DifferenceEvaluators;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
 
 public class ODataXmlSerializerTest {
   private static final ServiceMetadata metadata = new ServiceMetadataImpl(
       new EdmTechProvider(), Collections.<EdmxReference> emptyList(), new MetadataETagSupport("metadataETag"));
   private static final EdmEntityContainer entityContainer = metadata.getEdm().getEntityContainer();
-  private static final DifferenceListener DIFFERENCE_LISTENER = new CustomDifferenceListener();
   private static final int MAX_ALLOWED_UPDATED_DIFFERENCE = 2000;
   private static final SimpleDateFormat UPDATED_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
   private final DataProvider data = new DataProvider(OData.newInstance(), metadata.getEdm());
   private final ODataSerializer serializer = new ODataXmlSerializer();
   private final UriHelper helper = new UriHelperImpl();
-
-  @BeforeAll
-  public static void setup() {
-    XMLUnit.setIgnoreComments(true);
-    XMLUnit.setIgnoreAttributeOrder(true);
-    XMLUnit.setIgnoreWhitespace(true);
-    XMLUnit.setNormalizeWhitespace(true);
-    XMLUnit.setCompareUnmatched(false);
-  }
 
   @Test
   public void entitySimple() throws Exception {
@@ -3325,41 +3311,38 @@ public class ODataXmlSerializerTest {
     checkXMLEqual(expected, resultString);
   }
   
-  private void checkXMLEqual(final String expected, final String resultString) throws SAXException, IOException {
-    Diff diff = XMLUnit.compareXML(expected, resultString);
-    diff.overrideDifferenceListener(DIFFERENCE_LISTENER);
-    XMLAssert.assertXMLEqual(diff, true);
+  private void checkXMLEqual(final String expected, final String resultString) {
+    final String xpath = "/updated[1]/text()[1]";
+    Diff diff = DiffBuilder.compare(expected)
+        .withTest(resultString)
+        .ignoreComments()
+        .ignoreWhitespace()
+        .normalizeWhitespace()
+        .checkForSimilar()
+        .withDifferenceEvaluator(DifferenceEvaluators.chain(
+            DifferenceEvaluators.Default,
+            (comparison, outcome) -> {
+              if (outcome == ComparisonResult.DIFFERENT) {
+                String xPath = comparison.getControlDetails().getXPath();
+                if (xPath != null && xPath.endsWith(xpath)) {
+                  String controlValue = String.valueOf(comparison.getControlDetails().getValue());
+                  String testValue = String.valueOf(comparison.getTestDetails().getValue());
+                  try {
+                    long controlTime = UPDATED_FORMAT.parse(controlValue).getTime();
+                    long testTime = UPDATED_FORMAT.parse(testValue).getTime();
+                    if (Math.abs(controlTime - testTime) <= MAX_ALLOWED_UPDATED_DIFFERENCE) {
+                      return ComparisonResult.SIMILAR;
+                    }
+                  } catch (ParseException e) {
+                    throw new RuntimeException("Parse exception for updated value.");
+                  }
+                }
+              }
+              return outcome;
+            }))
+        .build();
+    assertFalse(diff.hasDifferences(), diff.toString());
   }
-
-  public static class CustomDifferenceListener implements DifferenceListener {
-    @Override
-    public int differenceFound(Difference difference) {
-      final String xpath = "/updated[1]/text()[1]";
-      if(difference.getControlNodeDetail().getXpathLocation().endsWith(xpath)) {
-        String controlValue = difference.getControlNodeDetail().getValue();
-        String testValue = difference.getTestNodeDetail().getValue();
-        // Allow a difference of up to 2 seconds.
-        try {
-          long controlTime = UPDATED_FORMAT.parse(controlValue).getTime();
-          long testTime = UPDATED_FORMAT.parse(testValue).getTime();
-          long diff = controlTime - testTime;
-          if (diff < 0) {
-            diff = diff * -1;
-          }
-          if (diff <= MAX_ALLOWED_UPDATED_DIFFERENCE) {
-            return DifferenceListener.RETURN_IGNORE_DIFFERENCE_NODES_SIMILAR;
-          }
-        } catch (ParseException e) {
-          throw new RuntimeException("Parse exception for updated value (see difference '" + difference + "').");
-        }
-      }
-      // Yes it is a difference so throw an exception.
-      return DifferenceListener.RETURN_ACCEPT_DIFFERENCE;
-    }
-
-    @Override
-    public void skippedComparison(Node control, Node test) { }
-  };
   
   @Test
   public void complexCollectionWithSelectProperty() throws Exception {

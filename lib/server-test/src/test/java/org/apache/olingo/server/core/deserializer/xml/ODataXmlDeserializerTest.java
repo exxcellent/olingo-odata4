@@ -46,23 +46,12 @@ import org.apache.olingo.commons.api.edm.EdmProperty;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.deserializer.ODataDeserializer;
 import org.apache.olingo.server.core.deserializer.AbstractODataDeserializerTest;
-import org.custommonkey.xmlunit.XMLUnit;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class ODataXmlDeserializerTest extends AbstractODataDeserializerTest {
 
   private static final EdmEntityContainer entityContainer = edm.getEntityContainer();
   private final ODataDeserializer deserializer = new ODataXmlDeserializer(metadata);
-
-  @BeforeAll
-  public static void setup() {
-    XMLUnit.setIgnoreComments(true);
-    XMLUnit.setIgnoreAttributeOrder(true);
-    XMLUnit.setIgnoreWhitespace(true);
-    XMLUnit.setNormalizeWhitespace(true);
-    XMLUnit.setCompareUnmatched(false);
-  }
 
   protected Object valueOf(final String value, final EdmPrimitiveTypeKind kind) throws EdmPrimitiveTypeException {
     final EdmPrimitiveType type = OData.newInstance().createPrimitiveTypeInstance(kind);

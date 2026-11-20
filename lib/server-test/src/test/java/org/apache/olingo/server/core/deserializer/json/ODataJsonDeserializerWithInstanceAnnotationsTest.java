@@ -43,8 +43,6 @@ import org.junit.jupiter.api.Test;
 
 public class ODataJsonDeserializerWithInstanceAnnotationsTest extends AbstractODataDeserializerTest {
 
-  private static final ContentType CONTENT_TYPE_JSON_IEEE754Compatible =
-      ContentType.create(ContentType.JSON, ContentType.PARAMETER_IEEE754_COMPATIBLE, "true");
   private static final OData odata = OData.newInstance();
 
   @Test

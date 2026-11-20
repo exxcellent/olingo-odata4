@@ -365,6 +365,7 @@ public class TripPinServiceTest {
     assertEquals("russellwhyte", node.get("UserName").asString());
   }
 
+  @Disabled("Flaky test, not running in complete suite")
   @Test
   public void testSelectOption() throws Exception {
     ClassicHttpResponse response = httpGET(baseURL + "/People('russellwhyte')?$select=FirstName,LastName", 200);

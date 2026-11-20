@@ -19,6 +19,7 @@
 package org.apache.olingo.client.core;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -59,8 +60,10 @@ import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.apache.olingo.commons.api.edm.FullQualifiedName;
 import org.apache.olingo.commons.api.format.ContentType;
-import org.custommonkey.xmlunit.Diff;
 import org.junit.jupiter.api.Test;
+import org.xmlunit.builder.DiffBuilder;
+import org.xmlunit.diff.DefaultNodeMatcher;
+import org.xmlunit.diff.Diff;
 
 public class AtomTest extends JSONTest {
 
@@ -87,10 +90,16 @@ public class AtomTest extends JSONTest {
   @Override
   protected void assertSimilar(final String filename, final String actual,
       boolean isServerMode) throws Exception {
-    final Diff diff = new Diff(
-        cleanup(IOUtils.toString(getClass().getResourceAsStream(filename), StandardCharsets.UTF_8)), actual);
-    diff.overrideElementQualifier(new AtomLinksQualifier());
-    assertTrue(diff.similar());
+    final String expected = cleanup(IOUtils.toString(getClass().getResourceAsStream(filename), StandardCharsets.UTF_8));
+    final Diff diff = DiffBuilder.compare(expected)
+        .withTest(actual)
+        .ignoreComments()
+        .ignoreWhitespace()
+        .normalizeWhitespace()
+        .checkForSimilar()
+        .withNodeMatcher(new DefaultNodeMatcher(new AtomLinksQualifier()))
+        .build();
+    assertFalse(diff.hasDifferences(), diff.toString());
   }
 
   @Override
