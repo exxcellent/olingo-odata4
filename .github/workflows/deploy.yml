@@ -2,6 +2,9 @@ name: Deploy Olingo on packagecloud
 on:
   release:
     types: [released]
+
+permissions:
+  contents: read
   
 jobs:
   deployment:
