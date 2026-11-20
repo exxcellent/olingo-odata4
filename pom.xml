@@ -32,11 +32,11 @@
 
   <inceptionYear>2013</inceptionYear>
 
-  <parent>
+  <!--parent>
     <groupId>org.apache</groupId>
     <artifactId>apache</artifactId>
     <version>30</version>
-  </parent>
+  </parent-->
 
   <licenses>
     <license>
@@ -434,6 +434,41 @@
 			<artifactId>maven-deploy-plugin</artifactId>
 			<version>3.2.0</version>
 		</plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-war-plugin</artifactId>
+          <version>3.5.1</version>
+		</plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>3.6.1</version>
+		</plugin>		
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>3.4.0</version>
+		</plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-failsafe-plugin</artifactId>
+          <version>3.6.1</version>
+		</plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>3.5.0</version>
+		</plugin>
+        <plugin>
+          <groupId>org.apache.rat</groupId>
+          <artifactId>apache-rat-plugin</artifactId>
+          <version>0.18</version>
+		</plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>3.12.0</version>
+		</plugin>
       </plugins>
     </pluginManagement>
 
@@ -454,13 +489,13 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-remote-resources-plugin</artifactId>
-        <dependencies>
+        <!--dependencies>
             <dependency>
                 <groupId>org.apache.maven.shared</groupId>
                 <artifactId>maven-filtering</artifactId>
                 <version>3.5.1</version>
             </dependency>
-        </dependencies>
+        </dependencies-->
         <executions>
           <execution>
             <goals>
@@ -478,6 +513,7 @@
         </executions>
       </plugin>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
         <configuration>
           <webResources>
