@@ -35,20 +35,6 @@
     <relativePath>..</relativePath>
   </parent>
 
-  <build>
-    <finalName>${project.name}-${project.version}</finalName>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <configuration>
-          <skip>true</skip>
-        </configuration>
-      </plugin>
-    </plugins>
-
-  </build>
-
   <profiles>
     <profile>
       <id>apache-release</id>
@@ -58,8 +44,9 @@
       <build>
         <plugins>
           <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-assembly-plugin</artifactId>
-            <inherited>false</inherited>
+            <!--inherited>false</inherited-->
             <executions>
               <execution>
                 <id>package-assemblies</id>
@@ -89,7 +76,6 @@
       <groupId>org.apache.olingo</groupId>
       <artifactId>odata-client-android</artifactId>
       <version>${project.version}</version>
-      <scope>compile</scope>
     </dependency>
   </dependencies>
 
