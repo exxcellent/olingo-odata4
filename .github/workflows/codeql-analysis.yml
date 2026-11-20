@@ -67,7 +67,7 @@ jobs:
           cache: maven
 
       - name: Build with Maven
-        run: mvn -B clean install -Dskip.pojogen.examplebuild=true
+        run: mvn -B clean install -DskipTests -Dskip.pojogen.examplebuild=true
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3

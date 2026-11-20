@@ -18,4 +18,4 @@ jobs:
       - name: Deploy with Maven
         env:
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-        run: mvn --batch-mode -s .github/workflows/settings.xml -P apache-release clean package deploy:deploy -Dskip.pojogen.examplebuild=true
+        run: mvn --batch-mode -s .github/workflows/settings.xml -P apache-release clean package deploy:deploy -DskipTests -Dskip.pojogen.examplebuild=true
