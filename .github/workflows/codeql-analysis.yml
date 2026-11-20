@@ -1,8 +1,8 @@
 name: "CodeQL"
 
 on:
-  schedule:
-    - cron: "00 20 * * 3"
+#  schedule:
+#    - cron: "00 20 * * 3"
   push:
     branches: [master]
     paths-ignore:
@@ -11,6 +11,7 @@ on:
       - "README"
       - "SECURITY.md"
   pull_request:
+    types: [opened, synchronize, reopened]
     branches: [master]
     paths-ignore:
       - "LICENSE"
