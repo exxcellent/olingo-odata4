@@ -484,19 +484,6 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>attach-sources</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>jar-no-fork</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-remote-resources-plugin</artifactId>
         <!--dependencies>
             <dependency>
@@ -766,6 +753,18 @@
               </execution>
             </executions>
           </plugin>
+	      <plugin>
+	        <groupId>org.apache.maven.plugins</groupId>
+	        <artifactId>maven-source-plugin</artifactId>
+	        <executions>
+	          <execution>
+	            <id>attach-sources</id>
+	            <goals>
+	              <goal>jar</goal>
+	            </goals>
+	          </execution>
+	        </executions>
+	      </plugin>
         </plugins>
       </build>
     </profile>
@@ -774,11 +773,11 @@
 	<distributionManagement>
 		<repository>
 			<id>packagecloud</id>
-			<url>packagecloud+https://packagecloud.io/exxcellent/olingo-test</url>
+			<url>packagecloud+https://packagecloud.io/exxcellent/olingo</url>
 		</repository>
 		<snapshotRepository>
 			<id>packagecloud</id>
-			<url>packagecloud+https://packagecloud.io/exxcellent/olingo-test</url>
+			<url>packagecloud+https://packagecloud.io/exxcellent/olingo</url>
 		</snapshotRepository>
 	</distributionManagement>
   
