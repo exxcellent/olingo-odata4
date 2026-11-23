@@ -676,6 +676,37 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+	  <plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		  <artifactId>maven-javadoc-plugin</artifactId>
+		  <configuration>
+		  <doclint>none</doclint>
+		  <show>protected</show>
+		  <serialwarn>false</serialwarn>
+		  <quiet>true</quiet>
+		  <failOnError>false</failOnError>
+		</configuration>
+		<executions>
+			<execution>
+				<id>attach-javadocs</id>
+				<goals>
+					<goal>jar</goal>
+				</goals>
+			</execution>
+		</executions>
+	  </plugin>
 	  <plugin>
 		<!-- enable deployment of this module -->
 		<groupId>org.apache.maven.plugins</groupId>
@@ -699,77 +730,6 @@
     
   </build>
 
-  <profiles>
-    <profile>
-      <id>apache-release</id>
-      <properties>
-        <olingo.deploy.skip>false</olingo.deploy.skip>
-      </properties>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <configuration>
-              <source>${project.build.release.version}</source>
-              <!--<failOnError>false</failOnError>-->
-              <additionalOptions>
-                <additionalOption>-Xdoclint:none</additionalOption>
-              </additionalOptions>
-            </configuration>
-            <executions>
-              <execution>
-                <id>javadoc-jar</id>
-                <phase>package</phase>
-                <goals>
-                  <goal>aggregate-jar</goal>
-                </goals>
-                <configuration>
-                  <excludePackageNames>
-                    org.apache.olingo.commons.core:org.apache.olingo.commons.core.*:org.apache.olingo.client.core:org.apache.olingo.client.core.*:org.apache.olingo.server.core:org.apache.olingo.server.core.*:org.apache.olingo.fit:org.apache.olingo.fit.*:org.apache.olingo.server.sample:org.apache.olingo.server.sample.*:org.apache.olingo.server.tecsvc:org.apache.olingo.server.tecsvc.*
-                  </excludePackageNames>
-                  <additionalJOptions>
-                    <additionalJOption>-quiet</additionalJOption>
-                  </additionalJOptions>
-                  <groups>
-                    <group>
-                      <title>OData Client</title>
-                      <packages>org.apache.olingo.client.api:org.apache.olingo.client.api.*</packages>
-                    </group>
-                    <group>
-                      <title>OData Client Proxy</title>
-                      <packages>org.apache.olingo.ext.proxy:org.apache.olingo.ext.proxy.*</packages>
-                    </group>
-					          <group>
-                      <title>OData Server</title>
-                      <packages>org.apache.olingo.server.api:org.apache.olingo.server.api.*</packages>
-                    </group>
-                    <group>
-                      <title>OData Commons</title>
-                      <packages>org.apache.olingo.commons.api:org.apache.olingo.commons.api.*</packages>
-                    </group>
-                  </groups>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-	      <plugin>
-	        <groupId>org.apache.maven.plugins</groupId>
-	        <artifactId>maven-source-plugin</artifactId>
-	        <executions>
-	          <execution>
-	            <id>attach-sources</id>
-	            <goals>
-	              <goal>jar</goal>
-	            </goals>
-	          </execution>
-	        </executions>
-	      </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
-  
 	<distributionManagement>
 		<repository>
 			<id>packagecloud</id>
