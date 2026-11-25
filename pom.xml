@@ -683,7 +683,7 @@
           <execution>
             <id>attach-sources</id>
             <goals>
-              <goal>jar</goal>
+              <goal>jar-no-fork</goal>
             </goals>
           </execution>
         </executions>
@@ -702,7 +702,7 @@
 			<execution>
 				<id>attach-javadocs</id>
 				<goals>
-					<goal>jar</goal>
+					<goal>javadoc-no-fork</goal>
 				</goals>
 			</execution>
 		</executions>
@@ -734,6 +734,9 @@
 		<repository>
 			<id>packagecloud</id>
 			<url>packagecloud+https://packagecloud.io/exxcellent/olingo</url>
+  		    <releases>
+              <checksumPolicy>ignore</checksumPolicy>
+			</releases>
 		</repository>
 		<snapshotRepository>
 			<id>packagecloud</id>
