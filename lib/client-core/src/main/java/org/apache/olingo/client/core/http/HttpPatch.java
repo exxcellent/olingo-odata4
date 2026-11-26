@@ -28,6 +28,7 @@ import java.net.URI;
  */
 public class HttpPatch extends HttpUriRequestBase {
 
+  private static final long serialVersionUID = -4610434932155504699L;
   public final static String METHOD_NAME = "PATCH";
 
   /**
