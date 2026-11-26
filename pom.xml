@@ -710,32 +710,21 @@
 		<inherited>true</inherited>
 		<configuration>
 			<skip>false</skip>
-			<deployAtEnd>true</deployAtEnd>
+			<deployAtEnd>false</deployAtEnd>
 		</configuration>
 	  </plugin>
     </plugins>
-    
-	<extensions>
-		<extension>
-			<groupId>io.packagecloud.maven.wagon</groupId>
-			<artifactId>maven-packagecloud-wagon</artifactId>
-			<version>0.0.6</version>
-		</extension>
-	</extensions>
     
   </build>
 
 	<distributionManagement>
 		<repository>
 			<id>packagecloud</id>
-			<url>packagecloud+https://packagecloud.io/exxcellent/olingo</url>
-  		    <releases>
-              <checksumPolicy>ignore</checksumPolicy>
-			</releases>
+			<url>https://packagecloud.io/eXXcellent/olingo/maven2</url>
 		</repository>
 		<snapshotRepository>
 			<id>packagecloud</id>
-			<url>packagecloud+https://packagecloud.io/exxcellent/olingo</url>
+			<url>https://packagecloud.io/eXXcellent/olingo/maven2</url>
 		</snapshotRepository>
 	</distributionManagement>
   
