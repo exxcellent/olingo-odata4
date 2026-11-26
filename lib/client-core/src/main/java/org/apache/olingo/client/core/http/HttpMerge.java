@@ -28,6 +28,7 @@ import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
  */
 public class HttpMerge extends HttpUriRequestBase {
 
+  private static final long serialVersionUID = -4923250981355721587L;
   public final static String METHOD_NAME = "MERGE";
 
   /**

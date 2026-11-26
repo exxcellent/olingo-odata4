@@ -21,6 +21,7 @@ package org.apache.olingo.client.core;
 import org.apache.olingo.client.api.Configuration;
 import org.apache.olingo.client.api.http.HttpClientFactory;
 import org.apache.olingo.client.api.http.HttpUriRequestFactory;
+import org.apache.olingo.client.api.http.ODataHttpClient;
 import org.apache.olingo.client.core.http.DefaultHttpClientFactory;
 import org.apache.olingo.client.core.http.DefaultHttpUriRequestFactory;
 import org.apache.olingo.commons.api.format.ContentType;
@@ -145,13 +146,14 @@ public class ConfigurationImpl implements Configuration {
     setProperty(DEFAULT_MEDIA_FORMAT, contentType);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public HttpClientFactory getHttpClientFactory() {
-    return (HttpClientFactory) getProperty(HTTP_CLIENT_FACTORY, new DefaultHttpClientFactory());
+  public <T extends ODataHttpClient> HttpClientFactory<T> getHttpClientFactory() {
+    return (HttpClientFactory<T>) getProperty(HTTP_CLIENT_FACTORY, new DefaultHttpClientFactory());
   }
 
   @Override
-  public void setHttpClientFactory(final HttpClientFactory factory) {
+  public <T extends ODataHttpClient> void setHttpClientFactory(final HttpClientFactory<T> factory) {
     setProperty(HTTP_CLIENT_FACTORY, factory);
   }
 
